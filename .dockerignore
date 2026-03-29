@@ -1,0 +1,36 @@
+# Ignore git history
+.git
+.gitignore
+
+# Ignore local dependencies (Docker should run `npm install` inside the container)
+node_modules
+apps/*/node_modules
+packages/*/node_modules
+
+# Ignore sensitive environment variables (pass these via Render's dashboard)
+.env
+.env.*
+*.secret
+
+# Ignore frontend build files (Render will only run the Node.js backend)
+apps/frontend/.expo/
+apps/frontend/web-build/
+apps/frontend/ios/
+apps/frontend/android/
+
+# Ignore local build artifacts (Docker should compile TypeScript during the build step)
+dist/
+build/
+*.tsbuildinfo
+
+# Ignore local logs and OS files
+*.log
+npm-debug.log
+.DS_Store
+.vscode/
+.idea/
+
+# Ignore documentation and markdown files to keep the image slim
+README.md
+docs/
+.github/

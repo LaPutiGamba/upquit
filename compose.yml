@@ -1,0 +1,42 @@
+services:
+  # PostgreSQL Database Service
+  db:
+    image: postgres:15-alpine
+    container_name: upquit-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localpassword
+      POSTGRES_DB: upquit_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Redis Cache Service
+  redis:
+    image: redis:alpine
+    container_name: upquit-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  # Node.js Backend Service
+  backend:
+    image: node:20-alpine
+    container_name: upquit-backend
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+    command: tail -f /dev/null 
+
+volumes:
+  pgdata:
+  redisdata:
