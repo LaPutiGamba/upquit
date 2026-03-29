@@ -1,7 +1,7 @@
 services:
   # PostgreSQL Database Service
   db:
-    image: postgres:15-alpine
+    image: dhi.io/postgres:17-debian13
     container_name: upquit-postgres
     restart: always
     environment:
@@ -15,7 +15,7 @@ services:
 
   # Redis Cache Service
   redis:
-    image: redis:alpine
+    image: dhi.io/redis:8-debian13
     container_name: upquit-redis
     restart: always
     ports:
@@ -25,7 +25,7 @@ services:
 
   # Node.js Backend Service
   backend:
-    image: node:20-alpine
+    image: dhi.io/node:24-debian13
     container_name: upquit-backend
     working_dir: /usr/src/app
     volumes:
@@ -35,7 +35,7 @@ services:
     depends_on:
       - db
       - redis
-    command: tail -f /dev/null 
+    command: node -e "setInterval(() => {}, 86400000)"
 
 volumes:
   pgdata:
