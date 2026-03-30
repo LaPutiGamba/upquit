@@ -5,7 +5,7 @@ import { requests, subscriptions } from "../schema.js";
 import RequestRepository from "../../domain/contracts/RequestRepository.js";
 import Request from "../../domain/entities/Request.js";
 import Subscription from "../../domain/entities/Subscription.js";
-import RequestStatus, { type StatusValue } from "../../domain/value-objects/RequestStatus.js";
+import { type StatusValue } from "../../domain/value-objects/RequestStatus.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 
 export default class RequestDrizzleRepository implements RequestRepository {
@@ -98,13 +98,13 @@ export default class RequestDrizzleRepository implements RequestRepository {
     const statusValue = (row.status ?? "open") as StatusValue;
 
     return new Request(
-      new Uuid(row.id),
-      new Uuid(row.boardId),
-      new Uuid(row.authorId),
-      row.categoryId ? new Uuid(row.categoryId) : null,
+      row.id,
+      row.boardId,
+      row.authorId,
+      row.categoryId,
       row.title,
       row.description,
-      new RequestStatus(statusValue),
+      statusValue,
       row.voteCount,
       row.isPinned,
       row.isHidden,

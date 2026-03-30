@@ -4,18 +4,28 @@ import HexColor from "../value-objects/HexColor.js";
 
 export default class Board {
   constructor(
-    public readonly id: Uuid,
-    public slug: Slug,
-    public name: string,
-    public description: string | null,
-    public logoUrl: string | null,
-    public primaryColor: HexColor | null,
-    public readonly ownerId: Uuid,
-    public isPublic: boolean | null,
-    public allowAnonymousVotes: boolean | null,
-    public giveToGetEnabled: boolean | null,
-    public giveToGetVotesReq: number | null,
-    public giveToGetCommentsReq: number | null,
+    id: string,
+    slug: string,
+    public readonly name: string,
+    public readonly description: string | null,
+    public readonly logoUrl: string | null,
+    primaryColor: string | null,
+    ownerId: string,
+    public readonly isPublic: boolean | null,
+    public readonly allowAnonymousVotes: boolean | null,
+    public readonly giveToGetEnabled: boolean | null,
+    public readonly giveToGetVotesReq: number | null,
+    public readonly giveToGetCommentsReq: number | null,
     public readonly createdAt: Date | null
-  ) {}
+  ) {
+    this.id = new Uuid(id);
+    this.slug = new Slug(slug);
+    this.primaryColor = primaryColor ? new HexColor(primaryColor) : null;
+    this.ownerId = new Uuid(ownerId);
+  }
+
+  public readonly id: Uuid;
+  public readonly slug: Slug;
+  public readonly primaryColor: HexColor | null;
+  public readonly ownerId: Uuid;
 }

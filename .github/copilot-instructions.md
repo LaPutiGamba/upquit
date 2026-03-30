@@ -14,26 +14,29 @@ Each module (e.g., `boards`, `requests`, `users`) must follow this internal stru
 
 ```text
 src/modules/[module-name]/
-├── application/             # Application Use Cases
-│   ├── commands/            # Write operations
-│   ├── queries/             # Read operations
-│   ├── exceptions/          # Use-case specific errors (e.g., RequestNotFoundException)
-│   ├── CommandHandler.ts
-│   └── QueryHandler.ts
-├── domain/                  # Enterprise Business Rules
-│   ├── contracts/           # Interfaces (e.g., Repository interfaces)
-│   ├── exceptions/          # Business rule violations (e.g., GiveToGetRequirementNotMetException)
-│   ├── value-objects/
-│   └── entities/            # Core domain entities (e.g., Board, Request, User)
-└── infrastructure/          # Frameworks, Drivers, and Implementations
-    ├── repositories/        # Drizzle ORM implementations
-    ├── exceptions/          # Technical errors (e.g., DatabaseConnectionException)
-    └── Controller.ts        # Express route handlers
+├── application/                    # Application Use Cases
+│   ├── commands/                   # Write operations
+│   ├── queries/                    # Read operations
+│   ├── exceptions/                 # Use-case specific errors (e.g., RequestNotFoundException)
+│   ├── Example1CommandHandler.ts   
+│   ├── Example2CommandHandler.ts   
+│   ├── Example1QueryHandler.ts   
+│   └── Example2QueryHandler.ts 
+├── domain/                         # Enterprise Business Rules
+│   ├── contracts/                  # Interfaces (e.g., Repository interfaces)
+│   ├── exceptions/                 # Business rule violations (e.g., GiveToGetRequirementNotMetException)
+│   ├── value-objects/      
+│   └── entities/                   # Core domain entities (e.g., Board, Request, User)
+└── infrastructure/                 # Frameworks, Drivers, and Implementations
+    ├── repositories/               # Drizzle ORM implementations
+    ├── exceptions/                 # Technical errors (e.g., DatabaseConnectionException)
+    ├── Example2Controller.ts  
+    └── Example1Controller.ts  
 
-src/shared/                  # Cross-module backend code
+src/shared/                         # Cross-module backend code
 └── infrastructure/
     └── middlewares/
-        └── ErrorHandler.ts  # Express global error middleware
+        └── ErrorHandler.ts         # Express global error middleware
 ```
 
 ### Backend Rules:

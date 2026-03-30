@@ -3,15 +3,21 @@ import Email from "../value-objects/Email.js";
 
 export default class User {
   constructor(
-    public readonly id: Uuid,
-    public email: Email,
-    public displayName: string,
-    public passwordHash: string | null,
-    public avatarUrl: string | null,
-    public emailVerified: boolean,
-    public oauthProvider: string | null,
-    public oauthId: string | null,
-    public isActive: boolean,
+    id: string,
+    email: string,
+    public readonly displayName: string,
+    public readonly passwordHash: string | null,
+    public readonly avatarUrl: string | null,
+    public readonly emailVerified: boolean,
+    public readonly oauthProvider: string | null,
+    public readonly oauthId: string | null,
+    public readonly isActive: boolean,
     public readonly createdAt: Date | null
-  ) {}
+  ) {
+    this.id = new Uuid(id);
+    this.email = new Email(email);
+  }
+
+  public readonly id: Uuid;
+  public readonly email: Email;
 }

@@ -55,12 +55,6 @@ export default class VoteDrizzleRepository implements VoteRepository {
   // =========================================================================
 
   private mapToDomainVote(row: typeof votes.$inferSelect): Vote {
-    return new Vote(
-      new Uuid(row.id),
-      new Uuid(row.requestId),
-      new Uuid(row.userId),
-      new Uuid(row.boardId),
-      row.createdAt
-    );
+    return new Vote(row.id, row.requestId, row.userId, row.boardId, row.createdAt);
   }
 }

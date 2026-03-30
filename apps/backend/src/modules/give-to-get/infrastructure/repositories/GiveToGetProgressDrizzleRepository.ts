@@ -63,9 +63,9 @@ export default class GiveToGetProgressDrizzleRepository implements GiveToGetProg
 
   private mapToDomainProgress(row: typeof giveToGetProgress.$inferSelect): GiveToGetProgress {
     return new GiveToGetProgress(
-      new Uuid(row.id),
-      new Uuid(row.userId),
-      new Uuid(row.boardId),
+      row.id,
+      row.userId,
+      row.boardId,
       row.votesGiven,
       row.qualifyingComments,
       row.canPost,

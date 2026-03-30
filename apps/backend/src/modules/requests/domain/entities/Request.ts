@@ -1,19 +1,31 @@
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
-import RequestStatus from "../value-objects/RequestStatus.js";
+import RequestStatus, { type StatusValue } from "../value-objects/RequestStatus.js";
 
 export default class Request {
   constructor(
-    public readonly id: Uuid,
-    public readonly boardId: Uuid,
-    public readonly authorId: Uuid,
-    public categoryId: Uuid | null,
-    public title: string,
-    public description: string | null,
-    public status: RequestStatus,
-    public voteCount: number | null,
-    public isPinned: boolean | null,
-    public isHidden: boolean | null,
-    public adminNote: string | null,
+    id: string,
+    boardId: string,
+    authorId: string,
+    categoryId: string | null,
+    public readonly title: string,
+    public readonly description: string | null,
+    status: StatusValue,
+    public readonly voteCount: number | null,
+    public readonly isPinned: boolean | null,
+    public readonly isHidden: boolean | null,
+    public readonly adminNote: string | null,
     public readonly createdAt: Date | null
-  ) {}
+  ) {
+    this.id = new Uuid(id);
+    this.boardId = new Uuid(boardId);
+    this.authorId = new Uuid(authorId);
+    this.categoryId = categoryId ? new Uuid(categoryId) : null;
+    this.status = new RequestStatus(status);
+  }
+
+  public readonly id: Uuid;
+  public readonly boardId: Uuid;
+  public readonly authorId: Uuid;
+  public readonly categoryId: Uuid | null;
+  public readonly status: RequestStatus;
 }

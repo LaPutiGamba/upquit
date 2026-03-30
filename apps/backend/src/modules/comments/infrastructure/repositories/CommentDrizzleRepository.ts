@@ -60,14 +60,6 @@ export default class CommentDrizzleRepository implements CommentRepository {
   // =========================================================================
 
   private mapToDomainComment(row: typeof comments.$inferSelect): Comment {
-    return new Comment(
-      new Uuid(row.id),
-      new Uuid(row.requestId),
-      new Uuid(row.userId),
-      row.parentId ? new Uuid(row.parentId) : null,
-      row.content,
-      row.isAdminReply,
-      row.createdAt
-    );
+    return new Comment(row.id, row.requestId, row.userId, row.parentId, row.content, row.isAdminReply, row.createdAt);
   }
 }

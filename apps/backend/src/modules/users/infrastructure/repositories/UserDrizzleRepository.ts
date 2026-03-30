@@ -61,8 +61,8 @@ export class UserDrizzleRepository implements UserRepository {
 
   private mapToDomainUser(row: typeof users.$inferSelect): User {
     return new User(
-      new Uuid(row.id),
-      new Email(row.email),
+      row.id,
+      row.email,
       row.displayName,
       row.passwordHash,
       row.avatarUrl,
