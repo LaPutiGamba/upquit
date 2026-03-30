@@ -1,3 +1,5 @@
+import InvalidHexColorException from "../exceptions/InvalidHexColorException.js";
+
 export default class HexColor {
   private readonly value: string;
 
@@ -7,13 +9,9 @@ export default class HexColor {
   }
 
   private ensureIsValidHex(value: string): void {
-    if (value.length > 7) {
-      throw new Error("Hex color exceeds maximum length of 7 characters");
-    }
-
     const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-    if (!hexRegex.test(value)) {
-      throw new Error(`Invalid hex color format: ${value}`);
+    if (value.length > 7 || !hexRegex.test(value)) {
+      throw new InvalidHexColorException(value);
     }
   }
 

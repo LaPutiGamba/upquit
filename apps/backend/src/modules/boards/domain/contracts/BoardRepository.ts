@@ -4,7 +4,7 @@ import Category from "../entities/Category.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import Slug from "../value-objects/Slug.js";
 
-export interface BoardRepository {
+export default interface BoardRepository {
   // Board Operations
   findById(id: Uuid): Promise<Board | null>;
   findBySlug(slug: Slug): Promise<Board | null>;

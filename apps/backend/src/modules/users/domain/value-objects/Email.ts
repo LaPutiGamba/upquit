@@ -1,3 +1,5 @@
+import InvalidEmailException from "../exceptions/InvalidEmailException.js";
+
 export default class Email {
   private readonly value: string;
 
@@ -7,13 +9,9 @@ export default class Email {
   }
 
   private ensureIsValidEmail(value: string): void {
-    if (value.length > 255) {
-      throw new Error("Email exceeds maximum length of 255 characters");
-    }
-    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(value)) {
-      throw new Error(`Invalid email format: ${value}`);
+    if (value.length > 255 || !emailRegex.test(value)) {
+      throw new InvalidEmailException(value);
     }
   }
 

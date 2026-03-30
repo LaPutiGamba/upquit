@@ -1,3 +1,5 @@
+import InvalidUuidException from "../exceptions/InvalidUuidException.js";
+
 export default class Uuid {
   private readonly value: string;
 
@@ -9,7 +11,7 @@ export default class Uuid {
   private ensureIsValidUuid(value: string): void {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(value)) {
-      throw new Error(`Invalid UUID format: ${value}`);
+      throw new InvalidUuidException(value);
     }
   }
 

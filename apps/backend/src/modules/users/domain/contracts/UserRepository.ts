@@ -1,8 +1,10 @@
+import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import User from "../entities/User.js";
+import Email from "../value-objects/Email.js";
 
-export interface UserRepository {
-  findById(id: string): Promise<User | null>;
-  findByEmail(email: string): Promise<User | null>;
+export default interface UserRepository {
+  findById(id: Uuid): Promise<User | null>;
+  findByEmail(email: Email): Promise<User | null>;
   save(user: User): Promise<void>;
   update(user: User): Promise<void>;
 }
