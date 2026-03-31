@@ -8,6 +8,7 @@ export default interface BoardRepository {
   // Board Operations
   findById(id: Uuid): Promise<Board | null>;
   findBySlug(slug: Slug): Promise<Board | null>;
+  findBoardIdsByUserId(userId: Uuid): Promise<string[]>;
   save(board: Board): Promise<void>;
   update(board: Board): Promise<void>;
 

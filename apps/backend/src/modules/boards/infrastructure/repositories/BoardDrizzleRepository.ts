@@ -30,6 +30,15 @@ export default class BoardDrizzleRepository implements BoardRepository {
     return this.mapToDomainBoard(row);
   }
 
+  public async findBoardIdsByUserId(userId: Uuid): Promise<string[]> {
+    const rows = await this.db
+      .select({ boardId: boardMembers.boardId })
+      .from(boardMembers)
+      .where(eq(boardMembers.userId, userId.getValue()));
+
+    return rows.map((row) => row.boardId);
+  }
+
   public async save(board: Board): Promise<void> {
     await this.db.insert(boards).values({
       id: board.id.getValue(),
