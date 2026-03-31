@@ -18,20 +18,22 @@ src/modules/[module-name]/
 │   ├── commands/                   # Write operations
 │   ├── queries/                    # Read operations
 │   ├── exceptions/                 # Use-case specific errors (e.g., RequestNotFoundException)
-│   ├── Example1CommandHandler.ts   
-│   ├── Example2CommandHandler.ts   
-│   ├── Example1QueryHandler.ts   
-│   └── Example2QueryHandler.ts 
+│   └── handlers/
+│       ├── Example1CommandHandler.ts
+│       ├── Example2CommandHandler.ts
+│       ├── Example1QueryHandler.ts
+│       └── Example2QueryHandler.ts
 ├── domain/                         # Enterprise Business Rules
 │   ├── contracts/                  # Interfaces (e.g., Repository interfaces)
 │   ├── exceptions/                 # Business rule violations (e.g., GiveToGetRequirementNotMetException)
-│   ├── value-objects/      
+│   ├── value-objects/
 │   └── entities/                   # Core domain entities (e.g., Board, Request, User)
 └── infrastructure/                 # Frameworks, Drivers, and Implementations
     ├── repositories/               # Drizzle ORM implementations
     ├── exceptions/                 # Technical errors (e.g., DatabaseConnectionException)
-    ├── Example2Controller.ts  
-    └── Example1Controller.ts  
+    └── controllers/
+        ├── Example2Controller.ts
+        └── Example1Controller.ts
 
 src/shared/                         # Cross-module backend code
 └── infrastructure/

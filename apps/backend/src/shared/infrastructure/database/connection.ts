@@ -9,10 +9,10 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL!
 });
 
-export const db = drizzle({ client: pool });
+export const db: any = drizzle({ client: pool });
 
 export async function withTenant<T>(tenantId: string, cb: (tx: any) => Promise<T>): Promise<T> {
-  return await db.transaction(async (tx) => {
+  return await db.transaction(async (tx: any) => {
     await tx.execute(sql`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`);
 
     return await cb(tx);

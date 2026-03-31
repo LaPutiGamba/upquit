@@ -7,7 +7,7 @@ import User from "../../domain/entities/User.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import Email from "../../domain/value-objects/Email.js";
 
-export class UserDrizzleRepository implements UserRepository {
+export default class UserDrizzleRepository implements UserRepository {
   constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
 
   public async findById(id: Uuid): Promise<User | null> {

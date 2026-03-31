@@ -4,6 +4,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { pinoHttp } from "pino-http";
 import pino from "pino";
+import usersRouter from "./modules/users/infrastructure/usersRoutes.js";
 
 const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 
@@ -24,6 +25,8 @@ app.use(pinoHttp({ logger }));
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
+
+app.use("/users", usersRouter);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   logger.error(err);
