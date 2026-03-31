@@ -1,12 +1,16 @@
 import Request from "../../domain/entities/Request.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
+import RealtimePublisher from "../../../../shared/domain/contracts/RealtimePublisher.js";
 import RequestRepository from "../../domain/contracts/RequestRepository.js";
 import UpdateRequestCommand from "../commands/UpdateRequestCommand.js";
 import RequestNotFoundException from "../exceptions/RequestNotFoundException.js";
 import RequestResponse, { mapRequestToResponse } from "../responses/RequestResponse.js";
 
 export default class UpdateRequestCommandHandler {
-  constructor(private readonly requestRepository: RequestRepository) {}
+  constructor(
+    private readonly requestRepository: RequestRepository,
+    private readonly realtimePublisher: RealtimePublisher
+  ) {}
 
   async execute(command: UpdateRequestCommand): Promise<RequestResponse> {
     const requestId = new Uuid(command.requestId);
@@ -33,6 +37,17 @@ export default class UpdateRequestCommandHandler {
 
     await this.requestRepository.update(updatedRequest);
 
-    return mapRequestToResponse(updatedRequest);
+    const response = mapRequestToResponse(updatedRequest);
+    const hasTitleChanged = request.title !== updatedRequest.title;
+    const hasStatusChanged = request.status.getValue() !== updatedRequest.status.getValue();
+
+    if (hasTitleChanged || hasStatusChanged) {
+      this.realtimePublisher.publish(updatedRequest.boardId.getValue(), "REQUEST_UPDATED", {
+        boardId: updatedRequest.boardId.getValue(),
+        request: response
+      });
+    }
+
+    return response;
   }
 }

@@ -6,13 +6,18 @@ import DeleteCommentCommand from "../../application/commands/DeleteCommentComman
 import DeleteCommentCommandHandler from "../../application/handlers/DeleteCommentCommandHandler.js";
 import CommentNotFoundException from "../../application/exceptions/CommentNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
+import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
+import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
 type DeleteCommentDeleteParams = {
   id: string;
 };
 
 export default async function DeleteCommentDeleteController(req: Request<DeleteCommentDeleteParams>, res: Response) {
-  const commandHandler = new DeleteCommentCommandHandler(new CommentDrizzleRepository(db));
+  const commandHandler = new DeleteCommentCommandHandler(
+    new CommentDrizzleRepository(db),
+    new WebSocketRealtimePublisher(getWebSocketServer())
+  );
 
   try {
     const command = new DeleteCommentCommand(req.params.id);

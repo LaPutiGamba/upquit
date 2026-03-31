@@ -1,12 +1,16 @@
 import Comment from "../../domain/entities/Comment.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
+import RealtimePublisher from "../../../../shared/domain/contracts/RealtimePublisher.js";
 import CommentRepository from "../../domain/contracts/CommentRepository.js";
 import UpdateCommentCommand from "../commands/UpdateCommentCommand.js";
 import CommentNotFoundException from "../exceptions/CommentNotFoundException.js";
 import CommentResponse, { mapCommentToResponse } from "../responses/CommentResponse.js";
 
 export default class UpdateCommentCommandHandler {
-  constructor(private readonly commentRepository: CommentRepository) {}
+  constructor(
+    private readonly commentRepository: CommentRepository,
+    private readonly realtimePublisher: RealtimePublisher
+  ) {}
 
   async execute(command: UpdateCommentCommand): Promise<CommentResponse> {
     const commentId = new Uuid(command.commentId);
@@ -28,6 +32,13 @@ export default class UpdateCommentCommandHandler {
 
     await this.commentRepository.update(updatedComment);
 
-    return mapCommentToResponse(updatedComment);
+    const response = mapCommentToResponse(updatedComment);
+
+    this.realtimePublisher.publish(updatedComment.requestId.getValue(), "COMMENT_UPDATED", {
+      requestId: updatedComment.requestId.getValue(),
+      comment: response
+    });
+
+    return response;
   }
 }

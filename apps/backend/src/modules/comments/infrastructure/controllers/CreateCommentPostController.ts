@@ -5,9 +5,14 @@ import CommentDrizzleRepository from "../repositories/CommentDrizzleRepository.j
 import CreateCommentCommand from "../../application/commands/CreateCommentCommand.js";
 import CreateCommentCommandHandler from "../../application/handlers/CreateCommentCommandHandler.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
+import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
+import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
 export default async function CreateCommentPostController(req: Request, res: Response) {
-  const commandHandler = new CreateCommentCommandHandler(new CommentDrizzleRepository(db));
+  const commandHandler = new CreateCommentCommandHandler(
+    new CommentDrizzleRepository(db),
+    new WebSocketRealtimePublisher(getWebSocketServer())
+  );
 
   try {
     const command = new CreateCommentCommand(

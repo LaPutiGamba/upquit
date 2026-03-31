@@ -6,13 +6,18 @@ import UpdateCommentCommand from "../../application/commands/UpdateCommentComman
 import UpdateCommentCommandHandler from "../../application/handlers/UpdateCommentCommandHandler.js";
 import CommentNotFoundException from "../../application/exceptions/CommentNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
+import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
+import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
 type UpdateCommentPatchParams = {
   id: string;
 };
 
 export default async function UpdateCommentPatchController(req: Request<UpdateCommentPatchParams>, res: Response) {
-  const commandHandler = new UpdateCommentCommandHandler(new CommentDrizzleRepository(db));
+  const commandHandler = new UpdateCommentCommandHandler(
+    new CommentDrizzleRepository(db),
+    new WebSocketRealtimePublisher(getWebSocketServer())
+  );
 
   try {
     const command = new UpdateCommentCommand(req.params.id, req.body.content, req.body.isAdminReply);

@@ -1,10 +1,14 @@
 import Request from "../../domain/entities/Request.js";
+import RealtimePublisher from "../../../../shared/domain/contracts/RealtimePublisher.js";
 import RequestRepository from "../../domain/contracts/RequestRepository.js";
 import CreateRequestCommand from "../commands/CreateRequestCommand.js";
 import RequestResponse, { mapRequestToResponse } from "../responses/RequestResponse.js";
 
 export default class CreateRequestCommandHandler {
-  constructor(private readonly requestRepository: RequestRepository) {}
+  constructor(
+    private readonly requestRepository: RequestRepository,
+    private readonly realtimePublisher: RealtimePublisher
+  ) {}
 
   async execute(command: CreateRequestCommand): Promise<RequestResponse> {
     const request = new Request(
@@ -24,6 +28,13 @@ export default class CreateRequestCommandHandler {
 
     await this.requestRepository.save(request);
 
-    return mapRequestToResponse(request);
+    const response = mapRequestToResponse(request);
+
+    this.realtimePublisher.publish(command.boardId, "REQUEST_CREATED", {
+      boardId: command.boardId,
+      request: response
+    });
+
+    return response;
   }
 }

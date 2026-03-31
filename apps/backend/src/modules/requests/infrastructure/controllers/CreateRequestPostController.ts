@@ -6,9 +6,14 @@ import CreateRequestCommand from "../../application/commands/CreateRequestComman
 import CreateRequestCommandHandler from "../../application/handlers/CreateRequestCommandHandler.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import InvalidRequestStatusException from "../../domain/exceptions/InvalidRequestStatusException.js";
+import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
+import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
 export default async function CreateRequestPostController(req: Request, res: Response) {
-  const commandHandler = new CreateRequestCommandHandler(new RequestDrizzleRepository(db));
+  const commandHandler = new CreateRequestCommandHandler(
+    new RequestDrizzleRepository(db),
+    new WebSocketRealtimePublisher(getWebSocketServer())
+  );
 
   try {
     const command = new CreateRequestCommand(

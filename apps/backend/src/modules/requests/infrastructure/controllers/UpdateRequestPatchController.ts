@@ -7,13 +7,18 @@ import UpdateRequestCommandHandler from "../../application/handlers/UpdateReques
 import RequestNotFoundException from "../../application/exceptions/RequestNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import InvalidRequestStatusException from "../../domain/exceptions/InvalidRequestStatusException.js";
+import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
+import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
 type UpdateRequestPatchParams = {
   id: string;
 };
 
 export default async function UpdateRequestPatchController(req: Request<UpdateRequestPatchParams>, res: Response) {
-  const commandHandler = new UpdateRequestCommandHandler(new RequestDrizzleRepository(db));
+  const commandHandler = new UpdateRequestCommandHandler(
+    new RequestDrizzleRepository(db),
+    new WebSocketRealtimePublisher(getWebSocketServer())
+  );
 
   try {
     const command = new UpdateRequestCommand(
