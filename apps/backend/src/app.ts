@@ -6,6 +6,7 @@ import { pinoHttp } from "pino-http";
 import pino from "pino";
 import usersRouter from "./modules/users/infrastructure/usersRoutes.js";
 import boardsRouter from "./modules/boards/infrastructure/boardsRoutes.js";
+import commentsRouter from "./modules/comments/infrastructure/commentsRoutes.js";
 
 const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 
@@ -29,6 +30,7 @@ app.get("/health", (req: Request, res: Response) => {
 
 app.use("/users", usersRouter);
 app.use("/boards", boardsRouter);
+app.use("/comments", commentsRouter);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   logger.error(err);
