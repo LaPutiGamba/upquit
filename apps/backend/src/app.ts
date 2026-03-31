@@ -9,6 +9,7 @@ import boardsRouter from "./modules/boards/infrastructure/boardsRoutes.js";
 import commentsRouter from "./modules/comments/infrastructure/commentsRoutes.js";
 import giveToGetRouter from "./modules/give-to-get/infrastructure/giveToGetRoutes.js";
 import requestsRouter from "./modules/requests/infrastructure/requestsRoutes.js";
+import votesRouter from "./modules/votes/infrastructure/votesRoutes.js";
 
 const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 
@@ -35,6 +36,7 @@ app.use("/boards", boardsRouter);
 app.use("/comments", commentsRouter);
 app.use("/give-to-get", giveToGetRouter);
 app.use("/requests", requestsRouter);
+app.use("/votes", votesRouter);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   logger.error(err);
