@@ -16,9 +16,13 @@ export default class AuthenticateUserQueryHandler {
 
   async execute(query: AuthenticateUserQuery): Promise<string> {
     const email = new Email(query.email);
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmailIncludingInactive(email);
 
     if (!user || !user.passwordHash) {
+      throw new InvalidCredentialsException();
+    }
+
+    if (!user.isActive) {
       throw new InvalidCredentialsException();
     }
 

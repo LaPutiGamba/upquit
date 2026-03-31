@@ -1,6 +1,7 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { boards, boardMembers, categories } from "../schema.js";
+import { users } from "../../../users/infrastructure/schema.js";
 
 import BoardRepository from "../../domain/contracts/BoardRepository.js";
 import Board from "../../domain/entities/Board.js";
@@ -34,7 +35,8 @@ export default class BoardDrizzleRepository implements BoardRepository {
     const rows = await this.db
       .select({ boardId: boardMembers.boardId })
       .from(boardMembers)
-      .where(eq(boardMembers.userId, userId.getValue()));
+      .innerJoin(users, eq(users.id, boardMembers.userId))
+      .where(and(eq(boardMembers.userId, userId.getValue()), eq(users.isActive, true)));
 
     return rows.map((row) => row.boardId);
   }

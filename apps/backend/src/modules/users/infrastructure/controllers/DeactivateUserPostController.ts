@@ -2,25 +2,21 @@ import { Request, Response } from "express";
 import { db } from "../../../../shared/infrastructure/database/connection.js";
 
 import UserDrizzleRepository from "../repositories/UserDrizzleRepository.js";
-import UpdateUserCommand from "../../application/commands/UpdateUserCommand.js";
-import UpdateUserCommandHandler from "../../application/handlers/UpdateUserCommandHandler.js";
+import DeactivateUserCommand from "../../application/commands/DeactivateUserCommand.js";
+import DeactivateUserCommandHandler from "../../application/handlers/DeactivateUserCommandHandler.js";
 import UserNotFoundException from "../../application/exceptions/UserNotFoundException.js";
+import UserAlreadyDeactivatedException from "../../application/exceptions/UserAlreadyDeactivatedException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 
-type UpdateUserPatchParams = {
+type DeactivateUserPostParams = {
   id: string;
 };
 
-export default async function UpdateUserPatchController(req: Request<UpdateUserPatchParams>, res: Response) {
-  const commandHandler = new UpdateUserCommandHandler(new UserDrizzleRepository(db));
+export default async function DeactivateUserPostController(req: Request<DeactivateUserPostParams>, res: Response) {
+  const commandHandler = new DeactivateUserCommandHandler(new UserDrizzleRepository(db));
 
   try {
-    const command = new UpdateUserCommand(
-      req.params.id,
-      req.body.displayName,
-      req.body.avatarUrl,
-      req.body.emailVerified
-    );
+    const command = new DeactivateUserCommand(req.params.id);
 
     const response = await commandHandler.execute(command);
     return res.status(200).json(response);
@@ -28,6 +24,12 @@ export default async function UpdateUserPatchController(req: Request<UpdateUserP
     if (ex instanceof UserNotFoundException) {
       return res.status(404).send({
         error: "USER_NOT_FOUND",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UserAlreadyDeactivatedException) {
+      return res.status(409).send({
+        error: "USER_ALREADY_DEACTIVATED",
         message: ex.message
       });
     }

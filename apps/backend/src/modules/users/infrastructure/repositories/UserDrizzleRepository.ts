@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { users } from "../schema.js";
 
@@ -11,6 +11,17 @@ export default class UserDrizzleRepository implements UserRepository {
   constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
 
   public async findById(id: Uuid): Promise<User | null> {
+    const [row] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, id.getValue()), eq(users.isActive, true)))
+      .limit(1);
+
+    if (!row) return null;
+    return this.mapToDomainUser(row);
+  }
+
+  public async findByIdIncludingInactive(id: Uuid): Promise<User | null> {
     const [row] = await this.db.select().from(users).where(eq(users.id, id.getValue())).limit(1);
 
     if (!row) return null;
@@ -18,6 +29,17 @@ export default class UserDrizzleRepository implements UserRepository {
   }
 
   public async findByEmail(email: Email): Promise<User | null> {
+    const [row] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.email, email.getValue()), eq(users.isActive, true)))
+      .limit(1);
+
+    if (!row) return null;
+    return this.mapToDomainUser(row);
+  }
+
+  public async findByEmailIncludingInactive(email: Email): Promise<User | null> {
     const [row] = await this.db.select().from(users).where(eq(users.email, email.getValue())).limit(1);
 
     if (!row) return null;
