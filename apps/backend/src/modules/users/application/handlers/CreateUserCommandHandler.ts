@@ -1,12 +1,16 @@
 import User from "../../domain/entities/User.js";
 import Email from "../../domain/value-objects/Email.js";
 import UserRepository from "../../domain/contracts/UserRepository.js";
+import PasswordHasher from "../../domain/contracts/PasswordHasher.js";
 import CreateUserCommand from "../commands/CreateUserCommand.js";
 import UserAlreadyExistsException from "../exceptions/UserAlreadyExistsException.js";
 import UserResponse, { mapUserToResponse } from "../responses/UserResponse.js";
 
 export default class CreateUserCommandHandler {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly passwordHasher: PasswordHasher
+  ) {}
 
   async execute(command: CreateUserCommand): Promise<UserResponse> {
     const email = new Email(command.email);
@@ -16,11 +20,13 @@ export default class CreateUserCommandHandler {
       throw new UserAlreadyExistsException(command.email);
     }
 
+    const passwordHash = command.password !== null ? await this.passwordHasher.hash(command.password) : null;
+
     const user = new User(
       crypto.randomUUID(),
       command.email,
       command.displayName,
-      command.passwordHash ?? null,
+      passwordHash,
       command.avatarUrl ?? null,
       false,
       command.oauthProvider ?? null,
