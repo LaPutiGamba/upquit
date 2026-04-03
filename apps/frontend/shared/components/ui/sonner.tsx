@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { Toaster as Sonner, toast, type ToasterProps } from "sonner";
+import { Toaster as Sonner, type ToasterProps, toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   CheckmarkCircle02Icon,
@@ -11,12 +11,13 @@ import {
   Loading03Icon
 } from "@hugeicons/core-free-icons";
 
-const Toaster = ({ ...props }: ToasterProps) => {
+const Toaster = ({ position = "top-center", ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
 
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
+      position={position}
       className="toaster group"
       icons={{
         success: <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="size-4" />,
