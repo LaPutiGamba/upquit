@@ -9,7 +9,7 @@ import AuthenticateUserPostController from "./controllers/AuthenticateUserPostCo
 
 const usersRouter = Router();
 
-usersRouter.post("/", CreateUserPostController);
+usersRouter.post("/register", CreateUserPostController);
 usersRouter.post("/login", AuthenticateUserPostController);
 usersRouter.get("/", GetUserByEmailGetController);
 usersRouter.get("/:id", GetUserByIdGetController);

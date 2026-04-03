@@ -26,20 +26,10 @@ lib/
 *.tsbuildinfo
 
 # ========================
-# Expo & React Native (Frontend)
+# Next.js Frontend Build Output
 # ========================
-.expo/
-web-build/
-dist/
-# If you ever generate native folders (npx expo prebuild)
-ios/
-android/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
+.next/
+out/
 
 # ========================
 # OS & Editor Files
@@ -59,6 +49,7 @@ Thumbs.db
 logs/
 *.log
 *.sqlite
-# In case you accidentally create local volume bind mounts instead of named volumes
 pgdata/
 redisdata/
+
+.agents/

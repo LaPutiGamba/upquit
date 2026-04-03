@@ -58,28 +58,32 @@ The frontend follows a Modular (Screaming) Architecture. Instead of grouping fil
 ### Folder Structure
 
 ```text
-apps/frontend/src/
-├── app/                     # Expo Router file-system routing (Screens only)
-│   ├── (auth)/
-│   ├── board/[slug]/
-│   └── index.tsx
+apps/frontend/
+├── app/                     # Next.js App Router
+│   ├── (auth)/              # Route groups (e.g., login, register)
+│   ├── board/[slug]/        # Dynamic routing for boards
+│   ├── layout.tsx           # Global/Nested layouts
+│   └── page.tsx             # Server Component entry points
 ├── features/                # Screaming Architecture Modules
 │   ├── authentication/
 │   ├── boards/              # Everything related to Boards
 │   │   ├── components/      # UI specific to boards (e.g., BoardHeader)
 │   │   ├── hooks/           # Custom hooks (e.g., useBoardData)
-│   │   ├── services/        # API calls to the backend
+│   │   ├── services/        # API calls and Server Actions
 │   │   └── store/           # Local state management for this feature
 │   ├── requests/            # Everything related to Feature Requests
 │   └── give-to-get/         # Give-to-Get specific UI and logic
 └── shared/                  # Shared/Core cross-feature elements
-    ├── components/          # Generic UI (Button, Card, Input)
-    ├── lib/                 # Utilities, API client (Axios/Fetch setup)
-    └── theme/               # Colors, typography, spacing
+    ├── components/          # Generic UI
+    │   └── ui/              # shadcn/ui base components (Button, Card, Dialog)
+    ├── lib/                 # Utilities (e.g., cn() for Tailwind), API client
+    └── hooks/               # Generic shared hooks across the app
 ```
 
 ### Frontend Rules:
 
-- **Feature Isolation:** A feature module (e.g., `requests`) should not import directly from the internal folders of another feature. If sharing is necessary, move it to `shared/` or expose a public `index.ts` for the feature.
-- **Routing (Expo Router):** The `app/` folder must remain as thin as possible. Screens inside `app/` should merely import and render complex components from the `features/` directory.
-- **Data Fetching:** API calls must be encapsulated in the `services/` or `hooks/` folder of the respective feature. Components should not make direct `fetch` or `axios` calls inline.
+- **Feature Isolation:** A feature module (e.g., requests) should not import directly from the internal folders of another feature. If sharing is necessary, move it to shared/ or expose a public index.ts for the feature.
+- **Routing (Next.js App Router):** The app/ folder must remain as thin as possible. Pages inside app/ should primarily handle routing, layout, and server-side data fetching. They should merely import and render complex components from the features/ directory.
+- **Server vs. Client Components:** Default to Server Components (page.tsx, layout.tsx) for maximum performance and SEO. Add the "use client" directive only at the top of feature components that require interactivity (hooks, states, event listeners).
+- **Data Fetching:** API calls must be encapsulated in the services/ or hooks/ folder of the respective feature. Utilize Next.js standard fetch for Server Components or Server Actions for mutations. Client components should not make direct fetch or axios calls without passing through a feature service or a data-fetching hook (like React Query/SWR if implemented).
+- **Styling & UI:** Use Tailwind CSS for styling. For standard elements, use shadcn/ui components located in shared/components/ui. Always combine Tailwind classes using the custom cn() utility function found in shared/lib/utils to avoid class conflicts.
