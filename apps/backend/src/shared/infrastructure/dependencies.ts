@@ -15,17 +15,21 @@ import BoardDrizzleRepository from "../../modules/boards/infrastructure/reposito
 // Domain Events
 // ========================
 import VoteCreatedEvent from "../../modules/votes/domain/events/VoteCreatedEvent.js";
+import VoteDeletedEvent from "../../modules/votes/domain/events/VoteDeletedEvent.js";
 
 // ========================
 // Event Listeners
 // ========================
 import IncrementVoteCountOnVoteCreated from "../../modules/requests/application/listeners/IncrementVoteCountOnVoteCreated.js";
 import UpdateProgressOnVoteCreated from "../../modules/give-to-get/application/listeners/UpdateProgressOnVoteCreated.js";
+import DecrementVoteCountOnVoteDeleted from "../../modules/requests/application/listeners/DecrementVoteCountOnVoteDeleted.js";
+import RevertProgressOnVoteDeleted from "../../modules/give-to-get/application/listeners/RevertProgressOnVoteDeleted.js";
 
 // ========================
 // Command Handlers
 // ========================
 import CreateVoteCommandHandler from "../../modules/votes/application/handlers/CreateVoteCommandHandler.js";
+import DeleteVoteCommandHandler from "../../modules/votes/application/handlers/DeleteVoteCommandHandler.js";
 
 // ========================
 // Event Bus and Realtime Publisher
@@ -46,14 +50,19 @@ export const boardRepository = new BoardDrizzleRepository(db);
 // ========================
 export const incrementVoteCountListener = new IncrementVoteCountOnVoteCreated(requestRepository, realtimePublisher);
 export const updateProgressListener = new UpdateProgressOnVoteCreated(giveToGetProgressRepository, boardRepository);
+export const decrementVoteCountListener = new DecrementVoteCountOnVoteDeleted(requestRepository, realtimePublisher);
+export const revertProgressListener = new RevertProgressOnVoteDeleted(giveToGetProgressRepository, boardRepository);
 
 // ========================
 // Subscribe Listeners to Events
 // ========================
 eventBus.subscribe("vote.created", (event: VoteCreatedEvent) => incrementVoteCountListener.handle(event));
 eventBus.subscribe("vote.created", (event: VoteCreatedEvent) => updateProgressListener.handle(event));
+eventBus.subscribe("vote.deleted", (event: VoteDeletedEvent) => decrementVoteCountListener.handle(event));
+eventBus.subscribe("vote.deleted", (event: VoteDeletedEvent) => revertProgressListener.handle(event));
 
 // ========================
 // Command Handlers Instances
 // ========================
 export const createVoteCommandHandler = new CreateVoteCommandHandler(voteRepository, eventBus);
+export const deleteVoteCommandHandler = new DeleteVoteCommandHandler(voteRepository, eventBus);

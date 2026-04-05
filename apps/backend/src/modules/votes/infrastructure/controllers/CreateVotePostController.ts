@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+
 import CreateVoteCommand from "../../application/commands/CreateVoteCommand.js";
 import CreateVoteCommandHandler from "../../application/handlers/CreateVoteCommandHandler.js";
 import VoteAlreadyExistsException from "../../application/exceptions/VoteAlreadyExistsException.js";

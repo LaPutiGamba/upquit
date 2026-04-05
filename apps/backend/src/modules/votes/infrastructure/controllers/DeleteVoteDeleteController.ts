@@ -1,24 +1,19 @@
 import { Request, Response } from "express";
-import { db } from "../../../../shared/infrastructure/database/connection.js";
 
-import VoteDrizzleRepository from "../repositories/VoteDrizzleRepository.js";
 import DeleteVoteCommand from "../../application/commands/DeleteVoteCommand.js";
 import DeleteVoteCommandHandler from "../../application/handlers/DeleteVoteCommandHandler.js";
 import VoteNotFoundException from "../../application/exceptions/VoteNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
-import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
-import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
 type DeleteVoteDeleteParams = {
   id: string;
 };
 
-export default async function DeleteVoteDeleteController(req: Request<DeleteVoteDeleteParams>, res: Response) {
-  const commandHandler = new DeleteVoteCommandHandler(
-    new VoteDrizzleRepository(db),
-    new WebSocketRealtimePublisher(getWebSocketServer())
-  );
-
+export default async function DeleteVoteDeleteController(
+  req: Request<DeleteVoteDeleteParams>,
+  res: Response,
+  commandHandler: DeleteVoteCommandHandler
+) {
   try {
     const command = new DeleteVoteCommand(req.params.id);
 
