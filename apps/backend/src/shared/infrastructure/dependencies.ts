@@ -1,5 +1,4 @@
 import { db } from "./database/connection.js";
-import { getWebSocketServer } from "./websocket/WebSocketServerRegistry.js";
 import InMemoryAsyncEventBus from "./events/InMemoryAsyncEventBus.js";
 import WebSocketRealtimePublisher from "./services/WebSocketRealtimePublisher.js";
 
@@ -35,7 +34,7 @@ import DeleteVoteCommandHandler from "../../modules/votes/application/handlers/D
 // Event Bus and Realtime Publisher
 // ========================
 export const eventBus = new InMemoryAsyncEventBus();
-export const realtimePublisher = new WebSocketRealtimePublisher(getWebSocketServer());
+export const realtimePublisher = new WebSocketRealtimePublisher();
 
 // ========================
 // Repositories Instances
@@ -49,9 +48,9 @@ export const boardRepository = new BoardDrizzleRepository(db);
 // Event Listeners Instances
 // ========================
 export const incrementVoteCountListener = new IncrementVoteCountOnVoteCreated(requestRepository, realtimePublisher);
-export const updateProgressListener = new UpdateProgressOnVoteCreated(giveToGetProgressRepository, boardRepository);
+export const updateProgressListener = new UpdateProgressOnVoteCreated(giveToGetProgressRepository, boardRepository, realtimePublisher);
 export const decrementVoteCountListener = new DecrementVoteCountOnVoteDeleted(requestRepository, realtimePublisher);
-export const revertProgressListener = new RevertProgressOnVoteDeleted(giveToGetProgressRepository, boardRepository);
+export const revertProgressListener = new RevertProgressOnVoteDeleted(giveToGetProgressRepository, boardRepository, realtimePublisher);
 
 // ========================
 // Subscribe Listeners to Events

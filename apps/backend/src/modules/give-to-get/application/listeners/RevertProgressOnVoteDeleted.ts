@@ -3,11 +3,14 @@ import GiveToGetProgressRepository from "../../domain/contracts/GiveToGetProgres
 import BoardRepository from "../../../boards/domain/contracts/BoardRepository.js";
 import GiveToGetProgress from "../../domain/entities/GiveToGetProgress.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
+import RealtimePublisher from "../../../../shared/domain/contracts/RealtimePublisher.js";
+import { mapGiveToGetProgressToResponse } from "../responses/GiveToGetProgressResponse.js";
 
 export default class RevertProgressOnVoteDeleted {
   constructor(
     private readonly progressRepository: GiveToGetProgressRepository,
-    private readonly boardRepository: BoardRepository
+    private readonly boardRepository: BoardRepository,
+    private readonly realtimePublisher: RealtimePublisher
   ) {}
 
   async handle(event: VoteDeletedEvent): Promise<void> {
@@ -20,29 +23,37 @@ export default class RevertProgressOnVoteDeleted {
     await this.progressRepository.decrementVotesGiven(userId, boardId);
 
     const currentProgress = await this.progressRepository.findByUserAndBoard(userId, boardId);
-    if (!currentProgress || !currentProgress.canPost) return;
+    if (!currentProgress) return;
 
-    const reqVotes = board.giveToGetVotesReq ?? 0;
-    const reqComments = board.giveToGetCommentsReq ?? 0;
+    let finalProgressToPublish = currentProgress;
 
-    const currentVotes = currentProgress.votesGiven ?? 0;
-    const currentComments = currentProgress.qualifyingComments ?? 0;
+    if (currentProgress.canPost) {
+      const reqVotes = board.giveToGetVotesReq ?? 0;
+      const reqComments = board.giveToGetCommentsReq ?? 0;
 
-    const meetsVotes = currentVotes >= reqVotes;
-    const meetsComments = currentComments >= reqComments;
+      const currentVotes = currentProgress.votesGiven ?? 0;
+      const currentComments = currentProgress.qualifyingComments ?? 0;
 
-    if (!meetsVotes || !meetsComments) {
-      const lockedProgress = new GiveToGetProgress(
-        currentProgress.id.getValue(),
-        currentProgress.userId.getValue(),
-        currentProgress.boardId.getValue(),
-        currentProgress.votesGiven,
-        currentProgress.qualifyingComments,
-        false,
-        null
-      );
+      if (currentVotes < reqVotes || currentComments < reqComments) {
+        const lockedProgress = new GiveToGetProgress(
+          currentProgress.id.getValue(),
+          currentProgress.userId.getValue(),
+          currentProgress.boardId.getValue(),
+          currentProgress.votesGiven,
+          currentProgress.qualifyingComments,
+          false,
+          null
+        );
 
-      await this.progressRepository.update(lockedProgress);
+        await this.progressRepository.update(lockedProgress);
+        finalProgressToPublish = lockedProgress;
+      }
     }
+
+    this.realtimePublisher.publish(
+      `progress.${userId.getValue()}.${boardId.getValue()}`,
+      "ProgressUpdated",
+      mapGiveToGetProgressToResponse(finalProgressToPublish)
+    );
   }
 }

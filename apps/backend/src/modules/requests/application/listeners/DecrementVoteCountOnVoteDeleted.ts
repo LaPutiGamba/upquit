@@ -15,8 +15,11 @@ export default class DecrementVoteCountOnVoteDeleted {
 
     const request = await this.requestRepository.findById(requestId);
     if (request) {
-      this.realtimePublisher.publish(event.boardId, "VOTE_COUNT_CHANGED", {
-        boardId: event.boardId,
+      const userId = new Uuid(event.userId);
+      const boardId = new Uuid(event.boardId);
+
+      this.realtimePublisher.publish(`request.${userId.getValue()}.${boardId.getValue()}`, "RequestUpdated", {
+        boardId: boardId.getValue(),
         requestId: event.requestId,
         voteCount: request.voteCount
       });

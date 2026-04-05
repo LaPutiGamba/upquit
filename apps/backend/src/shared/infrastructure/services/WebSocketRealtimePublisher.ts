@@ -1,14 +1,17 @@
 import RealtimePublisher from "../../domain/contracts/RealtimePublisher.js";
-import WebSocketServer from "../websocket/WebSocketServer.js";
+import { getWebSocketServer } from "../websocket/WebSocketServerRegistry.js";
 
 export default class WebSocketRealtimePublisher implements RealtimePublisher {
-  constructor(private readonly webSocketServer: WebSocketServer | null) {}
+  constructor() {}
 
   public publish(channel: string, event: string, payload: any): void {
-    if (!this.webSocketServer) {
+    const webSocketServer = getWebSocketServer();
+
+    if (!webSocketServer) {
+      console.warn("⚠️ Intento de emitir WS pero el servidor WebSocket no está inicializado.");
       return;
     }
 
-    this.webSocketServer.broadcast(channel, event, payload);
+    webSocketServer.broadcast(channel, event, payload);
   }
 }
