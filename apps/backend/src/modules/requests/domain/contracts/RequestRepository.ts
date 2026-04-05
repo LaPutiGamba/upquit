@@ -8,6 +8,9 @@ export default interface RequestRepository {
   findByBoardId(boardId: Uuid): Promise<Request[]>;
   save(request: Request): Promise<void>;
   update(request: Request): Promise<void>;
+  
+  incrementVoteCount(id: Uuid): Promise<void>;
+  decrementVoteCount(id: Uuid): Promise<void>;
 
   // Subscription Operations
   addSubscription(subscription: Subscription): Promise<void>;

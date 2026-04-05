@@ -5,11 +5,13 @@ import Vote from "../../domain/entities/Vote.js";
 import CreateVoteCommand from "../commands/CreateVoteCommand.js";
 import VoteAlreadyExistsException from "../exceptions/VoteAlreadyExistsException.js";
 import VoteResponse, { mapVoteToResponse } from "../responses/VoteResponse.js";
+import EventBus from "../../../../shared/domain/events/EventBus.js";
+import VoteCreatedEvent from "../../domain/events/VoteCreatedEvent.js";
 
 export default class CreateVoteCommandHandler {
   constructor(
     private readonly voteRepository: VoteRepository,
-    private readonly realtimePublisher: RealtimePublisher
+    private readonly eventBus: EventBus
   ) {}
 
   async execute(command: CreateVoteCommand): Promise<VoteResponse> {
@@ -24,16 +26,12 @@ export default class CreateVoteCommandHandler {
     const vote = new Vote(crypto.randomUUID(), command.requestId, command.userId, command.boardId, new Date());
 
     await this.voteRepository.save(vote);
-    const voteCount = await this.voteRepository.countByRequestId(requestId);
 
     const response = mapVoteToResponse(vote);
 
-    this.realtimePublisher.publish(command.boardId, "VOTE_COUNT_CHANGED", {
-      boardId: command.boardId,
-      requestId: command.requestId,
-      voteCount,
-      vote: response
-    });
+    await this.eventBus.publish([
+      new VoteCreatedEvent(vote.id.getValue(), command.requestId, command.userId, command.boardId)
+    ]);
 
     return response;
   }

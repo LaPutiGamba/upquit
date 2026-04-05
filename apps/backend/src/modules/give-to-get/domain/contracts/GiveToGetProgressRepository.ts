@@ -6,4 +6,7 @@ export default interface GiveToGetProgressRepository {
   findByUserAndBoard(userId: Uuid, boardId: Uuid): Promise<GiveToGetProgress | null>;
   save(progress: GiveToGetProgress): Promise<void>;
   update(progress: GiveToGetProgress): Promise<void>;
+
+  incrementVotesGiven(userId: Uuid, boardId: Uuid): Promise<void>;
+  decrementVotesGiven(userId: Uuid, boardId: Uuid): Promise<void>;
 }

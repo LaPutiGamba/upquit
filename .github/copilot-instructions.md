@@ -27,6 +27,7 @@ src/modules/[module-name]/
 │   ├── contracts/                  # Interfaces (e.g., Repository interfaces)
 │   ├── exceptions/                 # Business rule violations (e.g., GiveToGetRequirementNotMetException)
 │   ├── value-objects/
+│   ├── events/
 │   └── entities/                   # Core domain entities (e.g., Board, Request, User)
 └── infrastructure/                 # Frameworks, Drivers, and Implementations
     ├── repositories/               # Drizzle ORM implementations

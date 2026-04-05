@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { createVoteCommandHandler } from "../../../shared/infrastructure/dependencies.js";
 import CreateVotePostController from "./controllers/CreateVotePostController.js";
 import GetVoteByRequestAndUserGetController from "./controllers/GetVoteByRequestAndUserGetController.js";
 import GetVoteCountByRequestIdGetController from "./controllers/GetVoteCountByRequestIdGetController.js";
@@ -7,10 +8,10 @@ import DeleteVoteDeleteController from "./controllers/DeleteVoteDeleteController
 
 const votesRouter = Router();
 
-votesRouter.post("/", CreateVotePostController);
+votesRouter.post("/", (req, res) => CreateVotePostController(req, res, createVoteCommandHandler));
 votesRouter.get("/", GetVoteByRequestAndUserGetController);
 votesRouter.get("/count", GetVoteCountByRequestIdGetController);
 votesRouter.get("/:id", GetVoteByIdGetController);
-votesRouter.delete("/:id", DeleteVoteDeleteController);
+votesRouter.delete("/", DeleteVoteDeleteController);
 
 export default votesRouter;

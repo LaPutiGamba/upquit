@@ -1,4 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
+
+import "./shared/infrastructure/dependencies.js";
+
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";

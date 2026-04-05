@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { giveToGetProgress } from "../schema.js";
 
@@ -55,6 +55,24 @@ export default class GiveToGetProgressDrizzleRepository implements GiveToGetProg
         unlockedAt: progress.unlockedAt
       })
       .where(eq(giveToGetProgress.id, progress.id.getValue()));
+  }
+
+  public async incrementVotesGiven(userId: Uuid, boardId: Uuid): Promise<void> {
+    await this.db
+      .update(giveToGetProgress)
+      .set({
+        votesGiven: sql`${giveToGetProgress.votesGiven} + 1`
+      })
+      .where(and(eq(giveToGetProgress.userId, userId.getValue()), eq(giveToGetProgress.boardId, boardId.getValue())));
+  }
+
+  public async decrementVotesGiven(userId: Uuid, boardId: Uuid): Promise<void> {
+    await this.db
+      .update(giveToGetProgress)
+      .set({
+        votesGiven: sql`${giveToGetProgress.votesGiven} - 1`
+      })
+      .where(and(eq(giveToGetProgress.userId, userId.getValue()), eq(giveToGetProgress.boardId, boardId.getValue())));
   }
 
   // =========================================================================

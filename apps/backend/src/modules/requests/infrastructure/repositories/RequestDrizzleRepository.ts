@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { requests, subscriptions } from "../schema.js";
 
@@ -60,6 +60,24 @@ export default class RequestDrizzleRepository implements RequestRepository {
         adminNote: request.adminNote
       })
       .where(eq(requests.id, request.id.getValue()));
+  }
+
+  public async incrementVoteCount(id: Uuid): Promise<void> {
+    await this.db
+      .update(requests)
+      .set({
+        voteCount: sql`${requests.voteCount} + 1`
+      })
+      .where(eq(requests.id, id.getValue()));
+  }
+
+  public async decrementVoteCount(id: Uuid): Promise<void> {
+    await this.db
+      .update(requests)
+      .set({
+        voteCount: sql`${requests.voteCount} - 1`
+      })
+      .where(eq(requests.id, id.getValue()));
   }
 
   // =========================================================================

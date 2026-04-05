@@ -1,20 +1,14 @@
 import { Request, Response } from "express";
-import { db } from "../../../../shared/infrastructure/database/connection.js";
-
-import VoteDrizzleRepository from "../repositories/VoteDrizzleRepository.js";
 import CreateVoteCommand from "../../application/commands/CreateVoteCommand.js";
 import CreateVoteCommandHandler from "../../application/handlers/CreateVoteCommandHandler.js";
 import VoteAlreadyExistsException from "../../application/exceptions/VoteAlreadyExistsException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
-import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
-import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
-export default async function CreateVotePostController(req: Request, res: Response) {
-  const commandHandler = new CreateVoteCommandHandler(
-    new VoteDrizzleRepository(db),
-    new WebSocketRealtimePublisher(getWebSocketServer())
-  );
-
+export default async function CreateVotePostController(
+  req: Request,
+  res: Response,
+  commandHandler: CreateVoteCommandHandler
+) {
   try {
     const command = new CreateVoteCommand(req.body.requestId, req.body.userId, req.body.boardId);
 
