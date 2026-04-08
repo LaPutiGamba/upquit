@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { createUserCommandHandler } from "../../../shared/infrastructure/dependencies.js";
 import CreateUserPostController from "./controllers/CreateUserPostController.js";
 import GetUserByIdGetController from "./controllers/GetUserByIdGetController.js";
 import GetUserByEmailGetController from "./controllers/GetUserByEmailGetController.js";
@@ -9,7 +10,7 @@ import AuthenticateUserPostController from "./controllers/AuthenticateUserPostCo
 
 const usersRouter = Router();
 
-usersRouter.post("/register", CreateUserPostController);
+usersRouter.post("/register", (req, res) => CreateUserPostController(req, res, createUserCommandHandler));
 usersRouter.post("/login", AuthenticateUserPostController);
 usersRouter.get("/", GetUserByEmailGetController);
 usersRouter.get("/:id", GetUserByIdGetController);

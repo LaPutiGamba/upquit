@@ -5,11 +5,14 @@ import PasswordHasher from "../../domain/contracts/PasswordHasher.js";
 import CreateUserCommand from "../commands/CreateUserCommand.js";
 import UserAlreadyExistsException from "../exceptions/UserAlreadyExistsException.js";
 import UserResponse, { mapUserToResponse } from "../responses/UserResponse.js";
+import EventBus from "../../../../shared/domain/events/EventBus.js";
+import UserCreatedEvent from "../../domain/events/UserCreatedEvent.js";
 
 export default class CreateUserCommandHandler {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly passwordHasher: PasswordHasher
+    private readonly passwordHasher: PasswordHasher,
+    private readonly eventBus: EventBus
   ) {}
 
   async execute(command: CreateUserCommand): Promise<UserResponse> {
@@ -36,6 +39,8 @@ export default class CreateUserCommandHandler {
     );
 
     await this.userRepository.save(user);
+
+    await this.eventBus.publish([new UserCreatedEvent(user.id.getValue(), command.email, user.displayName)]);
 
     return mapUserToResponse(user);
   }
