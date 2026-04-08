@@ -22,7 +22,6 @@ yarn-error.log*
 # ========================
 dist/
 build/
-lib/
 *.tsbuildinfo
 
 # ========================

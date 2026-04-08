@@ -44,7 +44,17 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
     try {
       const response = await authService.login(data);
       localStorage.setItem("accessToken", response.accessToken);
-      router.push("/");
+
+      const payload = JSON.parse(atob(response.accessToken.split(".")[1]));
+      const userId = payload.userId || payload.sub;
+
+      const user = await authService.getUserProfile(userId, response.accessToken);
+
+      if (!user.emailVerified) {
+        router.push("/verify-email"); 
+      } else {
+        router.push("/");
+      }
     } catch (error) {
       toast.error(getErrorMessage(error));
     }

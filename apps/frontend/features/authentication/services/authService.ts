@@ -23,8 +23,8 @@ export interface UserResponse {
   email: string;
   displayName: string;
   avatarUrl: string | null;
+  emailVerified: boolean;
   isActive: boolean;
-  isEmailVerified: boolean;
 }
 
 export const authService = {
@@ -39,6 +39,19 @@ export const authService = {
     return await apiClient<UserResponse>("/users/register", {
       method: "POST",
       body: JSON.stringify(credentials)
+    });
+  },
+
+  getUserProfile: async (userId: string, token: string): Promise<UserResponse> => {
+    return await apiClient<UserResponse>(`/users/${userId}`, {
+      method: "GET",
+      token
+    });
+  },
+
+  verifyEmail: async (userId: string): Promise<void> => {
+    await apiClient(`/users/${userId}/verify-email`, {
+      method: "POST"
     });
   }
 };
