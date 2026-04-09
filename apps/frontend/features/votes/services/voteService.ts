@@ -9,10 +9,10 @@ export interface VoteResponse {
 }
 
 export const voteService = {
-  addVote: async (requestId: string, userId: string, boardId: string, token: string): Promise<string> => {
+  addVote: async (requestId: string, boardId: string, token: string): Promise<string> => {
     const response = await apiClient<VoteResponse>("/votes", {
       method: "POST",
-      body: JSON.stringify({ requestId, userId, boardId }),
+      body: JSON.stringify({ requestId, boardId }),
       token
     });
     return response.id;

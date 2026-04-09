@@ -15,6 +15,7 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
   const [progress, setProgress] = useState<GiveToGetProgressResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -22,34 +23,46 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         setUserId(payload.userId || payload.sub);
+        setIsAuthenticated(true);
       } catch (e) {
         console.error("Failed to parse token", e);
+        setLoading(false);
       }
+    } else {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (!board.giveToGetEnabled || !userId) {
-      if (!board.giveToGetEnabled) setLoading(false);
+      setLoading(false);
       return;
     }
 
     const fetchProgress = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const token = localStorage.getItem("accessToken")!;
-        const data = await giveToGetService.getProgress(userId, board.id, token);
+        const data = await giveToGetService.getProgress(board.id, token);
         setProgress(data);
       } catch (error) {
-        const isNotFoundError = error instanceof Error && error.message.toLowerCase().includes("not found");
+        const message = error instanceof Error ? error.message.toLowerCase() : "";
+        const isNotFoundError = message.includes("not found");
+        const isUnauthorized = message.includes("unauthorized") || message.includes("not authenticated");
 
         if (isNotFoundError) {
           try {
-            const token = localStorage.getItem("accessToken")!;
-            const newData = await giveToGetService.createProgress(userId, board.id, token);
+            const newData = await giveToGetService.createProgress(board.id, token);
             setProgress(newData);
           } catch (createError) {
             console.error("Failed to auto-create give-to-get progress", createError);
           }
+        } else if (isUnauthorized) {
+          setProgress(null);
         } else {
           console.error("Error fetching give-to-get progress", error);
         }
@@ -72,6 +85,20 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
   if (!board.giveToGetEnabled) return null;
 
   if (loading) return <div className="h-24 animate-pulse bg-muted rounded-lg w-full mb-8"></div>;
+
+  if (!isAuthenticated) {
+    return (
+      <Card className="mb-8 border-primary/20 bg-primary/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Your Contribution Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Log in to track your Give to Get progress on this board.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (!progress) return null;
 
   const votesReq = board.giveToGetVotesReq || 0;

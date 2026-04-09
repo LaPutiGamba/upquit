@@ -57,9 +57,6 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
       return;
     }
 
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const userId = payload.id || payload.sub;
-
     setIsLoading(true);
 
     try {
@@ -73,7 +70,7 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
         setVoteCount((prev) => prev + 1);
         setHasVoted(true);
 
-        const newVoteId = await voteService.addVote(requestId, userId, boardId, token);
+        const newVoteId = await voteService.addVote(requestId, boardId, token);
         setVoteId(newVoteId);
       }
     } catch {

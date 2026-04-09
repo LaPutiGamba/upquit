@@ -16,11 +16,25 @@ export interface BoardResponse {
   createdAt: string | null;
 }
 
+export interface CreateBoardPayload {
+  name: string;
+  slug: string;
+  description?: string;
+}
+
 export const boardService = {
   getBoardBySlug: async (slug: string): Promise<BoardResponse> => {
-    return await apiClient<BoardResponse>(`/boards?slug=${slug}`, {
+    return await apiClient<BoardResponse>(`/boards/slug/${slug}`, {
       method: "GET",
       next: { revalidate: 60 }
+    });
+  },
+
+  createBoard: async (payload: CreateBoardPayload, token: string): Promise<BoardResponse> => {
+    return await apiClient<BoardResponse>("/boards", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      token
     });
   }
 };

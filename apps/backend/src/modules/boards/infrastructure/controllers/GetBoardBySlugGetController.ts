@@ -11,7 +11,7 @@ export default async function GetBoardBySlugGetController(req: Request, res: Res
   const queryHandler = new GetBoardBySlugQueryHandler(new BoardDrizzleRepository(db));
 
   try {
-    const slug = req.query.slug;
+    const slug = req.params.slug;
     if (typeof slug !== "string") {
       throw new InvalidSlugException(String(slug));
     }

@@ -53,7 +53,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
       if (!user.emailVerified) {
         router.push("/verify-email"); 
       } else {
-        router.push("/");
+        router.push("/onboarding");
       }
     } catch (error) {
       toast.error(getErrorMessage(error));
