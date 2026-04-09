@@ -6,18 +6,21 @@ import CreateCommentCommand from "../../application/commands/CreateCommentComman
 import CreateCommentCommandHandler from "../../application/handlers/CreateCommentCommandHandler.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
-import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
 export default async function CreateCommentPostController(req: Request, res: Response) {
   const commandHandler = new CreateCommentCommandHandler(
     new CommentDrizzleRepository(db),
-    new WebSocketRealtimePublisher(getWebSocketServer())
+    new WebSocketRealtimePublisher()
   );
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
     const command = new CreateCommentCommand(
       req.body.requestId,
-      req.body.userId,
+      req.userId,
       req.body.content,
       req.body.parentId ?? null,
       req.body.isAdminReply ?? null

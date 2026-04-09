@@ -6,6 +6,7 @@ import UnlockGiveToGetProgressCommand from "../../application/commands/UnlockGiv
 import UnlockGiveToGetProgressCommandHandler from "../../application/handlers/UnlockGiveToGetProgressCommandHandler.js";
 import GiveToGetProgressNotFoundException from "../../application/exceptions/GiveToGetProgressNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 type UnlockGiveToGetProgressPostParams = {
   id: string;
@@ -18,7 +19,11 @@ export default async function UnlockGiveToGetProgressPostController(
   const commandHandler = new UnlockGiveToGetProgressCommandHandler(new GiveToGetProgressDrizzleRepository(db));
 
   try {
-    const command = new UnlockGiveToGetProgressCommand(req.params.id);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const command = new UnlockGiveToGetProgressCommand(req.params.id, req.userId);
 
     const response = await commandHandler.execute(command);
     return res.status(200).json(response);
@@ -32,6 +37,12 @@ export default async function UnlockGiveToGetProgressPostController(
     if (ex instanceof InvalidUuidException) {
       return res.status(400).send({
         error: "INVALID_GIVE_TO_GET_PROGRESS_ID",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UnauthorizedActionException) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
         message: ex.message
       });
     }

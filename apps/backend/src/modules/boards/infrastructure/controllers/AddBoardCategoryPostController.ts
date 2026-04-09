@@ -7,15 +7,15 @@ import AddBoardCategoryCommandHandler from "../../application/handlers/AddBoardC
 import BoardNotFoundException from "../../application/exceptions/BoardNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 
-type AddBoardCategoryPostParams = {
-  id: string;
-};
-
-export default async function AddBoardCategoryPostController(req: Request<AddBoardCategoryPostParams>, res: Response) {
+export default async function AddBoardCategoryPostController(req: Request, res: Response) {
   const commandHandler = new AddBoardCategoryCommandHandler(new BoardDrizzleRepository(db));
 
   try {
-    const command = new AddBoardCategoryCommand(req.params.id, req.body.name);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const command = new AddBoardCategoryCommand(req.params.id as string, req.body.name);
 
     const response = await commandHandler.execute(command);
     return res.status(201).json(response);

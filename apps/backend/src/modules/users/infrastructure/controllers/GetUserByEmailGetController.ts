@@ -11,6 +11,10 @@ export default async function GetUserByEmailGetController(req: Request, res: Res
   const queryHandler = new GetUserByEmailQueryHandler(new UserDrizzleRepository(db));
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
     const email = req.query.email;
     if (typeof email !== "string") {
       throw new InvalidEmailException(String(email));

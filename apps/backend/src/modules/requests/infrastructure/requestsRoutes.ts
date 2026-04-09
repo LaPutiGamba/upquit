@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
 import CreateRequestPostController from "./controllers/CreateRequestPostController.js";
 import GetRequestsByBoardIdGetController from "./controllers/GetRequestsByBoardIdGetController.js";
 import GetRequestByIdGetController from "./controllers/GetRequestByIdGetController.js";
@@ -9,12 +10,15 @@ import IsSubscribedToRequestGetController from "./controllers/IsSubscribedToRequ
 
 const requestsRouter = Router();
 
-requestsRouter.post("/", CreateRequestPostController);
+// Public
 requestsRouter.get("/", GetRequestsByBoardIdGetController);
 requestsRouter.get("/:id", GetRequestByIdGetController);
-requestsRouter.patch("/:id", UpdateRequestPatchController);
-requestsRouter.post("/:id/subscriptions", SubscribeToRequestPostController);
-requestsRouter.delete("/:id/subscriptions", UnsubscribeFromRequestDeleteController);
-requestsRouter.get("/:id/subscriptions", IsSubscribedToRequestGetController);
+
+// Protected
+requestsRouter.post("/", JwtAuthMiddleware, CreateRequestPostController);
+requestsRouter.patch("/:id", JwtAuthMiddleware, UpdateRequestPatchController);
+requestsRouter.post("/:id/subscriptions", JwtAuthMiddleware, SubscribeToRequestPostController);
+requestsRouter.delete("/:id/subscriptions", JwtAuthMiddleware, UnsubscribeFromRequestDeleteController);
+requestsRouter.get("/:id/subscriptions", JwtAuthMiddleware, IsSubscribedToRequestGetController);
 
 export default requestsRouter;

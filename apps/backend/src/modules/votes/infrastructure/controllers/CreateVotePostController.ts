@@ -11,7 +11,11 @@ export default async function CreateVotePostController(
   commandHandler: CreateVoteCommandHandler
 ) {
   try {
-    const command = new CreateVoteCommand(req.body.requestId, req.body.userId, req.body.boardId);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const command = new CreateVoteCommand(req.body.requestId, req.userId, req.body.boardId);
 
     const response = await commandHandler.execute(command);
     return res.status(201).json(response);

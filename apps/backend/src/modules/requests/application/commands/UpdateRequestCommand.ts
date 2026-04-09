@@ -3,6 +3,7 @@ import { type StatusValue } from "../../domain/value-objects/RequestStatus.js";
 export default class UpdateRequestCommand {
   constructor(
     readonly requestId: string,
+    readonly userId: string,
     readonly title?: string,
     readonly description?: string | null,
     readonly categoryId?: string | null,

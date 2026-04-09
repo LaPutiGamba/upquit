@@ -4,18 +4,19 @@ import DeleteVoteCommand from "../../application/commands/DeleteVoteCommand.js";
 import DeleteVoteCommandHandler from "../../application/handlers/DeleteVoteCommandHandler.js";
 import VoteNotFoundException from "../../application/exceptions/VoteNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
-
-type DeleteVoteDeleteParams = {
-  id: string;
-};
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default async function DeleteVoteDeleteController(
-  req: Request<DeleteVoteDeleteParams>,
+  req: Request,
   res: Response,
   commandHandler: DeleteVoteCommandHandler
 ) {
   try {
-    const command = new DeleteVoteCommand(req.params.id);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const command = new DeleteVoteCommand(req.params.id as string, req.userId);
 
     await commandHandler.execute(command);
     return res.sendStatus(204);
@@ -29,6 +30,12 @@ export default async function DeleteVoteDeleteController(
     if (ex instanceof InvalidUuidException) {
       return res.status(400).send({
         error: "INVALID_VOTE_ID",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UnauthorizedActionException) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
         message: ex.message
       });
     }

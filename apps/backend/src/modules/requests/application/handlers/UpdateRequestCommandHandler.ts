@@ -5,6 +5,7 @@ import RequestRepository from "../../domain/contracts/RequestRepository.js";
 import UpdateRequestCommand from "../commands/UpdateRequestCommand.js";
 import RequestNotFoundException from "../exceptions/RequestNotFoundException.js";
 import RequestResponse, { mapRequestToResponse } from "../responses/RequestResponse.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default class UpdateRequestCommandHandler {
   constructor(
@@ -18,6 +19,10 @@ export default class UpdateRequestCommandHandler {
 
     if (!request) {
       throw new RequestNotFoundException(command.requestId);
+    }
+
+    if (request.authorId.getValue() !== command.userId) {
+      throw new UnauthorizedActionException("You can only update your own requests");
     }
 
     const updatedRequest = new Request(

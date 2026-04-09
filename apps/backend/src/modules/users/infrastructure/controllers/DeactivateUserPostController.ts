@@ -8,15 +8,22 @@ import UserNotFoundException from "../../application/exceptions/UserNotFoundExce
 import UserAlreadyDeactivatedException from "../../application/exceptions/UserAlreadyDeactivatedException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 
-type DeactivateUserPostParams = {
-  id: string;
-};
-
-export default async function DeactivateUserPostController(req: Request<DeactivateUserPostParams>, res: Response) {
+export default async function DeactivateUserPostController(req: Request, res: Response) {
   const commandHandler = new DeactivateUserCommandHandler(new UserDrizzleRepository(db));
 
   try {
-    const command = new DeactivateUserCommand(req.params.id);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    if (req.userId !== req.params.id) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
+        message: "You are not allowed to deactivate this user"
+      });
+    }
+
+    const command = new DeactivateUserCommand(req.params.id as string);
 
     const response = await commandHandler.execute(command);
     return res.status(200).json(response);

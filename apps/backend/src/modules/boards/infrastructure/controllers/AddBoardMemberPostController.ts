@@ -7,15 +7,15 @@ import AddBoardMemberCommandHandler from "../../application/handlers/AddBoardMem
 import BoardNotFoundException from "../../application/exceptions/BoardNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 
-type AddBoardMemberPostParams = {
-  id: string;
-};
-
-export default async function AddBoardMemberPostController(req: Request<AddBoardMemberPostParams>, res: Response) {
+export default async function AddBoardMemberPostController(req: Request, res: Response) {
   const commandHandler = new AddBoardMemberCommandHandler(new BoardDrizzleRepository(db));
 
   try {
-    const command = new AddBoardMemberCommand(req.params.id, req.body.userId, req.body.role);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const command = new AddBoardMemberCommand(req.params.id as string, req.body.userId, req.body.role);
 
     const response = await commandHandler.execute(command);
     return res.status(201).json(response);

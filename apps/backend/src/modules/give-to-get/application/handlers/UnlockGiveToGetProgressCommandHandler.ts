@@ -4,6 +4,7 @@ import GiveToGetProgressRepository from "../../domain/contracts/GiveToGetProgres
 import UnlockGiveToGetProgressCommand from "../commands/UnlockGiveToGetProgressCommand.js";
 import GiveToGetProgressNotFoundException from "../exceptions/GiveToGetProgressNotFoundException.js";
 import GiveToGetProgressResponse, { mapGiveToGetProgressToResponse } from "../responses/GiveToGetProgressResponse.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default class UnlockGiveToGetProgressCommandHandler {
   constructor(private readonly giveToGetProgressRepository: GiveToGetProgressRepository) {}
@@ -14,6 +15,10 @@ export default class UnlockGiveToGetProgressCommandHandler {
 
     if (!progress) {
       throw new GiveToGetProgressNotFoundException(command.progressId);
+    }
+
+    if (progress.userId.getValue() !== command.userId) {
+      throw new UnauthorizedActionException("You can only unlock your own give-to-get progress");
     }
 
     const unlockedProgress = new GiveToGetProgress(

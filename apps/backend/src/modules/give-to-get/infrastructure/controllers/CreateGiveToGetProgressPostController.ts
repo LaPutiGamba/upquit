@@ -11,8 +11,12 @@ export default async function CreateGiveToGetProgressPostController(req: Request
   const commandHandler = new CreateGiveToGetProgressCommandHandler(new GiveToGetProgressDrizzleRepository(db));
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
     const command = new CreateGiveToGetProgressCommand(
-      req.body.userId,
+      req.userId,
       req.body.boardId,
       req.body.votesGiven ?? 0,
       req.body.qualifyingComments ?? 0,

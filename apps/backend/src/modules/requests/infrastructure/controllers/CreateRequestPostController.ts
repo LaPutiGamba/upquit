@@ -7,18 +7,21 @@ import CreateRequestCommandHandler from "../../application/handlers/CreateReques
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import InvalidRequestStatusException from "../../domain/exceptions/InvalidRequestStatusException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
-import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
 export default async function CreateRequestPostController(req: Request, res: Response) {
   const commandHandler = new CreateRequestCommandHandler(
     new RequestDrizzleRepository(db),
-    new WebSocketRealtimePublisher(getWebSocketServer())
+    new WebSocketRealtimePublisher()
   );
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
     const command = new CreateRequestCommand(
       req.body.boardId,
-      req.body.authorId,
+      req.userId,
       req.body.title,
       req.body.description ?? null,
       req.body.categoryId ?? null,

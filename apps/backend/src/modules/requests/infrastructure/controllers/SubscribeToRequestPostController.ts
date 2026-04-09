@@ -19,7 +19,11 @@ export default async function SubscribeToRequestPostController(
   const commandHandler = new SubscribeToRequestCommandHandler(new RequestDrizzleRepository(db));
 
   try {
-    const command = new SubscribeToRequestCommand(req.body.userId, req.params.id);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const command = new SubscribeToRequestCommand(req.userId, req.params.id);
 
     const response = await commandHandler.execute(command);
     return res.status(201).json(response);

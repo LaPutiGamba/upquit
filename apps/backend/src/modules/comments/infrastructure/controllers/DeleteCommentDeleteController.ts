@@ -7,7 +7,7 @@ import DeleteCommentCommandHandler from "../../application/handlers/DeleteCommen
 import CommentNotFoundException from "../../application/exceptions/CommentNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
-import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 type DeleteCommentDeleteParams = {
   id: string;
@@ -16,11 +16,15 @@ type DeleteCommentDeleteParams = {
 export default async function DeleteCommentDeleteController(req: Request<DeleteCommentDeleteParams>, res: Response) {
   const commandHandler = new DeleteCommentCommandHandler(
     new CommentDrizzleRepository(db),
-    new WebSocketRealtimePublisher(getWebSocketServer())
+    new WebSocketRealtimePublisher()
   );
 
   try {
-    const command = new DeleteCommentCommand(req.params.id);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const command = new DeleteCommentCommand(req.params.id, req.userId);
 
     await commandHandler.execute(command);
     return res.sendStatus(204);
@@ -34,6 +38,12 @@ export default async function DeleteCommentDeleteController(req: Request<DeleteC
     if (ex instanceof InvalidUuidException) {
       return res.status(400).send({
         error: "INVALID_COMMENT_ID",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UnauthorizedActionException) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
         message: ex.message
       });
     }

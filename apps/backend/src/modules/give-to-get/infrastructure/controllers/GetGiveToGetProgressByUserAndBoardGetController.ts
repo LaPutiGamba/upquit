@@ -11,16 +11,16 @@ export default async function GetGiveToGetProgressByUserAndBoardGetController(re
   const queryHandler = new GetGiveToGetProgressByUserAndBoardQueryHandler(new GiveToGetProgressDrizzleRepository(db));
 
   try {
-    const userId = req.query.userId;
-    if (typeof userId !== "string") {
-      throw new InvalidUuidException(String(userId));
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
     }
+
     const boardId = req.query.boardId;
     if (typeof boardId !== "string") {
       throw new InvalidUuidException(String(boardId));
     }
 
-    const command = new GetGiveToGetProgressByUserAndBoardQuery(userId, boardId);
+    const command = new GetGiveToGetProgressByUserAndBoardQuery(req.userId, boardId);
 
     const response = await queryHandler.execute(command);
     return res.status(200).json(response);

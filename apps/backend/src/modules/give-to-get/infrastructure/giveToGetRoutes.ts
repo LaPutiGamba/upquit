@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
 import CreateGiveToGetProgressPostController from "./controllers/CreateGiveToGetProgressPostController.js";
 import GetGiveToGetProgressByIdGetController from "./controllers/GetGiveToGetProgressByIdGetController.js";
 import GetGiveToGetProgressByUserAndBoardGetController from "./controllers/GetGiveToGetProgressByUserAndBoardGetController.js";
@@ -7,10 +8,13 @@ import UnlockGiveToGetProgressPostController from "./controllers/UnlockGiveToGet
 
 const giveToGetRouter = Router();
 
-giveToGetRouter.post("/", CreateGiveToGetProgressPostController);
-giveToGetRouter.get("/", GetGiveToGetProgressByUserAndBoardGetController);
+// Public
 giveToGetRouter.get("/:id", GetGiveToGetProgressByIdGetController);
-giveToGetRouter.patch("/:id", UpdateGiveToGetProgressPatchController);
-giveToGetRouter.post("/:id/unlock", UnlockGiveToGetProgressPostController);
+
+// Protected
+giveToGetRouter.post("/", JwtAuthMiddleware, CreateGiveToGetProgressPostController);
+giveToGetRouter.get("/", JwtAuthMiddleware, GetGiveToGetProgressByUserAndBoardGetController);
+giveToGetRouter.patch("/:id", JwtAuthMiddleware, UpdateGiveToGetProgressPatchController);
+giveToGetRouter.post("/:id/unlock", JwtAuthMiddleware, UnlockGiveToGetProgressPostController);
 
 export default giveToGetRouter;

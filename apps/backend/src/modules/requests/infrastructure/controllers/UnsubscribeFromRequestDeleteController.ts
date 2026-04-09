@@ -18,7 +18,11 @@ export default async function UnsubscribeFromRequestDeleteController(
   const commandHandler = new UnsubscribeFromRequestCommandHandler(new RequestDrizzleRepository(db));
 
   try {
-    const command = new UnsubscribeFromRequestCommand(req.body.userId, req.params.id);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const command = new UnsubscribeFromRequestCommand(req.userId, req.params.id);
 
     await commandHandler.execute(command);
     return res.sendStatus(204);

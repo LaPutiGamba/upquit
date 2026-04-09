@@ -3,6 +3,7 @@ import RealtimePublisher from "../../../../shared/domain/contracts/RealtimePubli
 import CommentRepository from "../../domain/contracts/CommentRepository.js";
 import DeleteCommentCommand from "../commands/DeleteCommentCommand.js";
 import CommentNotFoundException from "../exceptions/CommentNotFoundException.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default class DeleteCommentCommandHandler {
   constructor(
@@ -16,6 +17,10 @@ export default class DeleteCommentCommandHandler {
 
     if (!comment) {
       throw new CommentNotFoundException(command.commentId);
+    }
+
+    if (comment.userId.getValue() !== command.userId) {
+      throw new UnauthorizedActionException("You can only delete your own comments");
     }
 
     await this.commentRepository.delete(commentId);

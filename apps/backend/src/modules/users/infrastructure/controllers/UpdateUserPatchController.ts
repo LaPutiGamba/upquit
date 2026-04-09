@@ -7,16 +7,23 @@ import UpdateUserCommandHandler from "../../application/handlers/UpdateUserComma
 import UserNotFoundException from "../../application/exceptions/UserNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 
-type UpdateUserPatchParams = {
-  id: string;
-};
-
-export default async function UpdateUserPatchController(req: Request<UpdateUserPatchParams>, res: Response) {
+export default async function UpdateUserPatchController(req: Request, res: Response) {
   const commandHandler = new UpdateUserCommandHandler(new UserDrizzleRepository(db));
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    if (req.userId !== req.params.id) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
+        message: "You are not allowed to update this user"
+      });
+    }
+
     const command = new UpdateUserCommand(
-      req.params.id,
+      req.params.id as string,
       req.body.displayName,
       req.body.avatarUrl,
       req.body.emailVerified

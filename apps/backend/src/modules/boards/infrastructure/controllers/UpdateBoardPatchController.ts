@@ -9,16 +9,16 @@ import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUu
 import InvalidSlugException from "../../domain/exceptions/InvalidSlugException.js";
 import InvalidHexColorException from "../../domain/exceptions/InvalidHexColorException.js";
 
-type UpdateBoardPatchParams = {
-  id: string;
-};
-
-export default async function UpdateBoardPatchController(req: Request<UpdateBoardPatchParams>, res: Response) {
+export default async function UpdateBoardPatchController(req: Request, res: Response) {
   const commandHandler = new UpdateBoardCommandHandler(new BoardDrizzleRepository(db));
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
     const command = new UpdateBoardCommand(
-      req.params.id,
+      req.params.id as string,
       req.body.slug,
       req.body.name,
       req.body.description,

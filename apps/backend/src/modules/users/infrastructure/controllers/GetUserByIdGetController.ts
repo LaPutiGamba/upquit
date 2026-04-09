@@ -7,15 +7,15 @@ import GetUserByIdQueryHandler from "../../application/handlers/GetUserByIdQuery
 import UserNotFoundException from "../../application/exceptions/UserNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 
-type GetUserByIdGetParams = {
-  id: string;
-};
-
-export default async function GetUserByIdGetController(req: Request<GetUserByIdGetParams>, res: Response) {
+export default async function GetUserByIdGetController(req: Request, res: Response) {
   const queryHandler = new GetUserByIdQueryHandler(new UserDrizzleRepository(db));
 
   try {
-    const command = new GetUserByIdQuery(req.params.id);
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const command = new GetUserByIdQuery(req.params.id as string);
 
     const response = await queryHandler.execute(command);
     return res.status(200).json(response);

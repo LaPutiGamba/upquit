@@ -13,10 +13,14 @@ export default async function CreateBoardPostController(req: Request, res: Respo
   const commandHandler = new CreateBoardCommandHandler(new BoardDrizzleRepository(db));
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
     const command = new CreateBoardCommand(
       req.body.slug,
       req.body.name,
-      req.body.ownerId,
+      req.userId,
       req.body.description ?? null,
       req.body.logoUrl ?? null,
       req.body.primaryColor ?? null,

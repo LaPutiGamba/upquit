@@ -7,15 +7,19 @@ import UpdateUserPatchController from "./controllers/UpdateUserPatchController.j
 import DeactivateUserPostController from "./controllers/DeactivateUserPostController.js";
 import VerifyUserEmailPostController from "./controllers/VerifyUserEmailPostController.js";
 import AuthenticateUserPostController from "./controllers/AuthenticateUserPostController.js";
+import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
 
 const usersRouter = Router();
 
+// Public
 usersRouter.post("/register", (req, res) => CreateUserPostController(req, res, createUserCommandHandler));
 usersRouter.post("/login", AuthenticateUserPostController);
-usersRouter.get("/", GetUserByEmailGetController);
-usersRouter.get("/:id", GetUserByIdGetController);
-usersRouter.patch("/:id", UpdateUserPatchController);
-usersRouter.post("/:id/deactivate", DeactivateUserPostController);
 usersRouter.post("/:id/verify-email", VerifyUserEmailPostController);
+
+// Protected
+usersRouter.get("/", JwtAuthMiddleware, GetUserByEmailGetController);
+usersRouter.get("/:id", JwtAuthMiddleware, GetUserByIdGetController);
+usersRouter.patch("/:id", JwtAuthMiddleware, UpdateUserPatchController);
+usersRouter.post("/:id/deactivate", JwtAuthMiddleware, DeactivateUserPostController);
 
 export default usersRouter;

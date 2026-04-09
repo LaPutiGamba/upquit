@@ -18,12 +18,11 @@ export default async function IsSubscribedToRequestGetController(
   const queryHandler = new IsSubscribedToRequestQueryHandler(new RequestDrizzleRepository(db));
 
   try {
-    const userId = req.query.userId;
-    if (typeof userId !== "string") {
-      throw new InvalidUuidException(String(userId));
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
     }
 
-    const command = new IsSubscribedToRequestQuery(userId, req.params.id);
+    const command = new IsSubscribedToRequestQuery(req.userId, req.params.id);
 
     const isSubscribed = await queryHandler.execute(command);
     return res.status(200).json({ isSubscribed });

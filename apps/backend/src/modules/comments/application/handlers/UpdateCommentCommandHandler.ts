@@ -5,6 +5,7 @@ import CommentRepository from "../../domain/contracts/CommentRepository.js";
 import UpdateCommentCommand from "../commands/UpdateCommentCommand.js";
 import CommentNotFoundException from "../exceptions/CommentNotFoundException.js";
 import CommentResponse, { mapCommentToResponse } from "../responses/CommentResponse.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default class UpdateCommentCommandHandler {
   constructor(
@@ -18,6 +19,10 @@ export default class UpdateCommentCommandHandler {
 
     if (!comment) {
       throw new CommentNotFoundException(command.commentId);
+    }
+
+    if (comment.userId.getValue() !== command.userId) {
+      throw new UnauthorizedActionException("You can only update your own comments");
     }
 
     const updatedComment = new Comment(

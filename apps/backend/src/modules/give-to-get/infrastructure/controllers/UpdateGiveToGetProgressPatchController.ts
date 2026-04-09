@@ -6,6 +6,7 @@ import UpdateGiveToGetProgressCommand from "../../application/commands/UpdateGiv
 import UpdateGiveToGetProgressCommandHandler from "../../application/handlers/UpdateGiveToGetProgressCommandHandler.js";
 import GiveToGetProgressNotFoundException from "../../application/exceptions/GiveToGetProgressNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 type UpdateGiveToGetProgressPatchParams = {
   id: string;
@@ -18,8 +19,13 @@ export default async function UpdateGiveToGetProgressPatchController(
   const commandHandler = new UpdateGiveToGetProgressCommandHandler(new GiveToGetProgressDrizzleRepository(db));
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
     const command = new UpdateGiveToGetProgressCommand(
       req.params.id,
+      req.userId,
       req.body.votesGiven,
       req.body.qualifyingComments,
       req.body.canPost,
@@ -38,6 +44,12 @@ export default async function UpdateGiveToGetProgressPatchController(
     if (ex instanceof InvalidUuidException) {
       return res.status(400).send({
         error: "INVALID_GIVE_TO_GET_PROGRESS_ID",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UnauthorizedActionException) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
         message: ex.message
       });
     }

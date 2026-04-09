@@ -8,7 +8,7 @@ import RequestNotFoundException from "../../application/exceptions/RequestNotFou
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import InvalidRequestStatusException from "../../domain/exceptions/InvalidRequestStatusException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
-import { getWebSocketServer } from "../../../../shared/infrastructure/websocket/WebSocketServerRegistry.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 type UpdateRequestPatchParams = {
   id: string;
@@ -17,12 +17,17 @@ type UpdateRequestPatchParams = {
 export default async function UpdateRequestPatchController(req: Request<UpdateRequestPatchParams>, res: Response) {
   const commandHandler = new UpdateRequestCommandHandler(
     new RequestDrizzleRepository(db),
-    new WebSocketRealtimePublisher(getWebSocketServer())
+    new WebSocketRealtimePublisher()
   );
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
     const command = new UpdateRequestCommand(
       req.params.id,
+      req.userId,
       req.body.title,
       req.body.description,
       req.body.categoryId,
@@ -51,6 +56,12 @@ export default async function UpdateRequestPatchController(req: Request<UpdateRe
     if (ex instanceof InvalidRequestStatusException) {
       return res.status(400).send({
         error: "INVALID_REQUEST_STATUS",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UnauthorizedActionException) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
         message: ex.message
       });
     }

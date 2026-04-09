@@ -4,6 +4,7 @@ import VoteRepository from "../../domain/contracts/VoteRepository.js";
 import DeleteVoteCommand from "../commands/DeleteVoteCommand.js";
 import VoteNotFoundException from "../exceptions/VoteNotFoundException.js";
 import VoteDeletedEvent from "../../domain/events/VoteDeletedEvent.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default class DeleteVoteCommandHandler {
   constructor(
@@ -16,6 +17,10 @@ export default class DeleteVoteCommandHandler {
     const vote = await this.voteRepository.findById(voteId);
     if (!vote) {
       throw new VoteNotFoundException(command.voteId);
+    }
+
+    if (vote.userId.getValue() !== command.userId) {
+      throw new UnauthorizedActionException("You can only delete your own votes");
     }
 
     await this.voteRepository.delete(voteId);
