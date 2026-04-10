@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { boards, boardMembers, categories } from "../schema.js";
 import { users } from "../../../users/infrastructure/schema.js";
@@ -29,6 +29,17 @@ export default class BoardDrizzleRepository implements BoardRepository {
 
     if (!row) return null;
     return this.mapToDomainBoard(row);
+  }
+
+  public async findByUserId(userId: Uuid): Promise<Board[]> {
+    const boardIds = await this.findBoardIdsByUserId(userId);
+
+    if (boardIds.length === 0) {
+      return [];
+    }
+
+    const rows = await this.db.select().from(boards).where(inArray(boards.id, boardIds));
+    return rows.map((row) => this.mapToDomainBoard(row));
   }
 
   public async findBoardIdsByUserId(userId: Uuid): Promise<string[]> {

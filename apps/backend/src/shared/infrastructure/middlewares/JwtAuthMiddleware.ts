@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { sql } from "drizzle-orm";
+import { db } from "../database/connection.js";
 
 declare global {
   namespace Express {
@@ -10,7 +12,25 @@ declare global {
   }
 }
 
-export const JwtAuthMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+async function hasTenantAccessInDb(userId: string, tenantId: string): Promise<boolean> {
+  const result = await db.execute(sql`
+    SELECT EXISTS (
+      SELECT 1
+      FROM boards b
+      WHERE b.id::text = ${tenantId}
+        AND b.owner_id::text = ${userId}
+      UNION ALL
+      SELECT 1
+      FROM board_members bm
+      WHERE bm.board_id::text = ${tenantId}
+        AND bm.user_id::text = ${userId}
+    ) AS has_access
+  `);
+
+  return Boolean((result.rows[0] as { has_access?: boolean } | undefined)?.has_access);
+}
+
+export const JwtAuthMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -41,9 +61,10 @@ export const JwtAuthMiddleware = (req: Request, res: Response, next: NextFunctio
     const isAdmin = decoded.isAdmin === true || decoded.role === "ADMIN";
 
     if (requestedTenantId) {
-      const canAccessTenant = boardIds.includes(requestedTenantId);
+      const canAccessFromToken = boardIds.includes(requestedTenantId);
+      const canAccessFromDb = canAccessFromToken || (await hasTenantAccessInDb(decoded.sub, requestedTenantId));
 
-      if (!canAccessTenant && !isAdmin) {
+      if (!canAccessFromDb && !isAdmin) {
         res.status(403).send({
           error: "FORBIDDEN",
           message: "You are not allowed to access this tenant"

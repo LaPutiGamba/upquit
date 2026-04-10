@@ -3,6 +3,7 @@ import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/Jw
 import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/TenantDbMiddleware.js";
 import CreateBoardPostController from "./controllers/CreateBoardPostController.js";
 import GetBoardBySlugGetController from "./controllers/GetBoardBySlugGetController.js";
+import GetBoardsByUserGetController from "./controllers/GetBoardsByUserGetController.js";
 import GetBoardByIdGetController from "./controllers/GetBoardByIdGetController.js";
 import UpdateBoardPatchController from "./controllers/UpdateBoardPatchController.js";
 import GetBoardCategoriesGetController from "./controllers/GetBoardCategoriesGetController.js";
@@ -12,16 +13,17 @@ import AddBoardMemberPostController from "./controllers/AddBoardMemberPostContro
 
 const boardsRouter = Router();
 
+// Protected
+boardsRouter.get("/mine", JwtAuthMiddleware, TenantDbMiddleware, GetBoardsByUserGetController);
+boardsRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, CreateBoardPostController);
+boardsRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateBoardPatchController);
+boardsRouter.post("/:id/categories", JwtAuthMiddleware, TenantDbMiddleware, AddBoardCategoryPostController);
+boardsRouter.post("/:id/members", JwtAuthMiddleware, TenantDbMiddleware, AddBoardMemberPostController);
+
 // Public
 boardsRouter.get("/slug/:slug", GetBoardBySlugGetController);
 boardsRouter.get("/:id", GetBoardByIdGetController);
 boardsRouter.get("/:id/categories", GetBoardCategoriesGetController);
 boardsRouter.get("/:id/members", GetBoardMembersGetController);
-
-// Protected
-boardsRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, CreateBoardPostController);
-boardsRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateBoardPatchController);
-boardsRouter.post("/:id/categories", JwtAuthMiddleware, TenantDbMiddleware, AddBoardCategoryPostController);
-boardsRouter.post("/:id/members", JwtAuthMiddleware, TenantDbMiddleware, AddBoardMemberPostController);
 
 export default boardsRouter;
