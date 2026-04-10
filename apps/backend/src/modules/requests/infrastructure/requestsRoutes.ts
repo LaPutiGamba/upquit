@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
+import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/TenantDbMiddleware.js";
 import CreateRequestPostController from "./controllers/CreateRequestPostController.js";
 import GetRequestsByBoardIdGetController from "./controllers/GetRequestsByBoardIdGetController.js";
 import GetRequestByIdGetController from "./controllers/GetRequestByIdGetController.js";
@@ -15,10 +16,15 @@ requestsRouter.get("/", GetRequestsByBoardIdGetController);
 requestsRouter.get("/:id", GetRequestByIdGetController);
 
 // Protected
-requestsRouter.post("/", JwtAuthMiddleware, CreateRequestPostController);
-requestsRouter.patch("/:id", JwtAuthMiddleware, UpdateRequestPatchController);
-requestsRouter.post("/:id/subscriptions", JwtAuthMiddleware, SubscribeToRequestPostController);
-requestsRouter.delete("/:id/subscriptions", JwtAuthMiddleware, UnsubscribeFromRequestDeleteController);
-requestsRouter.get("/:id/subscriptions", JwtAuthMiddleware, IsSubscribedToRequestGetController);
+requestsRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, CreateRequestPostController);
+requestsRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateRequestPatchController);
+requestsRouter.post("/:id/subscriptions", JwtAuthMiddleware, TenantDbMiddleware, SubscribeToRequestPostController);
+requestsRouter.delete(
+  "/:id/subscriptions",
+  JwtAuthMiddleware,
+  TenantDbMiddleware,
+  UnsubscribeFromRequestDeleteController
+);
+requestsRouter.get("/:id/subscriptions", JwtAuthMiddleware, TenantDbMiddleware, IsSubscribedToRequestGetController);
 
 export default requestsRouter;

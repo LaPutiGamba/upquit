@@ -6,6 +6,7 @@ import GetVoteCountByRequestIdGetController from "./controllers/GetVoteCountByRe
 import GetVoteByIdGetController from "./controllers/GetVoteByIdGetController.js";
 import DeleteVoteDeleteController from "./controllers/DeleteVoteDeleteController.js";
 import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
+import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/TenantDbMiddleware.js";
 
 const votesRouter = Router();
 
@@ -15,8 +16,10 @@ votesRouter.get("/count", GetVoteCountByRequestIdGetController);
 votesRouter.get("/:id", GetVoteByIdGetController);
 
 // Protected
-votesRouter.post("/", JwtAuthMiddleware, (req, res) => CreateVotePostController(req, res, createVoteCommandHandler));
-votesRouter.delete("/:id", JwtAuthMiddleware, (req, res) =>
+votesRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, (req, res) =>
+  CreateVotePostController(req, res, createVoteCommandHandler)
+);
+votesRouter.delete("/:id", JwtAuthMiddleware, TenantDbMiddleware, (req, res) =>
   DeleteVoteDeleteController(req, res, deleteVoteCommandHandler)
 );
 

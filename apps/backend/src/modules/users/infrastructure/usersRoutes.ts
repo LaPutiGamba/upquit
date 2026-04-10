@@ -8,6 +8,7 @@ import DeactivateUserPostController from "./controllers/DeactivateUserPostContro
 import VerifyUserEmailPostController from "./controllers/VerifyUserEmailPostController.js";
 import AuthenticateUserPostController from "./controllers/AuthenticateUserPostController.js";
 import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
+import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/TenantDbMiddleware.js";
 
 const usersRouter = Router();
 
@@ -17,9 +18,9 @@ usersRouter.post("/login", AuthenticateUserPostController);
 usersRouter.post("/:id/verify-email", VerifyUserEmailPostController);
 
 // Protected
-usersRouter.get("/", JwtAuthMiddleware, GetUserByEmailGetController);
-usersRouter.get("/:id", JwtAuthMiddleware, GetUserByIdGetController);
-usersRouter.patch("/:id", JwtAuthMiddleware, UpdateUserPatchController);
-usersRouter.post("/:id/deactivate", JwtAuthMiddleware, DeactivateUserPostController);
+usersRouter.get("/", JwtAuthMiddleware, TenantDbMiddleware, GetUserByEmailGetController);
+usersRouter.get("/:id", JwtAuthMiddleware, TenantDbMiddleware, GetUserByIdGetController);
+usersRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateUserPatchController);
+usersRouter.post("/:id/deactivate", JwtAuthMiddleware, TenantDbMiddleware, DeactivateUserPostController);
 
 export default usersRouter;

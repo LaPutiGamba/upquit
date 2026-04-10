@@ -35,7 +35,6 @@ export default class AuthenticateUserQueryHandler {
     const payload: AuthTokenPayload = {
       sub: user.id.getValue(),
       userId: user.id.getValue(),
-      tenantId: boardIds[0] ?? null,
       boardIds
     };
 
