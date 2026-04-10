@@ -13,7 +13,8 @@ export const voteService = {
     const response = await apiClient<VoteResponse>("/votes", {
       method: "POST",
       body: JSON.stringify({ requestId, boardId }),
-      token
+      token,
+      tenantId: boardId
     });
     return response.id;
   },

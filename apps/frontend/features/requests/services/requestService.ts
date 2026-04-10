@@ -19,7 +19,8 @@ export const requestService = {
   getRequestsByBoardId: async (boardId: string): Promise<RequestResponse[]> => {
     return await apiClient<RequestResponse[]>(`/requests?boardId=${boardId}`, {
       method: "GET",
-      cache: "no-store"
+      cache: "no-store",
+      tenantId: boardId
     });
   }
 };
