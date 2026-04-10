@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { authService } from "@/features/authentication/services/authService";
+import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
@@ -45,15 +46,22 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
       const response = await authService.login(data);
       localStorage.setItem("accessToken", response.accessToken);
 
-      const payload = JSON.parse(atob(response.accessToken.split(".")[1]));
-      const userId = payload.userId || payload.sub;
+      const decodedPayload = decodeJwtPayload(response.accessToken);
+      if (!decodedPayload) {
+        throw new Error("Unable to read authentication token.");
+      }
+
+      const userId = decodedPayload.userId || decodedPayload.sub;
+      if (!userId) {
+        throw new Error("Invalid authentication token.");
+      }
 
       const user = await authService.getUserProfile(userId, response.accessToken);
 
       if (!user.emailVerified) {
-        router.push("/verify-email"); 
+        router.push("/verify-email");
       } else {
-        router.push("/onboarding");
+        router.push("/boards");
       }
     } catch (error) {
       toast.error(getErrorMessage(error));

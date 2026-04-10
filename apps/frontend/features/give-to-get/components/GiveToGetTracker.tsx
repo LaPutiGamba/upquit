@@ -6,6 +6,7 @@ import { BoardResponse } from "@/features/boards/services/boardService";
 import { Progress } from "@/shared/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { useChannel } from "@/shared/hooks/useChannel";
+import { decodeJwtPayload } from "@/shared/lib/jwt";
 
 interface GiveToGetTrackerProps {
   board: BoardResponse;
@@ -20,12 +21,14 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUserId(payload.userId || payload.sub);
+      const payload = decodeJwtPayload(token);
+      const nextUserId = payload?.userId || payload?.sub;
+
+      if (nextUserId) {
+        setUserId(nextUserId);
         setIsAuthenticated(true);
-      } catch (e) {
-        console.error("Failed to parse token", e);
+      } else {
+        console.error("Failed to parse token");
         setLoading(false);
       }
     } else {

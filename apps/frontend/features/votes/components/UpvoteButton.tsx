@@ -5,6 +5,7 @@ import { voteService } from "../services/voteService";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "@/shared/components/ui/sonner";
+import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowUp01Icon } from "@hugeicons/core-free-icons";
 
@@ -29,8 +30,11 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
 
       try {
         setIsLoading(true);
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const userId = payload.id || payload.sub;
+        const payload = decodeJwtPayload(token);
+        const userId = payload?.userId || payload?.sub;
+        if (!userId) {
+          return;
+        }
 
         const existingVoteId = await voteService.checkVote(requestId, userId, token);
         if (existingVoteId) {
