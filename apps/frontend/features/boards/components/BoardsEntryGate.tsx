@@ -5,18 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { boardService, BoardResponse } from "@/features/boards/services/boardService";
-import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
-
-function parseBoardIdsFromToken(token: string): string[] {
-  const decodedPayload = decodeJwtPayload(token);
-  if (!decodedPayload || !Array.isArray(decodedPayload.boardIds)) {
-    return [];
-  }
-
-  return decodedPayload.boardIds.filter((id): id is string => typeof id === "string" && id.length > 0);
-}
 
 export function BoardsEntryGate() {
   const router = useRouter();
@@ -33,16 +23,7 @@ export function BoardsEntryGate() {
         return;
       }
 
-      const boardIds = parseBoardIdsFromToken(token);
-      if (boardIds.length === 0) {
-        router.replace("/onboarding");
-        return;
-      }
-
-      const boardResults = await Promise.all(
-        boardIds.map((boardId) => boardService.getBoardById(boardId, token).catch(() => null))
-      );
-      const availableBoards = boardResults.filter((board): board is BoardResponse => board !== null);
+      const availableBoards = await boardService.getMyBoards(token);
 
       if (availableBoards.length === 0) {
         router.replace("/onboarding");

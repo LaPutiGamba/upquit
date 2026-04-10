@@ -23,6 +23,13 @@ export interface CreateBoardPayload {
 }
 
 export const boardService = {
+  getMyBoards: async (token: string): Promise<BoardResponse[]> => {
+    return await apiClient<BoardResponse[]>("/boards/mine", {
+      method: "GET",
+      token
+    });
+  },
+
   getBoardById: async (id: string, token?: string): Promise<BoardResponse> => {
     return await apiClient<BoardResponse>(`/boards/${id}`, {
       method: "GET",
