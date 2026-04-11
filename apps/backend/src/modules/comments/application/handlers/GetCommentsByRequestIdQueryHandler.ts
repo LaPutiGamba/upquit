@@ -8,8 +8,10 @@ export default class GetCommentsByRequestIdQueryHandler {
 
   async execute(query: GetCommentsByRequestIdQuery): Promise<CommentResponse[]> {
     const requestId = new Uuid(query.requestId);
-    const comments = await this.commentRepository.findByRequestId(requestId);
+    const comments = await this.commentRepository.findByRequestIdWithAuthor(requestId);
 
-    return comments.map(mapCommentToResponse);
+    return comments.map(({ comment, authorDisplayName, authorAvatarUrl }) =>
+      mapCommentToResponse(comment, authorDisplayName, authorAvatarUrl)
+    );
   }
 }

@@ -1,9 +1,10 @@
 import { eq } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { comments } from "../schema.js";
+import { users } from "../../../users/infrastructure/schema.js";
 
 import CommentRepository from "../../domain/contracts/CommentRepository.js";
-import Comment from "../../domain/entities/Comment.js";
+import Comment, { CommentWithAuthor } from "../../domain/entities/Comment.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 
 export default class CommentDrizzleRepository implements CommentRepository {
@@ -19,6 +20,24 @@ export default class CommentDrizzleRepository implements CommentRepository {
   public async findByRequestId(requestId: Uuid): Promise<Comment[]> {
     const rows = await this.db.select().from(comments).where(eq(comments.requestId, requestId.getValue()));
     return rows.map((row) => this.mapToDomainComment(row));
+  }
+
+  public async findByRequestIdWithAuthor(requestId: Uuid): Promise<CommentWithAuthor[]> {
+    const rows = await this.db
+      .select({
+        comment: comments,
+        authorDisplayName: users.displayName,
+        authorAvatarUrl: users.avatarUrl
+      })
+      .from(comments)
+      .leftJoin(users, eq(comments.userId, users.id))
+      .where(eq(comments.requestId, requestId.getValue()));
+
+    return rows.map((row) => ({
+      comment: this.mapToDomainComment(row.comment),
+      authorDisplayName: row.authorDisplayName,
+      authorAvatarUrl: row.authorAvatarUrl
+    }));
   }
 
   public async findByParentId(parentId: Uuid): Promise<Comment[]> {

@@ -21,3 +21,9 @@ export default class Comment {
   public readonly userId: Uuid;
   public readonly parentId: Uuid | null;
 }
+
+export interface CommentWithAuthor {
+  comment: Comment;
+  authorDisplayName: string | null;
+  authorAvatarUrl: string | null;
+}
