@@ -33,7 +33,7 @@ export default function VerifyPage() {
   }, [userId]);
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center bg-muted p-6">
+    <main className="flex min-h-svh flex-col items-center justify-center bg-background p-6">
       <Card className="w-full max-w-md text-center">
         <CardHeader className="flex flex-col items-center gap-4">
           <span

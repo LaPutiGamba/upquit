@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 
 export default function VerifyEmailPage() {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
+    <main className="flex min-h-svh flex-col items-center justify-center bg-background p-6 md:p-10">
       <Card className="w-full max-w-md border-none shadow-none bg-transparent sm:bg-card sm:border sm:shadow-sm">
         <CardHeader className="flex flex-col items-center gap-4 text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">

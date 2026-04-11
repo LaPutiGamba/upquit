@@ -93,7 +93,7 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
       variant={hasVoted ? "default" : "outline"}
       size="sm"
       className={cn(
-        "flex flex-col items-center gap-1 h-auto py-2 px-3 min-w-[3.5rem]",
+        "flex flex-col hover:cursor-pointer items-center gap-1 h-auto py-2 px-3 min-w-[3.5rem]",
         hasVoted ? "bg-primary text-primary-foreground" : "text-muted-foreground"
       )}
       onClick={handleVote}
