@@ -1,5 +1,5 @@
-import { BoardsEntryGate } from "@/features/boards/components/BoardsEntryGate";
+import { redirect } from "next/navigation";
 
 export default function BoardsPage() {
-  return <BoardsEntryGate />;
+  redirect("/boards");
 }

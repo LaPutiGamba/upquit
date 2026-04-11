@@ -6,8 +6,7 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "@/shared/components/ui/sonner";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowUp01Icon } from "@hugeicons/core-free-icons";
+import { ArrowUp } from "lucide-react";
 
 interface UpvoteButtonProps {
   requestId: string;
@@ -97,11 +96,7 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
       onClick={handleVote}
       disabled={isLoading}
     >
-      <HugeiconsIcon
-        icon={ArrowUp01Icon}
-        size={16}
-        className={cn("transition-transform", hasVoted && "transform -translate-y-0.5")}
-      />
+      <ArrowUp className={cn("h-4 w-4 transition-transform", hasVoted && "transform -translate-y-0.5")} />
       <span className="text-xs font-semibold">{voteCount}</span>
     </Button>
   );

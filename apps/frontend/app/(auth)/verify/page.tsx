@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Tick01Icon, ChampionIcon, Loading03Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 import { authService } from "@/features/authentication/services/authService";
 import { Button } from "@/shared/components/ui/button";
@@ -15,6 +14,7 @@ export default function VerifyPage() {
   const userId = searchParams.get("id");
 
   const [status, setStatus] = useState<"loading" | "success" | "error">(userId ? "loading" : "error");
+  const StatusIcon = status === "success" ? CheckCircle2 : status === "error" ? XCircle : Loader2;
 
   useEffect(() => {
     if (!userId) return;
@@ -45,11 +45,7 @@ export default function VerifyPage() {
                   : "bg-primary/10 text-primary"
             }`}
           >
-            <HugeiconsIcon
-              icon={status === "success" ? ChampionIcon : status === "error" ? Tick01Icon : Loading03Icon}
-              size={24}
-              className={status === "loading" ? "animate-spin" : ""}
-            />
+            <StatusIcon className={`h-6 w-6 ${status === "loading" ? "animate-spin" : ""}`} />
           </span>
 
           <CardTitle className="text-2xl font-bold">

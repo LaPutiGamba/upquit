@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Mail } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
@@ -13,7 +12,7 @@ export default function VerifyEmailPage() {
       <Card className="w-full max-w-md border-none shadow-none bg-transparent sm:bg-card sm:border sm:shadow-sm">
         <CardHeader className="flex flex-col items-center gap-4 text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <HugeiconsIcon icon={Mail01Icon} size={24} />
+            <Mail className="h-6 w-6" />
           </span>
           <CardTitle className="text-2xl font-bold tracking-tight">Check your email</CardTitle>
           <CardDescription className="text-balance text-base">
