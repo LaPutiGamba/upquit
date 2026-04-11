@@ -1,0 +1,217 @@
+{
+  "GiveToGet": {
+    "title": "Tu progreso de contribución",
+    "loginHint": "Inicia sesion para seguir tu progreso de contribución en este tablero",
+    "unlocked": "¡Has desbloqueado la capacidad de publicar!",
+    "locked": "Necesitas {votes} votos más y {comments} comentarios más para publicar una solicitud"
+  },
+  "BoardsEntryGate": {
+    "title": "Tus tableros",
+    "subtitle": "Gestiona tus espacios de feedback de tus productos",
+    "importBoard": "Importar tablero",
+    "createBoard": "Crear tablero",
+    "dialogTitle": "Crear un nuevo tablero",
+    "dialogDescription": "Responde estas preguntas rápidas para configurar tu espacio",
+    "emptyTitle": "Aun no hay tableros",
+    "emptyDescription": "Todavía no has creado ningun tablero. Empieza creando el primero",
+    "noDescription": "Sin descripción todavía"
+  },
+  "CreateBoardForm": {
+    "validation": {
+      "nameMin": "El nombre debe tener al menos 3 carácteres",
+      "slugMin": "El slug debe tener al menos 3 carácteres",
+      "slugPattern": "Usa solo minúsculas, números y guiones"
+    },
+    "errors": {
+      "unauthenticated": "No estás autenticado",
+      "createFailed": "Error al crear el tablero"
+    },
+    "success": {
+      "created": "Tablero creado correctamente"
+    },
+    "fields": {
+      "name": {
+        "label": "Nombre del producto",
+        "placeholder": "Ejemplo: Mi Increíble App"
+      },
+      "slug": {
+        "label": "URL / Slug",
+        "placeholder": "mi-app"
+      },
+      "description": {
+        "label": "Descripción (Opcional)",
+        "placeholder": "Un breve resumen de tu proyecto..."
+      }
+    },
+    "actions": {
+      "creating": "Creando...",
+      "create": "Crear tablero"
+    }
+  },
+  "LoginForm": {
+    "validation": {
+      "email": "Introduce un correo electrónico válido",
+      "password": "La contraseña es obligatoria"
+    },
+    "errors": {
+      "readToken": "No se pudo leer el token de autenticación",
+      "invalidToken": "Token de autenticación inválido",
+      "generic": "No se pudo iniciar sesión ahora. Inténtalo de nuevo"
+    },
+    "title": "Bienvenido de nuevo",
+    "subtitle": "Inicia sesión en tu cuenta de UpQuit",
+    "fields": {
+      "email": {
+        "label": "Email",
+        "placeholder": "m@example.com"
+      },
+      "password": {
+        "label": "Contraseña",
+        "placeholder": "••••••••"
+      }
+    },
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "actions": {
+      "signingIn": "Iniciando sesión...",
+      "login": "Entrar",
+      "signUp": "Regístrate"
+    },
+    "orContinueWith": "O continua con",
+    "loginWithGoogle": "Entrar con Google",
+    "noAccount": "¿No tienes cuenta?",
+    "terms": {
+      "prefix": "Al continuar, aceptas nuestros",
+      "termsOfService": "Términos del servicio",
+      "and": "y",
+      "privacyPolicy": "Política de privacidad"
+    }
+  },
+  "RegisterForm": {
+    "validation": {
+      "displayName": "El nombre visible debe tener al menos 2 carácteres",
+      "email": "Introduce un correo electrónico válido",
+      "password": "La contraseña debe tener al menos 8 carácteres",
+      "confirmPassword": "Las contraseñas no coinciden"
+    },
+    "errors": {
+      "generic": "No se pudo registrar la cuenta ahora. Inténtalo de nuevo"
+    },
+    "success": {
+      "created": "Cuenta creada correctamente"
+    },
+    "title": "Crea tu cuenta",
+    "subtitle": "Introduce tus datos para crear tu cuenta",
+    "fields": {
+      "displayName": {
+        "label": "Nombre",
+        "placeholder": "Tu nombre"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "info@example.com"
+      },
+      "password": {
+        "label": "Contraseña",
+        "placeholder": "********"
+      },
+      "confirmPassword": {
+        "label": "Confirmar contraseña",
+        "placeholder": "********"
+      }
+    },
+    "actions": {
+      "creating": "Creando cuenta...",
+      "create": "Crear cuenta",
+      "signIn": "Inicia sesión"
+    },
+    "orContinueWith": "O continua con",
+    "signUpWithGoogle": "Registrarte con Google",
+    "alreadyHaveAccount": "¿Ya tienes cuenta?",
+    "terms": {
+      "prefix": "Al continuar, aceptas nuestros",
+      "termsOfService": "Términos del servicio",
+      "and": "y",
+      "privacyPolicy": "Política de privacidad"
+    }
+  },
+  "UpvoteButton": {
+    "mustLogin": "Debes iniciar sesión para votar",
+    "voteError": "No se pudo registrar tu voto. Inténtalo de nuevo"
+  },
+  "RequestCard": {
+    "status": {
+      "planned": "planificado",
+      "in_progress": "en progreso",
+      "completed": "completado",
+      "rejected": "rechazado"
+    }
+  },
+  "BoardPage": {
+    "featureRequestsTitle": "Solicitudes de funcionalidades",
+    "emptyRequests": "Aun no hay solicitudes. ¡Se el primero en sugerir algo!"
+  },
+  "DefaultHomePage": {
+    "header": {
+      "kicker": "Centro de control del roadmap",
+      "startFree": "Empieza gratis",
+      "login": "Entrar"
+    },
+    "badge": "Espacio moderno de feedback",
+    "hero": {
+      "titlePrefix": "Convierte el caos del feedback en un",
+      "titleHighlight": "roadmap que se envia",
+      "description": "UpQuit centraliza solicitudes, discusion y votos en un solo lugar para que los equipos de producto puedan priorizar mejor y lanzar con confianza.",
+      "primaryCta": "Crear workspace gratis",
+      "secondaryCta": "Abrir workspace"
+    },
+    "proofs": {
+      "0": "Creado para equipos de producto",
+      "1": "Disenado para boards orientados a clientes",
+      "2": "Estructurado alrededor de decisiones claras"
+    },
+    "flow": {
+      "title": "Como un board pasa de idea a plan",
+      "description": "Un flujo enfocado mantiene cada solicitud accionable sin depender de dashboards vacios ni metricas ruidosas."
+    },
+    "boardFlow": {
+      "capture": {
+        "label": "Captura",
+        "text": "Cada idea llega a una cola compartida, en lugar de perderse entre chat, formularios y docs."
+      },
+      "discuss": {
+        "label": "Discute",
+        "text": "Equipos y clientes anaden contexto en cada solicitud para mantener decisiones transparentes."
+      },
+      "prioritize": {
+        "label": "Prioriza",
+        "text": "Mueve las solicitudes principales a planificacion con responsables claros y estado visible."
+      }
+    },
+    "usage": {
+      "title": "Como usan UpQuit los equipos"
+    },
+    "roadmapSteps": {
+      "0": "Recoge solicitudes de clientes y equipos internos.",
+      "1": "Agrupa tendencias por impacto y urgencia.",
+      "2": "Promociona ideas validadas al trabajo planificado."
+    },
+    "highlights": {
+      "realtime": {
+        "title": "Colaboracion en tiempo real",
+        "description": "Comentarios, votos y cambios de estado se sincronizan para todos en el tablero"
+      },
+      "signal": {
+        "title": "Pensado para senal",
+        "description": "Filtra ruido rapidamente con estados estructurados, ownership y prioridades claras."
+      },
+      "multitenancy": {
+        "title": "Multitenencia segura",
+        "description": "Gestiona varias comunidades de clientes con espacios aislados y flujos consistentes."
+      }
+    },
+    "footer": {
+      "kicker": "Hecho para equipos que priorizan con contexto",
+      "text": "Crea un workspace, invita colaboradores y empieza a moldear tu roadmap en un solo lugar."
+    }
+  }
+}

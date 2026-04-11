@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Presentation } from "lucide-react";
+import { ChevronRightIcon, Presentation } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { boardService, BoardResponse } from "@/features/boards/services/boardService";
 import { CreateBoardForm } from "@/features/boards/components/CreateBoardForm";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -25,8 +26,11 @@ import {
   EmptyMedia,
   EmptyTitle
 } from "@/shared/components/ui/empty";
+import { Item, ItemGroup, ItemTitle, ItemDescription, ItemContent, ItemActions } from "@/shared/components/ui/item";
+import { Spinner } from "@/shared/components/ui/spinner";
 
 export function BoardsEntryGate() {
+  const t = useTranslations("BoardsEntryGate");
   const router = useRouter();
   const [boards, setBoards] = useState<BoardResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,12 +85,7 @@ export function BoardsEntryGate() {
   if (loading) {
     return (
       <main className="flex min-h-svh items-center justify-center p-6 md:p-10">
-        <Card className="w-full max-w-2xl">
-          <CardHeader>
-            <CardTitle>Loading your boards...</CardTitle>
-            <CardDescription>Checking where to take you next.</CardDescription>
-          </CardHeader>
-        </Card>
+        <Spinner className="size-12" />
       </main>
     );
   }
@@ -95,18 +94,25 @@ export function BoardsEntryGate() {
     <main className="mx-auto flex min-h-svh w-full max-w-5xl flex-col gap-6 p-6 md:p-10">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Your boards</h1>
-          <p className="text-muted-foreground">Manage your product feedback spaces.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>Create board</Button>
-          </DialogTrigger>
+          {sortedBoards.length !== 0 && (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" disabled>
+                {t("importBoard")}
+              </Button>
+              <DialogTrigger asChild>
+                <Button className="hover:cursor-pointer">{t("createBoard")}</Button>
+              </DialogTrigger>
+            </div>
+          )}
           <DialogContent className="max-w-xl">
             <DialogHeader>
-              <DialogTitle>Create a new board</DialogTitle>
-              <DialogDescription>Answer these quick questions to set up your workspace.</DialogDescription>
+              <DialogTitle>{t("dialogTitle")}</DialogTitle>
+              <DialogDescription>{t("dialogDescription")}</DialogDescription>
             </DialogHeader>
             <CreateBoardForm
               onSuccess={async () => {
@@ -125,34 +131,36 @@ export function BoardsEntryGate() {
               <EmptyMedia variant="icon">
                 <Presentation className="size-5" aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>No boards yet</EmptyTitle>
-              <EmptyDescription>
-                You haven&apos;t created any boards yet. Get started by creating your first board.
-              </EmptyDescription>
+              <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
+              <EmptyDescription>{t("emptyDescription")}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent className="max-w-md flex-row flex-wrap justify-center gap-2">
-              <Button onClick={() => setCreateDialogOpen(true)}>Create board</Button>
+              <Button onClick={() => setCreateDialogOpen(true)} className="hover:cursor-pointer">
+                {t("createBoard")}
+              </Button>
               <Button variant="outline" disabled>
-                Import board
+                {t("importBoard")}
               </Button>
             </EmptyContent>
           </Empty>
         </section>
       ) : (
-        <section className="grid gap-4 sm:grid-cols-2">
-          {sortedBoards.map((board) => (
-            <Card key={board.id} className="transition-colors hover:border-primary/50">
-              <CardHeader>
-                <CardTitle>{board.name}</CardTitle>
-                <CardDescription>{board.description ?? "No description yet."}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <Link href={`/board/${board.slug}`}>Open board</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+        <section>
+          <ItemGroup>
+            {sortedBoards.map((board) => (
+              <Item key={board.id} asChild variant="outline">
+                <Link href={`/board/${board.slug}`}>
+                  <ItemContent>
+                    <ItemTitle>{board.name}</ItemTitle>
+                    <ItemDescription>{board.description || t("noDescription")}</ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <ChevronRightIcon className="size-4" />
+                  </ItemActions>
+                </Link>
+              </Item>
+            ))}
+          </ItemGroup>
         </section>
       )}
     </main>

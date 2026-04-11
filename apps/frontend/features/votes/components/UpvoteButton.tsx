@@ -7,6 +7,7 @@ import { cn } from "@/shared/lib/utils";
 import { toast } from "@/shared/components/ui/sonner";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { ArrowUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface UpvoteButtonProps {
   requestId: string;
@@ -15,6 +16,8 @@ interface UpvoteButtonProps {
 }
 
 export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteButtonProps) {
+  const t = useTranslations("UpvoteButton");
+
   const [voteCount, setVoteCount] = useState(initialVoteCount);
   const [hasVoted, setHasVoted] = useState(false);
   const [voteId, setVoteId] = useState<string | null>(null);
@@ -56,7 +59,7 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
 
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      toast.error("You must be logged in to vote.");
+      toast.error(t("mustLogin"));
       return;
     }
 
@@ -79,7 +82,7 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
     } catch {
       setVoteCount((prev) => (hasVoted ? prev + 1 : prev - 1));
       setHasVoted(hasVoted);
-      toast.error("Could not register your vote. Try again.");
+      toast.error(t("voteError"));
     } finally {
       setIsLoading(false);
     }

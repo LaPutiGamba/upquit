@@ -2,12 +2,29 @@ import { RequestResponse } from "../services/requestService";
 import { UpvoteButton } from "@/features/votes/components/UpvoteButton";
 import { Card, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 interface RequestCardProps {
   request: RequestResponse;
 }
 
 export function RequestCard({ request }: RequestCardProps) {
+  const t = useTranslations("RequestCard");
+
+  const getStatusLabel = (status: string) => {
+    const normalized = status.toLowerCase();
+
+    switch (normalized) {
+      case "planned":
+      case "in_progress":
+      case "completed":
+      case "rejected":
+        return t(`status.${normalized}`);
+      default:
+        return status.replace("_", " ");
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "planned":
@@ -33,7 +50,7 @@ export function RequestCard({ request }: RequestCardProps) {
         <div className="flex justify-between items-start gap-4">
           <CardTitle className="text-xl leading-tight m-0">{request.title}</CardTitle>
           <Badge variant="outline" className={getStatusColor(request.status)}>
-            {request.status.replace("_", " ")}
+            {getStatusLabel(request.status)}
           </Badge>
         </div>
         <p className="text-muted-foreground line-clamp-2 text-sm">{request.description}</p>

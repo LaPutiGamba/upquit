@@ -14,34 +14,43 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/shared/co
 import { Input } from "@/shared/components/ui/input";
 import { toast } from "@/shared/components/ui/sonner";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from "@/shared/components/ui/field";
+import { useTranslations } from "next-intl";
 
-const registerSchema = z
-  .object({
-    displayName: z.string().min(2, "Display name must be at least 2 characters."),
-    email: z.email("Please enter a valid email address."),
-    password: z.string().min(8, "Password must be at least 8 characters."),
-    confirmPassword: z.string()
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"]
-  });
+function registerSchema(t: (key: string) => string) {
+  return z
+    .object({
+      displayName: z.string().min(2, t("validation.displayName")),
+      email: z.email(t("validation.email")),
+      password: z.string().min(8, t("validation.password")),
+      confirmPassword: z.string()
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("validation.confirmPassword"),
+      path: ["confirmPassword"]
+    });
+}
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type RegisterFormValues = {
+  displayName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
-function getErrorMessage(error: unknown): string {
+function getErrorMessage(error: unknown, fallbackMessage: string): string {
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return "Unable to register right now. Please try again.";
+  return fallbackMessage;
 }
 
 export default function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
+  const t = useTranslations("RegisterForm");
   const router = useRouter();
 
   const form = useForm<RegisterFormValues>({
     // @ts-expect-error - zodResolver is not correctly typed for some reason
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema(t)),
     defaultValues: {
       displayName: "",
       email: "",
@@ -52,13 +61,17 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {
-      const { confirmPassword, ...submitData } = data;
+      const submitData = {
+        displayName: data.displayName,
+        email: data.email,
+        password: data.password
+      };
       await authService.register(submitData);
 
-      toast.success("Account created successfully.");
+      toast.success(t("success.created"));
       router.push("/login");
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      toast.error(getErrorMessage(error, t("errors.generic")));
     }
   };
 
@@ -70,10 +83,8 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
             <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
               <FieldGroup>
                 <div className="flex flex-col items-center gap-2 text-center">
-                  <h1 className="text-2xl font-bold">Create your account</h1>
-                  <p className="text-sm text-balance text-muted-foreground">
-                    Enter your details below to create your account
-                  </p>
+                  <h1 className="text-2xl font-bold">{t("title")}</h1>
+                  <p className="text-sm text-balance text-muted-foreground">{t("subtitle")}</p>
                 </div>
 
                 <FormField
@@ -82,9 +93,14 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   render={({ field }) => (
                     <FormItem className="space-y-0">
                       <Field>
-                        <FieldLabel htmlFor="displayName">Display Name</FieldLabel>
+                        <FieldLabel htmlFor="displayName">{t("fields.displayName.label")}</FieldLabel>
                         <FormControl>
-                          <Input id="displayName" placeholder="Your name" autoComplete="name" {...field} />
+                          <Input
+                            id="displayName"
+                            placeholder={t("fields.displayName.placeholder")}
+                            autoComplete="name"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </Field>
@@ -98,9 +114,15 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   render={({ field }) => (
                     <FormItem className="space-y-0">
                       <Field>
-                        <FieldLabel htmlFor="email">Email</FieldLabel>
+                        <FieldLabel htmlFor="email">{t("fields.email.label")}</FieldLabel>
                         <FormControl>
-                          <Input id="email" type="email" placeholder="info@example.com" autoComplete="email" {...field} />
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder={t("fields.email.placeholder")}
+                            autoComplete="email"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </Field>
@@ -115,12 +137,12 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                     render={({ field }) => (
                       <FormItem className="space-y-0">
                         <Field>
-                          <FieldLabel htmlFor="password">Password</FieldLabel>
+                          <FieldLabel htmlFor="password">{t("fields.password.label")}</FieldLabel>
                           <FormControl>
                             <Input
                               id="password"
                               type="password"
-                              placeholder="********"
+                              placeholder={t("fields.password.placeholder")}
                               autoComplete="new-password"
                               {...field}
                             />
@@ -137,12 +159,12 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                     render={({ field }) => (
                       <FormItem className="space-y-0">
                         <Field>
-                          <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+                          <FieldLabel htmlFor="confirmPassword">{t("fields.confirmPassword.label")}</FieldLabel>
                           <FormControl>
                             <Input
                               id="confirmPassword"
                               type="password"
-                              placeholder="********"
+                              placeholder={t("fields.confirmPassword.placeholder")}
                               autoComplete="new-password"
                               {...field}
                             />
@@ -156,12 +178,12 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
 
                 <Field>
                   <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? "Creating account..." : "Create Account"}
+                    {form.formState.isSubmitting ? t("actions.creating") : t("actions.create")}
                   </Button>
                 </Field>
 
                 <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                  Or continue with
+                  {t("orContinueWith")}
                 </FieldSeparator>
 
                 <Field>
@@ -172,14 +194,14 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                         fill="currentColor"
                       />
                     </svg>
-                    <span className="sr-only">Sign up with Google</span>
+                    <span className="sr-only">{t("signUpWithGoogle")}</span>
                   </Button>
                 </Field>
 
                 <FieldDescription className="text-center">
-                  Already have an account?{" "}
+                  {t("alreadyHaveAccount")}{" "}
                   <Link href="/login" className="underline underline-offset-4 hover:text-primary">
-                    Sign in
+                    {t("actions.signIn")}
                   </Link>
                 </FieldDescription>
               </FieldGroup>
@@ -197,13 +219,13 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
       </Card>
 
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our{" "}
+        {t("terms.prefix")}{" "}
         <a href="#" className="underline underline-offset-4 hover:text-primary">
-          Terms of Service
+          {t("terms.termsOfService")}
         </a>{" "}
-        and{" "}
+        {t("terms.and")}{" "}
         <a href="#" className="underline underline-offset-4 hover:text-primary">
-          Privacy Policy
+          {t("terms.privacyPolicy")}
         </a>
         .
       </FieldDescription>

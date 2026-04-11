@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 
 import { boardService } from "@/features/boards/services/boardService";
 import { Button } from "@/shared/components/ui/button";
@@ -13,16 +14,22 @@ import { Input } from "@/shared/components/ui/input";
 import { Field, FieldLabel } from "@/shared/components/ui/field";
 import { toast } from "@/shared/components/ui/sonner";
 
-const createBoardSchema = z.object({
-  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
-  slug: z
-    .string()
-    .min(3, "El slug debe tener al menos 3 caracteres.")
-    .regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones."),
-  description: z.string().optional()
-});
+function createBoardSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(3, t("validation.nameMin")),
+    slug: z
+      .string()
+      .min(3, t("validation.slugMin"))
+      .regex(/^[a-z0-9-]+$/, t("validation.slugPattern")),
+    description: z.string().optional()
+  });
+}
 
-type CreateBoardFormValues = z.infer<typeof createBoardSchema>;
+type CreateBoardFormValues = {
+  name: string;
+  slug: string;
+  description?: string;
+};
 
 interface CreateBoardFormProps {
   onSuccess?: (createdBoardSlug: string) => void | Promise<void>;
@@ -44,12 +51,14 @@ function slugify(value: string, keepTrailingHyphen = false): string {
 }
 
 export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
+  const t = useTranslations("CreateBoardForm");
   const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<CreateBoardFormValues>({
     // @ts-expect-error - zodResolver type mismatch
-    resolver: zodResolver(createBoardSchema),
+    resolver: zodResolver(createBoardSchema(t)),
     defaultValues: {
       name: "",
       slug: "",
@@ -61,11 +70,11 @@ export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("No estás autenticado.");
+      if (!token) throw new Error(t("errors.unauthenticated"));
 
       const newBoard = await boardService.createBoard(data, token);
 
-      toast.success("Board creado correctamente.");
+      toast.success(t("success.created"));
 
       if (onSuccess) {
         await onSuccess(newBoard.slug);
@@ -82,7 +91,7 @@ export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
       if (error instanceof Error) {
         toast.error(error.message);
       } else {
-        toast.error("Error al crear el board.");
+        toast.error(t("errors.createFailed"));
       }
     } finally {
       setIsLoading(false);
@@ -98,10 +107,10 @@ export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
           render={({ field }) => (
             <FormItem>
               <Field>
-                <FieldLabel>Nombre del Producto</FieldLabel>
+                <FieldLabel>{t("fields.name.label")}</FieldLabel>
                 <FormControl>
                   <Input
-                    placeholder="Ej: Mi App Increíble"
+                    placeholder={t("fields.name.placeholder")}
                     {...field}
                     onChange={(event) => {
                       const name = event.target.value;
@@ -128,11 +137,11 @@ export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
           render={({ field }) => (
             <FormItem>
               <Field>
-                <FieldLabel>URL / Slug</FieldLabel>
+                <FieldLabel>{t("fields.slug.label")}</FieldLabel>
                 <FormControl>
                   <div className="flex items-center">
                     <Input
-                      placeholder="mi-app"
+                      placeholder={t("fields.slug.placeholder")}
                       {...field}
                       className="rounded-r-none"
                       onChange={(event) => {
@@ -156,9 +165,9 @@ export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
           render={({ field }) => (
             <FormItem>
               <Field>
-                <FieldLabel>Descripción (Opcional)</FieldLabel>
+                <FieldLabel>{t("fields.description.label")}</FieldLabel>
                 <FormControl>
-                  <Input placeholder="Un breve resumen de tu proyecto..." {...field} />
+                  <Input placeholder={t("fields.description.placeholder")} {...field} />
                 </FormControl>
                 <FormMessage />
               </Field>
@@ -166,8 +175,8 @@ export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Creando..." : "Crear Board"}
+        <Button type="submit" className="w-full hover:cursor-pointer" disabled={isLoading}>
+          {isLoading ? t("actions.creating") : t("actions.create")}
         </Button>
       </form>
     </Form>

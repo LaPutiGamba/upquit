@@ -28,6 +28,8 @@ services:
     image: dhi.io/node:24-debian13
     container_name: upquit-backend
     working_dir: /usr/src/app
+    environment:
+      - DATABASE_URL=postgres://postgres:localpassword@db:5432/upquit_dev
     volumes:
       - .:/usr/src/app
     ports:

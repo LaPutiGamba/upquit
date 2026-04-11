@@ -1,0 +1,217 @@
+{
+  "GiveToGet": {
+    "title": "El teu progrés de contribució",
+    "loginHint": "Inicia sessió per seguir el teu progrés de contribució en aquest tauler",
+    "unlocked": "Has desbloquejat la capacitat de publicar!",
+    "locked": "Necessites {votes} vots més i {comments} comentaris més per publicar una petició"
+  },
+  "BoardsEntryGate": {
+    "title": "Els teus taulers",
+    "subtitle": "Gestiona els teus espais de feedback dels teus productes",
+    "importBoard": "Importar tauler",
+    "createBoard": "Crear tauler",
+    "dialogTitle": "Crea un tauler nou",
+    "dialogDescription": "Respon aquestes preguntes ràpides per configurar el teu espai",
+    "emptyTitle": "Encara no hi ha taulers",
+    "emptyDescription": "Encara no has creat cap tauler. Comença creant el primer",
+    "noDescription": "Encara sense descripció"
+  },
+  "CreateBoardForm": {
+    "validation": {
+      "nameMin": "El nom ha de tenir almenys 3 caràcters.",
+      "slugMin": "El slug ha de tenir almenys 3 caràcters.",
+      "slugPattern": "Utilitza nomes minúscules, números i guions"
+    },
+    "errors": {
+      "unauthenticated": "No estas autenticat",
+      "createFailed": "Error en crear el tauler"
+    },
+    "success": {
+      "created": "Tauler creat correctament"
+    },
+    "fields": {
+      "name": {
+        "label": "Nom del producte",
+        "placeholder": "Exemple: La Meva Increïble App"
+      },
+      "slug": {
+        "label": "URL / Slug",
+        "placeholder": "la-meva-app"
+      },
+      "description": {
+        "label": "Descripció (Opcional)",
+        "placeholder": "Un resum breu del teu projecte..."
+      }
+    },
+    "actions": {
+      "creating": "Creant...",
+      "create": "Crear tauler"
+    }
+  },
+  "LoginForm": {
+    "validation": {
+      "email": "Introdueix un correu electrònic vàlid",
+      "password": "La contrasenya és obligatòria"
+    },
+    "errors": {
+      "readToken": "No s'ha pogut llegir el token d'autenticació",
+      "invalidToken": "Token d'autenticació invalid",
+      "generic": "No s'ha pogut iniciar sessió ara. Torna-ho a provar"
+    },
+    "title": "Benvingut de nou",
+    "subtitle": "Inicia sessió al teu compte d'UpQuit",
+    "fields": {
+      "email": {
+        "label": "Correu",
+        "placeholder": "m@example.com"
+      },
+      "password": {
+        "label": "Contrasenya",
+        "placeholder": "••••••••"
+      }
+    },
+    "forgotPassword": "Has oblidat la contrasenya?",
+    "actions": {
+      "signingIn": "Iniciant sessió...",
+      "login": "Entrar",
+      "signUp": "Registra't"
+    },
+    "orContinueWith": "O continua amb",
+    "loginWithGoogle": "Entrar amb Google",
+    "noAccount": "No tens compte?",
+    "terms": {
+      "prefix": "En continuar, acceptes els nostres",
+      "termsOfService": "Termes del servei",
+      "and": "i",
+      "privacyPolicy": "Politica de privacitat"
+    }
+  },
+  "RegisterForm": {
+    "validation": {
+      "displayName": "El nom visible ha de tenir almenys 2 caràcters",
+      "email": "Introdueix un correu electrònic vàlid",
+      "password": "La contrasenya ha de tenir almenys 8 caràcters",
+      "confirmPassword": "Les contrasenyes no coincideixen"
+    },
+    "errors": {
+      "generic": "No s'ha pogut registrar el compte ara. Torna-ho a provar"
+    },
+    "success": {
+      "created": "Compte creat correctament"
+    },
+    "title": "Crea el teu compte",
+    "subtitle": "Introdueix les teves dades per crear el compte",
+    "fields": {
+      "displayName": {
+        "label": "Nom",
+        "placeholder": "El teu nom"
+      },
+      "email": {
+        "label": "Correu",
+        "placeholder": "info@example.com"
+      },
+      "password": {
+        "label": "Contrasenya",
+        "placeholder": "********"
+      },
+      "confirmPassword": {
+        "label": "Confirmar contrasenya",
+        "placeholder": "********"
+      }
+    },
+    "actions": {
+      "creating": "Creant compte...",
+      "create": "Crear compte",
+      "signIn": "Inicia sessió"
+    },
+    "orContinueWith": "O continua amb",
+    "signUpWithGoogle": "Registra't amb Google",
+    "alreadyHaveAccount": "Ja tens compte?",
+    "terms": {
+      "prefix": "En continuar, acceptes els nostres",
+      "termsOfService": "Termes del servei",
+      "and": "i",
+      "privacyPolicy": "Politica de privacitat"
+    }
+  },
+  "UpvoteButton": {
+    "mustLogin": "Has d'iniciar sessió per votar",
+    "voteError": "No s'ha pogut registrar el teu vot. Torna-ho a provar"
+  },
+  "RequestCard": {
+    "status": {
+      "planned": "planificat",
+      "in_progréss": "en progrés",
+      "completed": "completat",
+      "rejected": "rebutjat"
+    }
+  },
+  "BoardPage": {
+    "featureRequestsTitle": "Solicituds de funcionalitats",
+    "emptyRequests": "Encara no n'hi han sol·licituds. Sigues el primer a suggerir-ne una!"
+  },
+  "DefaultHomePage": {
+    "header": {
+      "kicker": "Centre de comandament del roadmap",
+      "startFree": "Comença gratis",
+      "login": "Entrar"
+    },
+    "badge": "Espai modern de feedback",
+    "hero": {
+      "titlePrefix": "Converteix el caos del feedback en un",
+      "titleHighlight": "roadmap preparat per enviar",
+      "description": "UpQuit centralitza sol·licituds, discussió i vots en un sòl lloc perque els equips de producte puguin prioritzar millor i publicar amb confiança",
+      "primaryCta": "Crear workspace gratis",
+      "secondaryCta": "Obrir workspace"
+    },
+    "proofs": {
+      "0": "Fet per equips de producte",
+      "1": "Dissenyat per taulers orientats a clients",
+      "2": "Estructurat al voltant de decisions clares"
+    },
+    "flow": {
+      "title": "Com un tauler passa d'idea a pla",
+      "description": "Un flux enfocat manté cada sollicitud accionable sense dashboards de vanitat ni mètriques sorolloses"
+    },
+    "boardFlow": {
+      "capture": {
+        "label": "Captura",
+        "text": "Cada idea arriba a una cua compartida en lloc de perdre's entre xat, formularis i docs"
+      },
+      "discuss": {
+        "label": "Discuteix",
+        "text": "Equips i clients afegeixen context a cada sollicitud per mantenir decisions transparents"
+      },
+      "prioritize": {
+        "label": "Prioritza",
+        "text": "Mou les sollicituds principals a planificacio amb responsables clars i estat visible"
+      }
+    },
+    "usage": {
+      "title": "Com fan servir UpQuit els equips"
+    },
+    "roadmapSteps": {
+      "0": "Recull sollicituds de clients i equips interns",
+      "1": "Agrupa tendencies per impacte i urgencia",
+      "2": "Promou idees validades a feina planificada"
+    },
+    "highlights": {
+      "realtime": {
+        "title": "Col-laboracio en temps real",
+        "description": "Comentaris, vots i canvis d'estat se sincronitzen per a tothom al board"
+      },
+      "signal": {
+        "title": "Pensat per al senyal",
+        "description": "Filtra el soroll rapid amb estats estructurats, ownership i prioritats clares"
+      },
+      "multitenancy": {
+        "title": "Multitenencia segura",
+        "description": "Gestiona multiples comunitats de clients amb espais aillats i fluxos consistents"
+      }
+    },
+    "footer": {
+      "kicker": "Fet per equips que prioritzen amb context",
+      "text": "Crea un workspace, convida col-laboradors i comenca a donar forma al teu roadmap en un sol lloc"
+    }
+  }
+}

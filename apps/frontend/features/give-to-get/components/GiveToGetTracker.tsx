@@ -7,12 +7,15 @@ import { Progress } from "@/shared/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
+import { useTranslations } from "next-intl";
 
 interface GiveToGetTrackerProps {
   board: BoardResponse;
 }
 
 export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
+  const t = useTranslations("GiveToGet");
+
   const [progress, setProgress] = useState<GiveToGetProgressResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -93,10 +96,10 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
     return (
       <Card className="mb-8 border-primary/20 bg-primary/5">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Your Contribution Progress</CardTitle>
+          <CardTitle className="text-lg">{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Log in to track your Give to Get progress on this board.</p>
+          <p className="text-sm text-muted-foreground">{t("loginHint")}</p>
         </CardContent>
       </Card>
     );
@@ -109,10 +112,19 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
   const votesGiven = progress.votesGiven || 0;
   const commentsGiven = progress.qualifyingComments || 0;
 
-  const totalRequired = votesReq + commentsReq;
-  const totalGiven = votesGiven + commentsGiven;
+  const votesPercent = votesReq > 0 ? Math.min((votesGiven / votesReq) * 100, 100) : 100;
+  const commentsPercent = commentsReq > 0 ? Math.min((commentsGiven / commentsReq) * 100, 100) : 100;
 
-  const percentage = totalRequired === 0 ? 100 : Math.min(100, Math.round((totalGiven / totalRequired) * 100));
+  let percentage = 0;
+  if (votesReq > 0 && commentsReq > 0) {
+    percentage = Math.round((votesPercent + commentsPercent) / 2);
+  } else if (votesReq > 0) {
+    percentage = Math.round(votesPercent);
+  } else if (commentsReq > 0) {
+    percentage = Math.round(commentsPercent);
+  } else {
+    percentage = 100;
+  }
 
   const votesLeft = Math.max(0, votesReq - votesGiven);
   const commentsLeft = Math.max(0, commentsReq - commentsGiven);
@@ -121,16 +133,14 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
     <Card className="mb-8 border-primary/20 bg-primary/5">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-lg">Your Contribution Progress</CardTitle>
+          <CardTitle className="text-lg">{t("title")}</CardTitle>
           <span className="text-sm font-medium text-muted-foreground">{percentage}%</span>
         </div>
       </CardHeader>
       <CardContent>
         <Progress value={percentage} className="h-2 mb-3" />
         <p className="text-sm text-muted-foreground">
-          {progress.canPost
-            ? "🎉 You have unlocked the ability to post new feature requests!"
-            : `Give to Get: You need ${votesLeft} more votes and ${commentsLeft} more comments to publish a request.`}
+          {progress.canPost ? t("unlocked") : t("locked", { votes: votesLeft, comments: commentsLeft })}
         </p>
       </CardContent>
     </Card>

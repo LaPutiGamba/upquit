@@ -1,0 +1,217 @@
+{
+  "GiveToGet": {
+    "title": "Your Contribution Progress",
+    "loginHint": "Log in to track your Give to Get progress on this board.",
+    "unlocked": "You have unlocked the ability to post!",
+    "locked": "You need {votes} more votes and {comments} more comments to publish a request"
+  },
+  "BoardsEntryGate": {
+    "title": "Your boards",
+    "subtitle": "Manage your products feedback spaces",
+    "importBoard": "Import board",
+    "createBoard": "Create board",
+    "dialogTitle": "Create a new board",
+    "dialogDescription": "Answer these quick questions to set up your workspace",
+    "emptyTitle": "No boards yet",
+    "emptyDescription": "You haven't created any boards yet. Get started by creating your first board",
+    "noDescription": "No description yet"
+  },
+  "CreateBoardForm": {
+    "validation": {
+      "nameMin": "The name must be at least 3 characters.",
+      "slugMin": "The slug must be at least 3 characters.",
+      "slugPattern": "Use lowercase letters, numbers, and hyphens only."
+    },
+    "errors": {
+      "unauthenticated": "You are not authenticated.",
+      "createFailed": "Error creating the board."
+    },
+    "success": {
+      "created": "Board created successfully."
+    },
+    "fields": {
+      "name": {
+        "label": "Product Name",
+        "placeholder": "Example: My Amazing App"
+      },
+      "slug": {
+        "label": "URL / Slug",
+        "placeholder": "my-app"
+      },
+      "description": {
+        "label": "Description (Optional)",
+        "placeholder": "A short summary of your project..."
+      }
+    },
+    "actions": {
+      "creating": "Creating...",
+      "create": "Create Board"
+    }
+  },
+  "LoginForm": {
+    "validation": {
+      "email": "Please enter a valid email address.",
+      "password": "Password is required."
+    },
+    "errors": {
+      "readToken": "Unable to read authentication token.",
+      "invalidToken": "Invalid authentication token.",
+      "generic": "Unable to login right now. Please try again."
+    },
+    "title": "Welcome back",
+    "subtitle": "Login to your UpQuit account",
+    "fields": {
+      "email": {
+        "label": "Email",
+        "placeholder": "m@example.com"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "••••••••"
+      }
+    },
+    "forgotPassword": "Forgot your password?",
+    "actions": {
+      "signingIn": "Signing in...",
+      "login": "Login",
+      "signUp": "Sign up"
+    },
+    "orContinueWith": "Or continue with",
+    "loginWithGoogle": "Login with Google",
+    "noAccount": "Don't have an account?",
+    "terms": {
+      "prefix": "By clicking continue, you agree to our",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy"
+    }
+  },
+  "RegisterForm": {
+    "validation": {
+      "displayName": "Display name must be at least 2 characters.",
+      "email": "Please enter a valid email address.",
+      "password": "Password must be at least 8 characters.",
+      "confirmPassword": "Passwords don't match"
+    },
+    "errors": {
+      "generic": "Unable to register right now. Please try again."
+    },
+    "success": {
+      "created": "Account created successfully."
+    },
+    "title": "Create your account",
+    "subtitle": "Enter your details below to create your account",
+    "fields": {
+      "displayName": {
+        "label": "Display Name",
+        "placeholder": "Your name"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "info@example.com"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "********"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "placeholder": "********"
+      }
+    },
+    "actions": {
+      "creating": "Creating account...",
+      "create": "Create Account",
+      "signIn": "Sign in"
+    },
+    "orContinueWith": "Or continue with",
+    "signUpWithGoogle": "Sign up with Google",
+    "alreadyHaveAccount": "Already have an account?",
+    "terms": {
+      "prefix": "By clicking continue, you agree to our",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy"
+    }
+  },
+  "UpvoteButton": {
+    "mustLogin": "You must be logged in to vote.",
+    "voteError": "Could not register your vote. Try again."
+  },
+  "RequestCard": {
+    "status": {
+      "planned": "planned",
+      "in_progress": "in progress",
+      "completed": "completed",
+      "rejected": "rejected"
+    }
+  },
+  "BoardPage": {
+    "featureRequestsTitle": "Feature Requests",
+    "emptyRequests": "No feature requests yet. Be the first to suggest something!"
+  },
+  "DefaultHomePage": {
+    "header": {
+      "kicker": "Roadmap command center",
+      "startFree": "Start free",
+      "login": "Login"
+    },
+    "badge": "Modern feedback workspace",
+    "hero": {
+      "titlePrefix": "Turn feedback chaos into a",
+      "titleHighlight": "shippable roadmap",
+      "description": "UpQuit centralizes requests, discussion, and voting in one place so product teams can triage faster, prioritize better, and ship with confidence.",
+      "primaryCta": "Start free workspace",
+      "secondaryCta": "Open workspace"
+    },
+    "proofs": {
+      "0": "Built for product teams",
+      "1": "Designed for customer-facing boards",
+      "2": "Structured around clear decisions"
+    },
+    "flow": {
+      "title": "How a board moves from idea to plan",
+      "description": "A focused workflow keeps every request actionable without relying on vanity dashboards or noisy metrics."
+    },
+    "boardFlow": {
+      "capture": {
+        "label": "Capture",
+        "text": "Every idea lands in one shared queue instead of getting lost across chat, forms, and docs."
+      },
+      "discuss": {
+        "label": "Discuss",
+        "text": "Teams and customers add context directly on each request so decisions stay transparent."
+      },
+      "prioritize": {
+        "label": "Prioritize",
+        "text": "Move top requests into planning with clear ownership and visible status updates."
+      }
+    },
+    "usage": {
+      "title": "How teams use UpQuit"
+    },
+    "roadmapSteps": {
+      "0": "Collect requests from customers and internal teams.",
+      "1": "Cluster trends by impact and urgency.",
+      "2": "Promote validated ideas to planned work."
+    },
+    "highlights": {
+      "realtime": {
+        "title": "Realtime collaboration",
+        "description": "Comments, votes, and status updates stay synchronized for everyone in the board."
+      },
+      "signal": {
+        "title": "Built for signal",
+        "description": "Filter noise quickly with structured states, ownership, and clear priorities."
+      },
+      "multitenancy": {
+        "title": "Safe multitenancy",
+        "description": "Run multiple customer communities with isolated spaces and consistent workflows."
+      }
+    },
+    "footer": {
+      "kicker": "Built for teams that prioritize with context",
+      "text": "Create a workspace, invite collaborators, and start shaping your roadmap in one place."
+    }
+  }
+}
