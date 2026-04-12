@@ -8,6 +8,7 @@ import CommentNotFoundException from "../../application/exceptions/CommentNotFou
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
 import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
+import { eventBus } from "../../../../shared/infrastructure/dependencies.js";
 
 type DeleteCommentDeleteParams = {
   id: string;
@@ -16,7 +17,8 @@ type DeleteCommentDeleteParams = {
 export default async function DeleteCommentDeleteController(req: Request<DeleteCommentDeleteParams>, res: Response) {
   const commandHandler = new DeleteCommentCommandHandler(
     new CommentDrizzleRepository(db),
-    new WebSocketRealtimePublisher()
+    new WebSocketRealtimePublisher(),
+    eventBus
   );
 
   try {

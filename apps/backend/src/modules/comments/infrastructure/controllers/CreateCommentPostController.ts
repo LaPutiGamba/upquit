@@ -6,11 +6,13 @@ import CreateCommentCommand from "../../application/commands/CreateCommentComman
 import CreateCommentCommandHandler from "../../application/handlers/CreateCommentCommandHandler.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
+import { eventBus } from "../../../../shared/infrastructure/dependencies.js";
 
 export default async function CreateCommentPostController(req: Request, res: Response) {
   const commandHandler = new CreateCommentCommandHandler(
     new CommentDrizzleRepository(db),
-    new WebSocketRealtimePublisher()
+    new WebSocketRealtimePublisher(),
+    eventBus
   );
 
   try {

@@ -5,15 +5,19 @@ import { toast } from "sonner";
 import { commentService, default as CommentResponse } from "../services/commentService";
 import { CommentForm } from "./CommentForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import { cn } from "@/shared/lib/utils";
+import { useChannel } from "@/shared/hooks/useChannel";
 
 interface CommentSectionProps {
   requestId: string;
   boardId: string;
+  isDialog?: boolean;
 }
 
-export function CommentSection({ requestId, boardId }: CommentSectionProps) {
+export function CommentSection({ requestId, boardId, isDialog = false }: CommentSectionProps) {
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const syncChannelName = `comments:${requestId}`;
 
   const getDisplayName = (comment: CommentResponse) => {
     if (comment.authorDisplayName && comment.authorDisplayName.trim().length > 0) {
@@ -44,13 +48,40 @@ export function CommentSection({ requestId, boardId }: CommentSectionProps) {
     fetchComments();
   }, [fetchComments]);
 
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") {
+      return;
+    }
+
+    const channel = new BroadcastChannel(syncChannelName);
+
+    const handleSyncMessage = (event: MessageEvent) => {
+      if (event.data?.type === "COMMENT_SYNC") {
+        fetchComments();
+      }
+    };
+
+    channel.addEventListener("message", handleSyncMessage);
+
+    return () => {
+      channel.removeEventListener("message", handleSyncMessage);
+      channel.close();
+    };
+  }, [fetchComments, syncChannelName]);
+
+  useChannel(requestId, (message) => {
+    if (message.event === "COMMENT_ADDED" || message.event === "COMMENT_DELETED") {
+      fetchComments();
+    }
+  });
+
   const handleCommentAdded = () => {
     fetchComments();
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
+    <div className={cn("space-y-6", isDialog && "min-h-0")}>
+      <div className={cn("space-y-4", isDialog && "min-h-0")}>
         <h3 className="text-lg font-semibold">Comments</h3>
 
         {isLoading ? (
@@ -62,7 +93,9 @@ export function CommentSection({ requestId, boardId }: CommentSectionProps) {
             <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
           </div>
         ) : (
-          <ul className="space-y-3 border-l-2 border-border pl-4">
+          <ul
+            className={cn("space-y-3 border-l-2 border-border pl-4", isDialog && "max-h-[42vh] overflow-y-auto pr-2")}
+          >
             {comments.map((comment) => (
               <li key={comment.id} className="rounded-lg bg-muted/50 p-3 transition-colors hover:bg-muted">
                 <div className="flex items-start gap-3">
@@ -110,9 +143,7 @@ export function CommentSection({ requestId, boardId }: CommentSectionProps) {
         )}
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4">
-        <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={handleCommentAdded} />
-      </div>
+      <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={handleCommentAdded} />
     </div>
   );
 }

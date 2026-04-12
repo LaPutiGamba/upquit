@@ -16,6 +16,7 @@ export const commentService = {
   async getCommentsByRequestId(requestId: string, boardId: string): Promise<CommentResponse[]> {
     const response = await apiClient<CommentResponse[]>(`/comments?requestId=${requestId}`, {
       method: "GET",
+      cache: "no-store",
       tenantId: boardId
     });
     return response;

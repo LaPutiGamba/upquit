@@ -17,12 +17,17 @@ export default class IncrementVoteCountOnVoteCreated {
     if (request) {
       const userId = new Uuid(event.userId);
       const boardId = new Uuid(event.boardId);
-
-      this.realtimePublisher.publish(`request.${userId.getValue()}.${boardId.getValue()}`, "RequestUpdated", {
+      const payload = {
         boardId: boardId.getValue(),
         requestId: event.requestId,
+        voteId: event.voteId,
+        userId: userId.getValue(),
+        action: "created",
         voteCount: request.voteCount
-      });
+      };
+
+      this.realtimePublisher.publish(`request.${userId.getValue()}.${boardId.getValue()}`, "RequestUpdated", payload);
+      this.realtimePublisher.publish(`request.${boardId.getValue()}`, "RequestUpdated", payload);
     }
   }
 }

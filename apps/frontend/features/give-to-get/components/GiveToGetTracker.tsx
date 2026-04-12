@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { giveToGetService, GiveToGetProgressResponse } from "../services/giveToGetService";
 import { BoardResponse } from "@/features/boards/services/boardService";
 import { Progress } from "@/shared/components/ui/progress";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { useTranslations } from "next-intl";
@@ -90,16 +90,14 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
 
   if (!board.giveToGetEnabled) return null;
 
-  if (loading) return <div className="h-24 animate-pulse bg-muted rounded-lg w-full mb-8"></div>;
+  if (loading) return <div className="h-16 animate-pulse rounded-md bg-muted/60 w-full mb-4"></div>;
 
   if (!isAuthenticated) {
     return (
-      <Card className="mb-8 border-primary/20 bg-primary/5">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">{t("title")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{t("loginHint")}</p>
+      <Card className="mb-4 border-border/60 bg-background shadow-none">
+        <CardContent className="px-4 py-3">
+          <CardTitle className="text-lg leading-none">{t("title")}</CardTitle>
+          <p className="mt-1 text-sm text-muted-foreground">{t("loginHint")}</p>
         </CardContent>
       </Card>
     );
@@ -130,18 +128,18 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
   const commentsLeft = Math.max(0, commentsReq - commentsGiven);
 
   return (
-    <Card className="mb-8 border-primary/20 bg-primary/5">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg">{t("title")}</CardTitle>
-          <span className="text-sm font-medium text-muted-foreground">{percentage}%</span>
+    <Card className="mb-4 border-primary/20 bg-primary/5 shadow-none">
+      <CardContent className="px-4">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-lg leading-none shrink-0">{t("title")}</CardTitle>
+          <p className="text-sm text-muted-foreground text-right">
+            {progress.canPost ? t("unlocked") : t("locked", { votes: votesLeft, comments: commentsLeft })}
+          </p>
         </div>
-      </CardHeader>
-      <CardContent>
-        <Progress value={percentage} className="h-2 mb-3" />
-        <p className="text-sm text-muted-foreground">
-          {progress.canPost ? t("unlocked") : t("locked", { votes: votesLeft, comments: commentsLeft })}
-        </p>
+        <div className="mt-2 flex items-center gap-3">
+          <Progress value={percentage} className="h-2 flex-1" />
+          <span className="text-sm font-medium text-muted-foreground shrink-0">{percentage}%</span>
+        </div>
       </CardContent>
     </Card>
   );

@@ -20,6 +20,8 @@ export const userRepository = new UserDrizzleRepository(db);
 // ========================
 import VoteCreatedEvent from "../../modules/votes/domain/events/VoteCreatedEvent.js";
 import VoteDeletedEvent from "../../modules/votes/domain/events/VoteDeletedEvent.js";
+import CommentCreatedEvent from "../../modules/comments/domain/events/CommentCreatedEvent.js";
+import CommentDeletedEvent from "../../modules/comments/domain/events/CommentDeletedEvent.js";
 import UserCreatedEvent from "../../modules/users/domain/events/UserCreatedEvent.js";
 
 // ========================
@@ -29,6 +31,8 @@ import IncrementVoteCountOnVoteCreated from "../../modules/requests/application/
 import UpdateProgressOnVoteCreated from "../../modules/give-to-get/application/listeners/UpdateProgressOnVoteCreated.js";
 import DecrementVoteCountOnVoteDeleted from "../../modules/requests/application/listeners/DecrementVoteCountOnVoteDeleted.js";
 import RevertProgressOnVoteDeleted from "../../modules/give-to-get/application/listeners/RevertProgressOnVoteDeleted.js";
+import UpdateProgressOnCommentCreated from "../../modules/give-to-get/application/listeners/UpdateProgressOnCommentCreated.js";
+import RevertProgressOnCommentDeleted from "../../modules/give-to-get/application/listeners/RevertProgressOnCommentDeleted.js";
 import SendVerificationEmailOnUserCreated from "../../modules/users/application/listeners/SendVerificationEmailOnUserCreated.js";
 
 // ========================
@@ -66,6 +70,18 @@ export const revertProgressListener = new RevertProgressOnVoteDeleted(
   boardRepository,
   realtimePublisher
 );
+export const updateProgressOnCommentCreatedListener = new UpdateProgressOnCommentCreated(
+  giveToGetProgressRepository,
+  requestRepository,
+  boardRepository,
+  realtimePublisher
+);
+export const revertProgressOnCommentDeletedListener = new RevertProgressOnCommentDeleted(
+  giveToGetProgressRepository,
+  requestRepository,
+  boardRepository,
+  realtimePublisher
+);
 export const sendVerificationEmailListener = new SendVerificationEmailOnUserCreated(emailSender);
 
 // ========================
@@ -75,6 +91,12 @@ eventBus.subscribe("vote.created", (event: VoteCreatedEvent) => incrementVoteCou
 eventBus.subscribe("vote.created", (event: VoteCreatedEvent) => updateProgressListener.handle(event));
 eventBus.subscribe("vote.deleted", (event: VoteDeletedEvent) => decrementVoteCountListener.handle(event));
 eventBus.subscribe("vote.deleted", (event: VoteDeletedEvent) => revertProgressListener.handle(event));
+eventBus.subscribe("comment.created", (event: CommentCreatedEvent) =>
+  updateProgressOnCommentCreatedListener.handle(event)
+);
+eventBus.subscribe("comment.deleted", (event: CommentDeletedEvent) =>
+  revertProgressOnCommentDeletedListener.handle(event)
+);
 eventBus.subscribe("user.created", (event: UserCreatedEvent) => sendVerificationEmailListener.handle(event));
 
 // ========================

@@ -8,6 +8,7 @@ import { toast } from "@/shared/components/ui/sonner";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { ArrowUp } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useChannel } from "@/shared/hooks/useChannel";
 
 interface UpvoteButtonProps {
   requestId: string;
@@ -22,6 +23,29 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
   const [hasVoted, setHasVoted] = useState(false);
   const [voteId, setVoteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  const channelName = boardId ? `request.${boardId}` : null;
+
+  useChannel<{
+    requestId: string;
+    boardId: string;
+    voteId: string;
+    userId: string;
+    action: "created" | "deleted";
+    voteCount: number | null;
+  }>(channelName, (message) => {
+    if (message.event !== "RequestUpdated" || message.payload.requestId !== requestId) {
+      return;
+    }
+
+    setVoteCount(message.payload.voteCount ?? 0);
+
+    if (message.payload.userId === currentUserId) {
+      setHasVoted(message.payload.action === "created");
+      setVoteId(message.payload.action === "created" ? message.payload.voteId : null);
+    }
+  });
 
   useEffect(() => {
     const checkInitialVoteStatus = async () => {
@@ -37,6 +61,8 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
         if (!userId) {
           return;
         }
+
+        setCurrentUserId(userId);
 
         const existingVoteId = await voteService.checkVote(requestId, userId, token);
         if (existingVoteId) {

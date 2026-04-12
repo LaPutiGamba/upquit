@@ -8,6 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { giveToGetService } from "@/features/give-to-get/services/giveToGetService";
 import { requestService } from "../services/requestService";
+import { useChannel } from "@/shared/hooks/useChannel";
+import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -42,6 +44,7 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
   const [isProgressLoading, setIsProgressLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const form = useForm<CreateRequestFormValues>({
     // @ts-expect-error - zodResolver type mismatch
@@ -67,9 +70,21 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
         const token = localStorage.getItem("accessToken");
 
         if (!token) {
+          setUserId(null);
           setCanPost(false);
           return;
         }
+
+        const payload = decodeJwtPayload(token);
+        const nextUserId = payload?.userId || payload?.sub;
+
+        if (!nextUserId) {
+          setUserId(null);
+          setCanPost(false);
+          return;
+        }
+
+        setUserId(nextUserId);
 
         const progress = await giveToGetService.getProgress(boardId, token);
         setCanPost(Boolean(progress.canPost));
@@ -88,6 +103,15 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
 
     fetchProgress();
   }, [boardId, giveToGetEnabled]);
+
+  const channelName = giveToGetEnabled && userId ? `progress.${userId}.${boardId}` : null;
+
+  useChannel<GiveToGetProgressResponse>(channelName, (message) => {
+    if (message.event === "ProgressUpdated") {
+      setCanPost(Boolean(message.payload.canPost));
+      setIsProgressLoading(false);
+    }
+  });
 
   const onSubmit = async (data: CreateRequestFormValues) => {
     setIsSubmitting(true);

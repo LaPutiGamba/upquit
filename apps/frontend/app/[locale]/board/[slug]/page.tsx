@@ -21,6 +21,12 @@ export default async function BoardPage({ params }: BoardPageProps) {
   }
 
   const requests = await requestService.getRequestsByBoardId(board.id).catch(() => []);
+  const requestsSortedByDate = [...requests].sort((a, b) => {
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
+    return bTime - aTime;
+  });
 
   return (
     <main className="container mx-auto px-4 max-w-5xl min-h-screen flex flex-col gap-8 pb-12">
@@ -35,13 +41,13 @@ export default async function BoardPage({ params }: BoardPageProps) {
           <CreateRequestForm boardId={board.id} giveToGetEnabled={board.giveToGetEnabled} />
         </div>
 
-        {requests.length === 0 ? (
+        {requestsSortedByDate.length === 0 ? (
           <div className="py-12 text-center border rounded-lg border-dashed">
             <p className="text-muted-foreground">{t("emptyRequests")}</p>
           </div>
         ) : (
           <div className="grid gap-4">
-            {requests.map((request) => (
+            {requestsSortedByDate.map((request) => (
               <RequestCard key={request.id} request={request} boardSlug={slug} />
             ))}
           </div>

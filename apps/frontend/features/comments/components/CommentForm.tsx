@@ -15,6 +15,17 @@ interface CommentFormProps {
 export function CommentForm({ requestId, boardId, onCommentAdded }: CommentFormProps) {
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const syncChannelName = `comments:${requestId}`;
+
+  const notifyOtherTabs = () => {
+    if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") {
+      return;
+    }
+
+    const channel = new BroadcastChannel(syncChannelName);
+    channel.postMessage({ type: "COMMENT_SYNC", requestId });
+    channel.close();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +47,7 @@ export function CommentForm({ requestId, boardId, onCommentAdded }: CommentFormP
       await commentService.createComment(requestId, boardId, content.trim(), token);
 
       setContent("");
+      notifyOtherTabs();
       toast.success("Comment posted successfully");
       onCommentAdded();
     } catch (error) {
