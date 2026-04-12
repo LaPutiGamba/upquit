@@ -26,7 +26,6 @@ import {
   EmptyTitle
 } from "@/shared/components/ui/empty";
 import { Item, ItemGroup, ItemTitle, ItemDescription, ItemContent, ItemActions } from "@/shared/components/ui/item";
-import { Spinner } from "@/shared/components/ui/spinner";
 
 export function BoardsEntryGate() {
   const t = useTranslations("BoardsEntryGate");
@@ -69,11 +68,7 @@ export function BoardsEntryGate() {
   const sortedBoards = useMemo(() => [...boards].sort((a, b) => a.name.localeCompare(b.name)), [boards]);
 
   if (loading) {
-    return (
-      <main className="flex min-h-svh items-center justify-center bg-background p-6 md:p-10">
-        <Spinner className="size-12" />
-      </main>
-    );
+    return null;
   }
 
   return (

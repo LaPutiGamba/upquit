@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "../globals.css";
 import { cn } from "@/shared/lib/utils";
@@ -47,7 +48,9 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <WebSocketProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              <TooltipProvider>{children}</TooltipProvider>
+              <TooltipProvider>
+                <ViewTransition default="auto">{children}</ViewTransition>
+              </TooltipProvider>
               <Toaster />
             </ThemeProvider>
           </WebSocketProvider>

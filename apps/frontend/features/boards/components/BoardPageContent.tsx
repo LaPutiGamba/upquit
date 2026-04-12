@@ -10,7 +10,6 @@ import { GiveToGetTracker } from "@/features/give-to-get/components/GiveToGetTra
 import { RequestCard } from "@/features/requests/components/RequestCard";
 import { CreateRequestForm } from "@/features/requests/components/CreateRequestForm";
 import { requestService, RequestResponse } from "@/features/requests/services/requestService";
-import { Spinner } from "@/shared/components/ui/spinner";
 
 interface BoardPageContentProps {
   slug: string;
@@ -86,11 +85,7 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
   }, [requests]);
 
   if (loading) {
-    return (
-      <main className="container mx-auto px-4 max-w-5xl min-h-screen flex items-center justify-center">
-        <Spinner className="size-12" />
-      </main>
-    );
+    return null;
   }
 
   if (notFound || !board) {
