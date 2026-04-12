@@ -6,10 +6,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { giveToGetService } from "@/features/give-to-get/services/giveToGetService";
+import { giveToGetService, GiveToGetProgressResponse } from "@/features/give-to-get/services/giveToGetService";
 import { requestService } from "../services/requestService";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
+import { getAccessToken } from "@/shared/lib/apiClient";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -67,27 +68,23 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
     const fetchProgress = async () => {
       try {
         setIsProgressLoading(true);
-        const token = localStorage.getItem("accessToken");
-
-        if (!token) {
-          setUserId(null);
-          setCanPost(false);
-          return;
-        }
-
-        const payload = decodeJwtPayload(token);
+        const token = getAccessToken();
+        const payload = token ? decodeJwtPayload(token) : null;
         const nextUserId = payload?.userId || payload?.sub;
+        setUserId(nextUserId ?? null);
+
+        const progress = await giveToGetService.getProgress(boardId);
+        setCanPost(Boolean(progress.canPost));
 
         if (!nextUserId) {
-          setUserId(null);
-          setCanPost(false);
-          return;
+          const refreshedToken = getAccessToken();
+          const refreshedPayload = refreshedToken ? decodeJwtPayload(refreshedToken) : null;
+          const refreshedUserId = refreshedPayload?.userId || refreshedPayload?.sub;
+
+          if (refreshedUserId) {
+            setUserId(refreshedUserId);
+          }
         }
-
-        setUserId(nextUserId);
-
-        const progress = await giveToGetService.getProgress(boardId, token);
-        setCanPost(Boolean(progress.canPost));
       } catch (error) {
         const message = error instanceof Error ? error.message.toLowerCase() : "";
 
@@ -117,19 +114,7 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("accessToken");
-
-      if (!token) {
-        toast.error("You must be logged in to create a request");
-        return;
-      }
-
-      await requestService.createRequest(
-        boardId,
-        data.title,
-        data.description?.trim() ? data.description : null,
-        token
-      );
+      await requestService.createRequest(boardId, data.title, data.description?.trim() ? data.description : null);
 
       form.reset({ title: "", description: "" });
       setIsDialogOpen(false);

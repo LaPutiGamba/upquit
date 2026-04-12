@@ -41,7 +41,7 @@ export const JwtAuthMiddleware = async (req: Request, res: Response, next: NextF
   const token = authHeader.split(" ")[1];
 
   try {
-    const secret = process.env.JWT_SECRET || "your-secret-key";
+    const secret = process.env.JWT_ACCESS_SECRET || "your-secret-key";
     const decoded = jwt.verify(token, secret) as {
       sub: string;
       boardIds: string[];

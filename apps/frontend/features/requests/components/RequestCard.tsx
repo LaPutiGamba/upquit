@@ -91,7 +91,7 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
       </DialogTrigger>
 
       <DialogContent
-        className="w-[96vw] !max-w-[96vw] sm:!max-w-5xl lg:!max-w-5xl max-h-[90vh] overflow-hidden flex flex-col gap-6"
+        className="w-[96vw] !max-w-[96vw] sm:!max-w-5xl lg:!max-w-5xl max-h-[90vh] overflow-hidden flex flex-col gap-0 p-0"
         topRightActions={
           <>
             <Button variant="ghost" size="icon-sm" onClick={handleCopyLink} aria-label="Copy request link">
@@ -107,7 +107,7 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
           </>
         }
       >
-        <DialogHeader className="flex flex-row items-start gap-4 pr-28">
+        <DialogHeader className="flex flex-row items-start gap-4 pr-28 border-b px-6 py-4 shrink-0">
           <div className="shrink-0 mt-1">
             <UpvoteButton requestId={request.id} boardId={request.boardId} initialVoteCount={request.voteCount ?? 0} />
           </div>
@@ -123,9 +123,11 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
           </div>
         </DialogHeader>
 
-        <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">{request.description}</div>
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+          <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">{request.description}</div>
+        </div>
 
-        <div className="mt-4 min-h-0 pt-4 border-t border-border">
+        <div className="flex-1 min-h-0 flex flex-col border-t px-6 py-4 bg-card/50">
           <CommentSection requestId={request.id} boardId={request.boardId} isDialog />
         </div>
       </DialogContent>

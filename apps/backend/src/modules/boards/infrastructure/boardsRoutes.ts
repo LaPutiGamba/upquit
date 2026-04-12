@@ -15,13 +15,13 @@ const boardsRouter = Router();
 
 // Protected
 boardsRouter.get("/mine", JwtAuthMiddleware, TenantDbMiddleware, GetBoardsByUserGetController);
+boardsRouter.get("/slug/:slug", JwtAuthMiddleware, GetBoardBySlugGetController);
 boardsRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, CreateBoardPostController);
 boardsRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateBoardPatchController);
 boardsRouter.post("/:id/categories", JwtAuthMiddleware, TenantDbMiddleware, AddBoardCategoryPostController);
 boardsRouter.post("/:id/members", JwtAuthMiddleware, TenantDbMiddleware, AddBoardMemberPostController);
 
 // Public
-boardsRouter.get("/slug/:slug", GetBoardBySlugGetController);
 boardsRouter.get("/:id", GetBoardByIdGetController);
 boardsRouter.get("/:id/categories", GetBoardCategoriesGetController);
 boardsRouter.get("/:id/members", GetBoardMembersGetController);

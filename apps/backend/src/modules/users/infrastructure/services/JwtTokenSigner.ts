@@ -1,16 +1,35 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 
-import TokenSigner, { AuthTokenPayload } from "../../domain/contracts/TokenSigner.js";
+import TokenSigner, { AuthTokenPair, AuthTokenPayload } from "../../domain/contracts/TokenSigner.js";
 
 export default class JwtTokenSigner implements TokenSigner {
   constructor(
-    private readonly secret: string,
-    private readonly expiresIn: string | number = "1h"
+    private readonly accessSecret: string,
+    private readonly refreshSecret: string,
+    private readonly accessExpiresIn: string | number = "15m",
+    private readonly refreshExpiresIn: string | number = "7d"
   ) {}
 
-  sign(payload: AuthTokenPayload): string {
-    return jwt.sign(payload, this.secret, {
-      expiresIn: this.expiresIn as SignOptions["expiresIn"]
+  signAccessToken(payload: AuthTokenPayload): string {
+    return jwt.sign(payload, this.accessSecret, {
+      expiresIn: this.accessExpiresIn as SignOptions["expiresIn"]
     });
+  }
+
+  signRefreshToken(payload: AuthTokenPayload): string {
+    return jwt.sign(payload, this.refreshSecret, {
+      expiresIn: this.refreshExpiresIn as SignOptions["expiresIn"]
+    });
+  }
+
+  signTokenPair(payload: AuthTokenPayload): AuthTokenPair {
+    return {
+      accessToken: this.signAccessToken(payload),
+      refreshToken: this.signRefreshToken(payload)
+    };
+  }
+
+  verifyRefreshToken(token: string): AuthTokenPayload {
+    return jwt.verify(token, this.refreshSecret) as AuthTokenPayload;
   }
 }

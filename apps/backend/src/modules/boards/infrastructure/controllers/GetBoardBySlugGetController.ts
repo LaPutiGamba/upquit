@@ -11,6 +11,10 @@ export default async function GetBoardBySlugGetController(req: Request, res: Res
   const queryHandler = new GetBoardBySlugQueryHandler(new BoardDrizzleRepository(db));
 
   try {
+    if (!req.userId) {
+      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
     const slug = req.params.slug;
     if (typeof slug !== "string") {
       throw new InvalidSlugException(String(slug));
@@ -18,6 +22,14 @@ export default async function GetBoardBySlugGetController(req: Request, res: Res
     const command = new GetBoardBySlugQuery(slug);
 
     const response = await queryHandler.execute(command);
+
+    if (response.ownerId !== req.userId) {
+      return res.status(404).send({
+        error: "BOARD_NOT_FOUND",
+        message: `Board with slug ${slug} not found`
+      });
+    }
+
     return res.status(200).json(response);
   } catch (ex) {
     if (ex instanceof BoardNotFoundException) {

@@ -6,6 +6,7 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "@/shared/components/ui/sonner";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
+import { getAccessToken } from "@/shared/lib/apiClient";
 import { ArrowUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useChannel } from "@/shared/hooks/useChannel";
@@ -49,7 +50,7 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
 
   useEffect(() => {
     const checkInitialVoteStatus = async () => {
-      const token = localStorage.getItem("accessToken");
+      const token = getAccessToken();
       if (!token) {
         return;
       }
@@ -64,7 +65,7 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
 
         setCurrentUserId(userId);
 
-        const existingVoteId = await voteService.checkVote(requestId, userId, token);
+        const existingVoteId = await voteService.checkVote(requestId, userId);
         if (existingVoteId) {
           setHasVoted(true);
           setVoteId(existingVoteId);
@@ -83,12 +84,6 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
     e.preventDefault();
     e.stopPropagation();
 
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      toast.error(t("mustLogin"));
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -96,19 +91,19 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
         setVoteCount((prev) => prev - 1);
         setHasVoted(false);
 
-        await voteService.removeVote(voteId, token);
+        await voteService.removeVote(voteId);
         setVoteId(null);
       } else {
         setVoteCount((prev) => prev + 1);
         setHasVoted(true);
 
-        const newVoteId = await voteService.addVote(requestId, boardId, token);
+        const newVoteId = await voteService.addVote(requestId, boardId);
         setVoteId(newVoteId);
       }
     } catch {
       setVoteCount((prev) => (hasVoted ? prev + 1 : prev - 1));
       setHasVoted(hasVoted);
-      toast.error(t("voteError"));
+      toast.error(getAccessToken() ? t("voteError") : t("mustLogin"));
     } finally {
       setIsLoading(false);
     }

@@ -7,6 +7,7 @@ import { Progress } from "@/shared/components/ui/progress";
 import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
+import { getAccessToken } from "@/shared/lib/apiClient";
 import { useTranslations } from "next-intl";
 
 interface GiveToGetTrackerProps {
@@ -22,7 +23,7 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    const token = getAccessToken();
     if (token) {
       const payload = decodeJwtPayload(token);
       const nextUserId = payload?.userId || payload?.sub;
@@ -40,21 +41,26 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
   }, []);
 
   useEffect(() => {
-    if (!board.giveToGetEnabled || !userId) {
+    if (!board.giveToGetEnabled) {
       setLoading(false);
       return;
     }
 
     const fetchProgress = async () => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       try {
-        const data = await giveToGetService.getProgress(board.id, token);
+        const data = await giveToGetService.getProgress(board.id);
         setProgress(data);
+        setIsAuthenticated(true);
+
+        if (!userId) {
+          const token = getAccessToken();
+          const payload = token ? decodeJwtPayload(token) : null;
+          const nextUserId = payload?.userId || payload?.sub;
+
+          if (nextUserId) {
+            setUserId(nextUserId);
+          }
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message.toLowerCase() : "";
         const isNotFoundError = message.includes("not found");
@@ -62,7 +68,7 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
 
         if (isNotFoundError) {
           try {
-            const newData = await giveToGetService.createProgress(board.id, token);
+            const newData = await giveToGetService.createProgress(board.id);
             setProgress(newData);
           } catch (createError) {
             console.error("Failed to auto-create give-to-get progress", createError);

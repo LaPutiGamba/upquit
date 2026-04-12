@@ -4,6 +4,14 @@ export type AuthTokenPayload = {
   boardIds: string[];
 };
 
+export type AuthTokenPair = {
+  accessToken: string;
+  refreshToken: string;
+};
+
 export default interface TokenSigner {
-  sign(payload: AuthTokenPayload): string;
+  signAccessToken(payload: AuthTokenPayload): string;
+  signRefreshToken(payload: AuthTokenPayload): string;
+  signTokenPair(payload: AuthTokenPayload): AuthTokenPair;
+  verifyRefreshToken(token: string): AuthTokenPayload;
 }

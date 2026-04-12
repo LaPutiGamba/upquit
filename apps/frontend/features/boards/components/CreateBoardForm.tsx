@@ -69,10 +69,7 @@ export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
   const onSubmit = async (data: CreateBoardFormValues) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error(t("errors.unauthenticated"));
-
-      const newBoard = await boardService.createBoard(data, token);
+      const newBoard = await boardService.createBoard(data);
 
       toast.success(t("success.created"));
 

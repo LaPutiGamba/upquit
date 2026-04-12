@@ -17,20 +17,27 @@ type AuthenticateUserBody = {
 };
 
 export default async function AuthenticateUserPostController(req: Request<AuthenticateUserBody>, res: Response) {
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    console.error("JWT_SECRET environment variable is required");
+  const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
+  if (!jwtAccessSecret) {
+    console.error("JWT_ACCESS_SECRET environment variable is required");
     return res.status(500).send({
-      error: "JWT_SECRET_NOT_CONFIGURED",
-      message: "JWT_SECRET environment variable is required"
+      error: "JWT_ACCESS_SECRET_NOT_CONFIGURED",
+      message: "JWT_ACCESS_SECRET environment variable is required"
     });
   }
+  
+  const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || jwtAccessSecret;
 
   const queryHandler = new AuthenticateUserQueryHandler(
     new UserDrizzleRepository(db),
     new BoardDrizzleRepository(db),
     new BcryptPasswordHasher(),
-    new JwtTokenSigner(jwtSecret, (process.env.JWT_EXPIRES_IN as SignOptions["expiresIn"]) ?? "1h")
+    new JwtTokenSigner(
+      jwtAccessSecret,
+      jwtRefreshSecret,
+      (process.env.JWT_ACCESS_EXPIRES_IN as SignOptions["expiresIn"]) ?? "15m",
+      (process.env.JWT_REFRESH_EXPIRES_IN as SignOptions["expiresIn"]) ?? "7d"
+    )
   );
 
   try {
@@ -42,7 +49,15 @@ export default async function AuthenticateUserPostController(req: Request<Authen
     }
 
     const query = new AuthenticateUserQuery(req.body.email, req.body.password);
-    const accessToken = await queryHandler.execute(query);
+    const { accessToken, refreshToken } = await queryHandler.execute(query);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
 
     return res.status(200).json({ accessToken });
   } catch (ex) {

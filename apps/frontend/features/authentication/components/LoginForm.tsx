@@ -52,7 +52,6 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
   const onSubmit = async (data: LoginFormValues) => {
     try {
       const response = await authService.login(data);
-      localStorage.setItem("accessToken", response.accessToken);
 
       const decodedPayload = decodeJwtPayload(response.accessToken);
       if (!decodedPayload) {

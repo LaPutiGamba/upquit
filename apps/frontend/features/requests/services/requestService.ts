@@ -36,7 +36,7 @@ export const requestService = {
     boardId: string,
     title: string,
     description: string | null,
-    token: string
+    token?: string
   ): Promise<RequestResponse> => {
     return await apiClient<RequestResponse>(`/requests`, {
       method: "POST",

@@ -1,8 +1,8 @@
-import { apiClient } from "@/shared/lib/apiClient";
+import { apiClient, setAccessToken } from "@/shared/lib/apiClient";
 
 export interface LoginCredentials {
   email: string;
-  password?: string; 
+  password?: string;
 }
 
 export interface RegisterCredentials {
@@ -29,10 +29,13 @@ export interface UserResponse {
 
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    return await apiClient<AuthResponse>("/users/login", {
+    const response = await apiClient<AuthResponse>("/users/login", {
       method: "POST",
       body: JSON.stringify(credentials)
     });
+
+    setAccessToken(response.accessToken);
+    return response;
   },
 
   register: async (credentials: RegisterCredentials): Promise<UserResponse> => {
@@ -42,7 +45,7 @@ export const authService = {
     });
   },
 
-  getUserProfile: async (userId: string, token: string): Promise<UserResponse> => {
+  getUserProfile: async (userId: string, token?: string): Promise<UserResponse> => {
     return await apiClient<UserResponse>(`/users/${userId}`, {
       method: "GET",
       token

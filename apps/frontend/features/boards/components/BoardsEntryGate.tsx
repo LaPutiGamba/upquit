@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/localization/i18n/routing";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRightIcon, Presentation } from "lucide-react";
@@ -36,13 +36,7 @@ export function BoardsEntryGate() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const fetchBoards = async () => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
-
-    const availableBoards = await boardService.getMyBoards(token);
+    const availableBoards = await boardService.getMyBoards();
     setBoards(availableBoards);
     setLoading(false);
   };
@@ -52,13 +46,7 @@ export function BoardsEntryGate() {
 
     const resolveBoardsRoute = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          router.replace("/login");
-          return;
-        }
-
-        const availableBoards = await boardService.getMyBoards(token);
+        const availableBoards = await boardService.getMyBoards();
 
         if (!cancelled) {
           setBoards(availableBoards);
@@ -66,8 +54,7 @@ export function BoardsEntryGate() {
         }
       } catch {
         if (!cancelled) {
-          setBoards([]);
-          setLoading(false);
+          router.replace("/login");
         }
       }
     };

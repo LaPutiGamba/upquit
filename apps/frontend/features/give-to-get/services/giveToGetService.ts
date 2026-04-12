@@ -11,7 +11,7 @@ export interface GiveToGetProgressResponse {
 }
 
 export const giveToGetService = {
-  getProgress: async (boardId: string, token: string): Promise<GiveToGetProgressResponse> => {
+  getProgress: async (boardId: string, token?: string): Promise<GiveToGetProgressResponse> => {
     return await apiClient<GiveToGetProgressResponse>(`/give-to-get?boardId=${boardId}`, {
       method: "GET",
       token,
@@ -19,7 +19,7 @@ export const giveToGetService = {
     });
   },
 
-  createProgress: async (boardId: string, token: string): Promise<GiveToGetProgressResponse> => {
+  createProgress: async (boardId: string, token?: string): Promise<GiveToGetProgressResponse> => {
     return await apiClient<GiveToGetProgressResponse>("/give-to-get", {
       method: "POST",
       body: JSON.stringify({ boardId }),

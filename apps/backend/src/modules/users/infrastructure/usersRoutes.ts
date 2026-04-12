@@ -7,6 +7,7 @@ import UpdateUserPatchController from "./controllers/UpdateUserPatchController.j
 import DeactivateUserPostController from "./controllers/DeactivateUserPostController.js";
 import VerifyUserEmailPostController from "./controllers/VerifyUserEmailPostController.js";
 import AuthenticateUserPostController from "./controllers/AuthenticateUserPostController.js";
+import RefreshAccessTokenPostController from "./controllers/RefreshAccessTokenPostController.js";
 import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
 import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/TenantDbMiddleware.js";
 
@@ -15,6 +16,7 @@ const usersRouter = Router();
 // Public
 usersRouter.post("/register", (req, res) => CreateUserPostController(req, res, createUserCommandHandler));
 usersRouter.post("/login", AuthenticateUserPostController);
+usersRouter.post("/refresh", RefreshAccessTokenPostController);
 usersRouter.post("/:id/verify-email", VerifyUserEmailPostController);
 
 // Protected

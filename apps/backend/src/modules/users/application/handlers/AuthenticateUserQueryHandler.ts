@@ -1,6 +1,6 @@
 import UserRepository from "../../domain/contracts/UserRepository.js";
 import PasswordHasher from "../../domain/contracts/PasswordHasher.js";
-import TokenSigner, { AuthTokenPayload } from "../../domain/contracts/TokenSigner.js";
+import TokenSigner, { AuthTokenPair, AuthTokenPayload } from "../../domain/contracts/TokenSigner.js";
 import Email from "../../domain/value-objects/Email.js";
 import InvalidCredentialsException from "../exceptions/InvalidCredentialsException.js";
 import AuthenticateUserQuery from "../queries/AuthenticateUserQuery.js";
@@ -14,7 +14,7 @@ export default class AuthenticateUserQueryHandler {
     private readonly tokenSigner: TokenSigner
   ) {}
 
-  async execute(query: AuthenticateUserQuery): Promise<string> {
+  async execute(query: AuthenticateUserQuery): Promise<AuthTokenPair> {
     const email = new Email(query.email);
     const user = await this.userRepository.findByEmailIncludingInactive(email);
 
@@ -38,6 +38,6 @@ export default class AuthenticateUserQueryHandler {
       boardIds
     };
 
-    return this.tokenSigner.sign(payload);
+    return this.tokenSigner.signTokenPair(payload);
   }
 }

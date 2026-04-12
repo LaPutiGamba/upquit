@@ -79,11 +79,27 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
     fetchComments();
   };
 
-  return (
-    <div className={cn("space-y-6", isDialog && "min-h-0")}>
-      <div className={cn("space-y-4", isDialog && "min-h-0")}>
-        <h3 className="text-lg font-semibold">Comments</h3>
+  const composerStyle = isDialog
+    ? {
+        background:
+          "linear-gradient(to top, hsl(var(--background)) 62%, hsl(var(--background) / 0.82) 84%, hsl(var(--background) / 0) 100%)",
+        boxShadow: "0 -18px 34px -22px hsl(var(--foreground) / 0.6), 0 -4px 10px -10px hsl(var(--foreground) / 0.55)"
+      }
+    : {
+        background:
+          "linear-gradient(to top, hsl(var(--background)) 65%, hsl(var(--background) / 0.78) 86%, hsl(var(--background) / 0) 100%)",
+        boxShadow: "0 -14px 28px -22px hsl(var(--foreground) / 0.5)"
+      };
 
+  return (
+    <div className={cn("flex h-full min-h-0 flex-col gap-0")}>
+      {/* Comments Header */}
+      <div className="pb-4">
+        <h3 className="text-lg font-semibold">Comments</h3>
+      </div>
+
+      {/* Comments List Container */}
+      <div className={cn("min-h-0 flex-1 overflow-y-auto space-y-3 pr-2", isDialog ? "pb-20" : "pb-24")}>
         {isLoading ? (
           <div className="flex justify-center py-8">
             <p className="text-muted-foreground">Loading comments...</p>
@@ -93,11 +109,18 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
             <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
           </div>
         ) : (
-          <ul
-            className={cn("space-y-3 border-l-2 border-border pl-4", isDialog && "max-h-[42vh] overflow-y-auto pr-2")}
-          >
+          <ul className={cn("space-y-3")}>
             {comments.map((comment) => (
-              <li key={comment.id} className="rounded-lg bg-muted/50 p-3 transition-colors hover:bg-muted">
+              <li
+                key={comment.id}
+                className={cn(
+                  "rounded-lg p-3 transition-colors",
+                  isDialog ? "bg-muted/40 hover:bg-muted/60" : "bg-muted/50 hover:bg-muted"
+                )}
+                style={{
+                  boxShadow: "0 1px 0 0 var(--border) inset"
+                }}
+              >
                 <div className="flex items-start gap-3">
                   <Avatar className="size-9">
                     {comment.authorAvatarUrl ? (
@@ -143,7 +166,13 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
         )}
       </div>
 
-      <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={handleCommentAdded} />
+      {/* Comment Form - Sticky Footer */}
+      <div
+        className={cn("sticky bottom-0 z-10 shrink-0", isDialog ? "-mx-6 -mb-6 p-6" : "-mx-2 px-2 pb-2 pt-3")}
+        style={composerStyle}
+      >
+        <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={handleCommentAdded} isDialog={isDialog} />
+      </div>
     </div>
   );
 }
