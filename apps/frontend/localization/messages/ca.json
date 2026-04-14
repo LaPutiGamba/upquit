@@ -56,6 +56,7 @@
     "errors": {
       "readToken": "No s'ha pogut llegir el token d'autenticació",
       "invalidToken": "Token d'autenticació invalid",
+      "invalidCredentialsOrRegister": "No hem trobat cap compte amb aquestes dades. Prova de registrar-te primer",
       "generic": "No s'ha pogut iniciar sessió ara. Torna-ho a provar"
     },
     "title": "Benvingut de nou",
@@ -134,6 +135,63 @@
       "privacyPolicy": "Politica de privacitat"
     }
   },
+  "LogoutButton": {
+    "actions": {
+      "logout": "Tancar sessió",
+      "loggingOut": "Tancant sessió..."
+    },
+    "errors": {
+      "generic": "No s'ha pogut tancar la sessió ara. Torna-ho a provar"
+    }
+  },
+  "AppShell": {
+    "workspace": "Espai de producte",
+    "section": "Pla",
+    "boards": {
+      "title": "Taulers",
+      "empty": "Encara no hi ha taulers"
+    },
+    "navigation": {
+      "dashboard": "Dashboard",
+      "overview": "Vista general",
+      "boards": "Taulers",
+      "requests": "Sol-licituds",
+      "comments": "Comentaris",
+      "reports": "Informes",
+      "comingSoon": "Properament"
+    },
+    "user": {
+      "name": "Usuari del workspace",
+      "role": "Product owner"
+    },
+    "actions": {
+      "signOut": "Sortir",
+      "logOut": "Tancar sessió",
+      "dashboard": "Dashboard",
+      "settings": "Configuració",
+      "createBoard": "Crear tauler",
+      "createBoardShortcut": "Crear o canviar tauler",
+      "logoutFailed": "No s'ha pogut tancar la sessió ara. Torna-ho a provar"
+    },
+    "settings": {
+      "title": "Configuració del perfil",
+      "description": "Actualitza les dades que es mostren a la sidebar.",
+      "saved": "Perfil actualitzat correctament.",
+      "failed": "No s'ha pogut desar la configuració del perfil.",
+      "validation": {
+        "displayName": "El nom visible ha de tenir almenys 2 caràcters"
+      },
+      "fields": {
+        "displayName": "Nom visible",
+        "avatarUrl": "URL de l'avatar"
+      },
+      "actions": {
+        "cancel": "Cancel-lar",
+        "save": "Desar canvis",
+        "saving": "Desant..."
+      }
+    }
+  },
   "UpvoteButton": {
     "mustLogin": "Has d'iniciar sessió per votar",
     "voteError": "No s'ha pogut registrar el teu vot. Torna-ho a provar"
@@ -148,7 +206,10 @@
   },
   "BoardPage": {
     "featureRequestsTitle": "Solicituds de funcionalitats",
-    "emptyRequests": "Encara no n'hi han sol·licituds. Sigues el primer a suggerir-ne una!"
+    "emptyRequests": "Encara no n'hi han sol·licituds. Sigues el primer a suggerir-ne una!",
+    "actions": {
+      "goToDashboard": "Anar al dashboard"
+    }
   },
   "DefaultHomePage": {
     "header": {

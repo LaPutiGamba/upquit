@@ -56,6 +56,7 @@
     "errors": {
       "readToken": "Unable to read authentication token.",
       "invalidToken": "Invalid authentication token.",
+      "invalidCredentialsOrRegister": "We couldn't find an account with those credentials. Try signing up first.",
       "generic": "Unable to login right now. Please try again."
     },
     "title": "Welcome back",
@@ -134,6 +135,63 @@
       "privacyPolicy": "Privacy Policy"
     }
   },
+  "LogoutButton": {
+    "actions": {
+      "logout": "Logout",
+      "loggingOut": "Logging out..."
+    },
+    "errors": {
+      "generic": "Unable to log out right now. Please try again."
+    }
+  },
+  "AppShell": {
+    "workspace": "Product workspace",
+    "section": "Plan",
+    "boards": {
+      "title": "Boards",
+      "empty": "No boards yet"
+    },
+    "navigation": {
+      "dashboard": "Dashboard",
+      "overview": "Overview",
+      "boards": "Boards",
+      "requests": "Requests",
+      "comments": "Comments",
+      "reports": "Reports",
+      "comingSoon": "Coming soon"
+    },
+    "user": {
+      "name": "Workspace User",
+      "role": "Product owner"
+    },
+    "actions": {
+      "signOut": "Sign out",
+      "logOut": "Log out",
+      "dashboard": "Dashboard",
+      "settings": "Settings",
+      "createBoard": "Create board",
+      "createBoardShortcut": "Create or switch board",
+      "logoutFailed": "Unable to sign out right now. Please try again."
+    },
+    "settings": {
+      "title": "Profile settings",
+      "description": "Update your sidebar identity details.",
+      "saved": "Profile updated successfully.",
+      "failed": "Could not save your profile settings.",
+      "validation": {
+        "displayName": "Display name must be at least 2 characters."
+      },
+      "fields": {
+        "displayName": "Display name",
+        "avatarUrl": "Avatar URL"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save changes",
+        "saving": "Saving..."
+      }
+    }
+  },
   "UpvoteButton": {
     "mustLogin": "You must be logged in to vote.",
     "voteError": "Could not register your vote. Try again."
@@ -148,7 +206,10 @@
   },
   "BoardPage": {
     "featureRequestsTitle": "Feature Requests",
-    "emptyRequests": "No feature requests yet. Be the first to suggest something!"
+    "emptyRequests": "No feature requests yet. Be the first to suggest something!",
+    "actions": {
+      "goToDashboard": "Go to dashboard"
+    }
   },
   "DefaultHomePage": {
     "header": {

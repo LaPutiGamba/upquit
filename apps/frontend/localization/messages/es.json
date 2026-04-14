@@ -56,6 +56,7 @@
     "errors": {
       "readToken": "No se pudo leer el token de autenticación",
       "invalidToken": "Token de autenticación inválido",
+      "invalidCredentialsOrRegister": "No encontramos una cuenta con esos datos. Prueba a registrarte primero",
       "generic": "No se pudo iniciar sesión ahora. Inténtalo de nuevo"
     },
     "title": "Bienvenido de nuevo",
@@ -134,6 +135,63 @@
       "privacyPolicy": "Política de privacidad"
     }
   },
+  "LogoutButton": {
+    "actions": {
+      "logout": "Cerrar sesión",
+      "loggingOut": "Cerrando sesión..."
+    },
+    "errors": {
+      "generic": "No se pudo cerrar sesión ahora. Inténtalo de nuevo"
+    }
+  },
+  "AppShell": {
+    "workspace": "Espacio de producto",
+    "section": "Plan",
+    "boards": {
+      "title": "Tableros",
+      "empty": "Aun no hay tableros"
+    },
+    "navigation": {
+      "dashboard": "Dashboard",
+      "overview": "Resumen",
+      "boards": "Tableros",
+      "requests": "Solicitudes",
+      "comments": "Comentarios",
+      "reports": "Informes",
+      "comingSoon": "Próximamente"
+    },
+    "user": {
+      "name": "Usuario del workspace",
+      "role": "Product owner"
+    },
+    "actions": {
+      "signOut": "Salir",
+      "logOut": "Cerrar sesión",
+      "dashboard": "Dashboard",
+      "settings": "Configuración",
+      "createBoard": "Crear tablero",
+      "createBoardShortcut": "Crear o cambiar tablero",
+      "logoutFailed": "No se pudo cerrar sesión ahora. Inténtalo de nuevo"
+    },
+    "settings": {
+      "title": "Configuración de perfil",
+      "description": "Actualiza los datos que aparecen en tu sidebar.",
+      "saved": "Perfil actualizado correctamente.",
+      "failed": "No se pudo guardar la configuración del perfil.",
+      "validation": {
+        "displayName": "El nombre visible debe tener al menos 2 carácteres"
+      },
+      "fields": {
+        "displayName": "Nombre visible",
+        "avatarUrl": "URL del avatar"
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "save": "Guardar cambios",
+        "saving": "Guardando..."
+      }
+    }
+  },
   "UpvoteButton": {
     "mustLogin": "Debes iniciar sesión para votar",
     "voteError": "No se pudo registrar tu voto. Inténtalo de nuevo"
@@ -148,7 +206,10 @@
   },
   "BoardPage": {
     "featureRequestsTitle": "Solicitudes de funcionalidades",
-    "emptyRequests": "Aun no hay solicitudes. ¡Se el primero en sugerir algo!"
+    "emptyRequests": "Aun no hay solicitudes. ¡Se el primero en sugerir algo!",
+    "actions": {
+      "goToDashboard": "Ir al dashboard"
+    }
   },
   "DefaultHomePage": {
     "header": {

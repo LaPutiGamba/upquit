@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { authService } from "@/features/authentication/services/authService";
+import { resolveAuthenticatedRedirectPath } from "@/features/authentication/services/authRedirectService";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
@@ -15,6 +16,7 @@ import { Input } from "@/shared/components/ui/input";
 import { toast } from "@/shared/components/ui/sonner";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from "@/shared/components/ui/field";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 
 function registerSchema(t: (key: string) => string) {
   return z
@@ -58,6 +60,26 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
       confirmPassword: ""
     }
   });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const redirectAuthenticatedUser = async () => {
+      try {
+        const destination = await resolveAuthenticatedRedirectPath();
+
+        if (!cancelled) {
+          router.replace(destination);
+        }
+      } catch {}
+    };
+
+    void redirectAuthenticatedUser();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {

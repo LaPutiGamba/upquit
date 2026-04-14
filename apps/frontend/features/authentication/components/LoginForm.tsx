@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { authService } from "@/features/authentication/services/authService";
+import { resolveAuthenticatedRedirectPath } from "@/features/authentication/services/authRedirectService";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
@@ -16,6 +17,7 @@ import { Input } from "@/shared/components/ui/input";
 import { toast } from "@/shared/components/ui/sonner";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from "@/shared/components/ui/field";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 
 function loginSchema(t: (key: string) => string) {
   return z.object({
@@ -29,8 +31,12 @@ type LoginFormValues = {
   password: string;
 };
 
-function getErrorMessage(error: unknown, fallbackMessage: string): string {
+function getErrorMessage(error: unknown, fallbackMessage: string, invalidCredentialsMessage: string): string {
   if (error instanceof Error && error.message) {
+    if (error.message === "Invalid email or password") {
+      return invalidCredentialsMessage;
+    }
+
     return error.message;
   }
   return fallbackMessage;
@@ -48,6 +54,26 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
       password: ""
     }
   });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const redirectAuthenticatedUser = async () => {
+      try {
+        const destination = await resolveAuthenticatedRedirectPath();
+
+        if (!cancelled) {
+          router.replace(destination);
+        }
+      } catch {}
+    };
+
+    void redirectAuthenticatedUser();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
@@ -68,10 +94,11 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
       if (!user.emailVerified) {
         router.push("/verify-email");
       } else {
-        router.push("/boards");
+        const destination = await resolveAuthenticatedRedirectPath();
+        router.push(destination);
       }
     } catch (error) {
-      toast.error(getErrorMessage(error, t("errors.generic")));
+      toast.error(getErrorMessage(error, t("errors.generic"), t("errors.invalidCredentialsOrRegister")));
     }
   };
 

@@ -9,14 +9,16 @@ export function BoardHeader({ board }: BoardHeaderProps) {
   const fallbackLetter = board.name.charAt(0).toUpperCase();
 
   return (
-    <header className="flex items-center gap-4 py-8 border-b">
-      <Avatar className="h-16 w-16 border shadow-sm">
-        {board.logoUrl && <AvatarImage src={board.logoUrl} alt={board.name} />}
-        <AvatarFallback className="text-xl font-bold">{fallbackLetter}</AvatarFallback>
-      </Avatar>
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{board.name}</h1>
-        {board.description && <p className="text-muted-foreground mt-1 text-lg">{board.description}</p>}
+    <header className="flex items-start gap-4 p-5 md:p-6">
+      <div className="flex items-center gap-3 min-w-0">
+        <Avatar className="h-12 w-12 border">
+          {board.logoUrl && <AvatarImage src={board.logoUrl} alt={board.name} />}
+          <AvatarFallback className="text-sm font-semibold">{fallbackLetter}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight truncate">{board.name}</h1>
+          {board.description && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{board.description}</p>}
+        </div>
       </div>
     </header>
   );

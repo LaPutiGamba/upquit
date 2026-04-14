@@ -70,28 +70,34 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Card className="hover:bg-muted/50 transition-colors cursor-pointer flex flex-row items-start p-4 gap-4 text-left">
-          <div className="shrink-0 mt-1" onClick={(e) => e.stopPropagation()}>
-            <UpvoteButton requestId={request.id} boardId={request.boardId} initialVoteCount={request.voteCount ?? 0} />
-          </div>
-
-          <div className="flex flex-col gap-2 flex-grow">
-            <div className="flex justify-between items-start gap-4">
-              <CardTitle className="text-xl leading-tight m-0">{request.title}</CardTitle>
-              <div className="flex items-center gap-2">
-                {requestDateLabel && <span className="text-xs text-muted-foreground">{requestDateLabel}</span>}
-                <Badge variant="outline" className={getStatusColor(request.status)}>
-                  {getStatusLabel(request.status)}
-                </Badge>
-              </div>
+        <Card className="cursor-pointer border border-border/65 bg-background py-4 shadow-none transition-colors hover:bg-accent/35">
+          <div className="flex flex-row items-start gap-4 px-4 text-left">
+            <div className="shrink-0 mt-1" onClick={(e) => e.stopPropagation()}>
+              <UpvoteButton
+                requestId={request.id}
+                boardId={request.boardId}
+                initialVoteCount={request.voteCount ?? 0}
+              />
             </div>
-            <p className="text-muted-foreground line-clamp-2 text-sm">{request.description}</p>
+
+            <div className="flex grow flex-col gap-2">
+              <div className="flex justify-between items-start gap-4">
+                <CardTitle className="text-xl leading-tight m-0">{request.title}</CardTitle>
+                <div className="flex items-center gap-2">
+                  {requestDateLabel && <span className="text-xs text-muted-foreground">{requestDateLabel}</span>}
+                  <Badge variant="outline" className={getStatusColor(request.status)}>
+                    {getStatusLabel(request.status)}
+                  </Badge>
+                </div>
+              </div>
+              <p className="text-muted-foreground line-clamp-2 text-sm">{request.description}</p>
+            </div>
           </div>
         </Card>
       </DialogTrigger>
 
       <DialogContent
-        className="w-[96vw] !max-w-[96vw] sm:!max-w-5xl lg:!max-w-5xl max-h-[90vh] overflow-hidden flex flex-col gap-0 p-0"
+        className="w-[96vw] max-w-[96vw]! max-h-[90vh] overflow-hidden rounded-xl border flex flex-col gap-0 p-0 sm:max-w-5xl! lg:max-w-5xl!"
         topRightActions={
           <>
             <Button variant="ghost" size="icon-sm" onClick={handleCopyLink} aria-label="Copy request link">
@@ -107,7 +113,7 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
           </>
         }
       >
-        <DialogHeader className="flex flex-row items-start gap-4 pr-28 border-b px-6 py-4 shrink-0">
+        <DialogHeader className="flex flex-row items-start gap-4 border-b px-6 py-4 pr-28 shrink-0">
           <div className="shrink-0 mt-1">
             <UpvoteButton requestId={request.id} boardId={request.boardId} initialVoteCount={request.voteCount ?? 0} />
           </div>
@@ -127,7 +133,7 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
           <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">{request.description}</div>
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col border-t px-6 py-4 bg-card/50">
+        <div className="flex min-h-0 flex-1 flex-col border-t bg-muted/25 px-6 py-4">
           <CommentSection requestId={request.id} boardId={request.boardId} isDialog />
         </div>
       </DialogContent>

@@ -27,6 +27,12 @@ export interface UserResponse {
   isActive: boolean;
 }
 
+export interface UpdateUserPayload {
+  displayName?: string;
+  avatarUrl?: string | null;
+  emailVerified?: boolean;
+}
+
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await apiClient<AuthResponse>("/users/login", {
@@ -52,9 +58,33 @@ export const authService = {
     });
   },
 
+  updateUser: async (userId: string, payload: UpdateUserPayload, token?: string): Promise<UserResponse> => {
+    return await apiClient<UserResponse>(`/users/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+      token
+    });
+  },
+
   verifyEmail: async (userId: string): Promise<void> => {
     await apiClient(`/users/${userId}/verify-email`, {
       method: "POST"
     });
+  },
+
+  refreshSession: async (): Promise<AuthResponse> => {
+    const response = await apiClient<AuthResponse>("/users/refresh", {
+      method: "POST"
+    });
+
+    setAccessToken(response.accessToken);
+    return response;
+  },
+
+  logout: async (): Promise<void> => {
+    await apiClient("/users/logout", {
+      method: "POST"
+    });
+    setAccessToken(null);
   }
 };

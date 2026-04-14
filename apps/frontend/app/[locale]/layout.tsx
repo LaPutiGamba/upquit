@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import { Toaster } from "@/shared/components/ui/sonner";
 import { WebSocketProvider } from "@/shared/components/WebSocketProvider";
+import { AppShell } from "@/shared/components/AppShell";
 
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -49,7 +50,9 @@ export default async function RootLayout({
           <WebSocketProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
               <TooltipProvider>
-                <ViewTransition default="auto">{children}</ViewTransition>
+                <ViewTransition default="auto">
+                  <AppShell>{children}</AppShell>
+                </ViewTransition>
               </TooltipProvider>
               <Toaster />
             </ThemeProvider>

@@ -1,5 +1,6 @@
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
 const REFRESH_ENDPOINT = "/users/refresh";
+const TOKEN_REFRESH_EXCLUDED_ENDPOINTS = new Set([REFRESH_ENDPOINT, "/users/login"]);
 
 let inMemoryAccessToken: string | null = null;
 let refreshAccessTokenPromise: Promise<string | null> | null = null;
@@ -41,7 +42,7 @@ function shouldAttemptTokenRefresh(endpoint: string): boolean {
   }
 
   const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  return normalizedEndpoint !== REFRESH_ENDPOINT;
+  return !TOKEN_REFRESH_EXCLUDED_ENDPOINTS.has(normalizedEndpoint);
 }
 
 async function parseJsonResponse(response: Response): Promise<Record<string, unknown> | null> {

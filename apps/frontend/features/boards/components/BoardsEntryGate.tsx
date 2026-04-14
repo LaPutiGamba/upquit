@@ -36,6 +36,7 @@ export function BoardsEntryGate() {
 
   const fetchBoards = async () => {
     const availableBoards = await boardService.getMyBoards();
+
     setBoards(availableBoards);
     setLoading(false);
   };

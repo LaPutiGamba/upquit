@@ -179,7 +179,7 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
   if (giveToGetEnabled && (!isHydrated || isProgressLoading || !canPost)) {
     return (
       <div className="flex items-center gap-3">
-        <Button aria-disabled="true" tabIndex={-1} className="pointer-events-none opacity-50">
+        <Button aria-disabled="true" tabIndex={-1} variant="outline" className="pointer-events-none opacity-60">
           Contribute to unlock posting
         </Button>
       </div>
@@ -189,10 +189,10 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button>New Request</Button>
+        <Button size="sm">New Request</Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="rounded-xl border">
         <DialogHeader>
           <DialogTitle>Create a new request</DialogTitle>
           <DialogDescription>Share your idea with details so others can vote and discuss it.</DialogDescription>

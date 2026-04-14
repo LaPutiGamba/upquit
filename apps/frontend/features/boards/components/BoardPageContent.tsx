@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { BoardHeader } from "@/features/boards/components/BoardHeader";
@@ -18,11 +18,13 @@ interface BoardPageContentProps {
 export function BoardPageContent({ slug }: BoardPageContentProps) {
   const t = useTranslations("BoardPage");
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [board, setBoard] = useState<BoardResponse | null>(null);
   const [requests, setRequests] = useState<RequestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const isRequestsTab = searchParams.get("tab") === "requests";
 
   useEffect(() => {
     let cancelled = false;
@@ -37,13 +39,17 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
 
         setBoard(currentBoard);
 
-        const boardRequests = await requestService.getRequestsByBoardId(currentBoard.id).catch(() => []);
+        if (isRequestsTab) {
+          const boardRequests = await requestService.getRequestsByBoardId(currentBoard.id).catch(() => []);
 
-        if (cancelled) {
-          return;
+          if (cancelled) {
+            return;
+          }
+
+          setRequests(boardRequests);
+        } else {
+          setRequests([]);
         }
-
-        setRequests(boardRequests);
       } catch (error) {
         if (cancelled) {
           return;
@@ -73,7 +79,7 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
     return () => {
       cancelled = true;
     };
-  }, [router, slug]);
+  }, [isRequestsTab, router, slug]);
 
   const requestsSortedByDate = useMemo(() => {
     return [...requests].sort((a, b) => {
@@ -90,38 +96,46 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
 
   if (notFound || !board) {
     return (
-      <main className="container mx-auto px-4 max-w-5xl min-h-screen flex items-center justify-center">
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <p className="text-muted-foreground">Board not found.</p>
+      <main className="min-h-svh bg-background">
+        <div className="mx-auto flex min-h-svh w-full max-w-6xl items-center justify-center p-6 md:p-10">
+          <div className="w-full max-w-md rounded-xl border border-dashed bg-card p-8 text-center">
+            <p className="text-muted-foreground">Board not found.</p>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 max-w-5xl min-h-screen flex flex-col gap-8 pb-12">
-      <BoardHeader board={board} />
+    <main className="min-h-svh bg-background">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6 pb-10 md:p-8 md:pb-12">
+        <section className="rounded-xl border bg-card">
+          <BoardHeader board={board} />
+        </section>
 
-      <GiveToGetTracker board={board} />
+        <GiveToGetTracker board={board} />
 
-      <section className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight">{t("featureRequestsTitle")}</h2>
-          <CreateRequestForm boardId={board.id} giveToGetEnabled={board.giveToGetEnabled} />
-        </div>
+        {isRequestsTab ? (
+          <section className="rounded-xl border bg-card p-5 md:p-6">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b pb-4">
+              <h2 className="text-xl font-semibold tracking-tight md:text-2xl">{t("featureRequestsTitle")}</h2>
+              <CreateRequestForm boardId={board.id} giveToGetEnabled={board.giveToGetEnabled} />
+            </div>
 
-        {requestsSortedByDate.length === 0 ? (
-          <div className="py-12 text-center border rounded-lg border-dashed">
-            <p className="text-muted-foreground">{t("emptyRequests")}</p>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {requestsSortedByDate.map((request) => (
-              <RequestCard key={request.id} request={request} boardSlug={slug} />
-            ))}
-          </div>
-        )}
-      </section>
+            {requestsSortedByDate.length === 0 ? (
+              <div className="rounded-xl border border-dashed bg-background py-12 text-center">
+                <p className="text-muted-foreground">{t("emptyRequests")}</p>
+              </div>
+            ) : (
+              <div className="grid gap-3 md:gap-4">
+                {requestsSortedByDate.map((request) => (
+                  <RequestCard key={request.id} request={request} boardSlug={slug} />
+                ))}
+              </div>
+            )}
+          </section>
+        ) : null}
+      </div>
     </main>
   );
 }

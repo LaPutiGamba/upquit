@@ -8,6 +8,7 @@ import DeactivateUserPostController from "./controllers/DeactivateUserPostContro
 import VerifyUserEmailPostController from "./controllers/VerifyUserEmailPostController.js";
 import AuthenticateUserPostController from "./controllers/AuthenticateUserPostController.js";
 import RefreshAccessTokenPostController from "./controllers/RefreshAccessTokenPostController.js";
+import LogoutUserPostController from "./controllers/LogoutUserPostController.js";
 import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
 import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/TenantDbMiddleware.js";
 
@@ -17,6 +18,7 @@ const usersRouter = Router();
 usersRouter.post("/register", (req, res) => CreateUserPostController(req, res, createUserCommandHandler));
 usersRouter.post("/login", AuthenticateUserPostController);
 usersRouter.post("/refresh", RefreshAccessTokenPostController);
+usersRouter.post("/logout", LogoutUserPostController);
 usersRouter.post("/:id/verify-email", VerifyUserEmailPostController);
 
 // Protected
