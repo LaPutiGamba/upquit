@@ -157,7 +157,7 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
                       </span>
                     )}
 
-                    <p className="text-sm text-foreground">{comment.content}</p>
+                    <p className="text-sm text-foreground whitespace-pre-wrap wrap-anywhere">{comment.content}</p>
                   </div>
                 </div>
               </li>

@@ -163,13 +163,18 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
 
         <section className="mt-8 rounded-xl border bg-card p-6 sm:p-8">
           <div className="prose prose-neutral max-w-none dark:prose-invert">
-            <p className="whitespace-pre-wrap text-base leading-7 text-foreground/90">{request.description}</p>
+            <p
+              className="text-base leading-7 text-foreground/90"
+              style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
+            >
+              {request.description}
+            </p>
           </div>
         </section>
 
         <section className="mt-10 mb-8 flex flex-col min-h-0">
           <Separator />
-          <div className="mt-6 flex h-[68vh] min-h-[360px] max-h-[760px] min-w-0 flex-col overflow-hidden rounded-xl border bg-card/60 p-4 sm:p-6">
+          <div className="mt-6 flex h-[68vh] min-h-90 max-h-190 min-w-0 flex-col overflow-hidden rounded-xl border bg-card/60 p-4 sm:p-6">
             <CommentSection requestId={request.id} boardId={board.id} />
           </div>
         </section>

@@ -90,7 +90,7 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
                   </Badge>
                 </div>
               </div>
-              <p className="text-muted-foreground line-clamp-2 text-sm">{request.description}</p>
+              <p className="text-muted-foreground line-clamp-2 break-all text-sm">{request.description}</p>
             </div>
           </div>
         </Card>
@@ -130,7 +130,9 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
         </DialogHeader>
 
         <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-          <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">{request.description}</div>
+          <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap break-all">
+            {request.description}
+          </div>
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col border-t bg-muted/25 px-6 py-4">

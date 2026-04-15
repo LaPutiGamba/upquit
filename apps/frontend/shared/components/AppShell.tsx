@@ -125,6 +125,7 @@ export function AppShell({ children }: AppShellProps) {
   const activeBoard = boards.find((board) => board.slug === currentBoardSlug) ?? null;
   const isRequestsTab = searchParams.get("tab") === "requests";
   const isUserBoardsDashboard = pathname === "/boards";
+  const shouldShowBoardNavigation = !isUserBoardsDashboard;
 
   const boardDashboardHref = activeBoard ? `/board/${activeBoard.slug}` : "/boards";
   const boardRequestsHref = activeBoard ? `/board/${activeBoard.slug}?tab=requests` : "/boards";
@@ -211,30 +212,34 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <SidebarProvider defaultOpen>
       <Sidebar collapsible="icon" className="border-r border-sidebar-border/70">
-        <SidebarHeader className="px-2 py-3 group-data-[collapsible=icon]/sidebar-wrapper:px-1">
-          <BoardSwitcher
-            activeBoard={activeBoard}
-            boards={boards}
-            workspaceLabel={t("workspace")}
-            createBoardShortcutLabel={t("actions.createBoardShortcut")}
-            boardsTitle={t("boards.title")}
-            emptyBoardsLabel={t("boards.empty")}
-            createBoardLabel={t("actions.createBoard")}
-            onCreateBoard={() => setIsCreateBoardOpen(true)}
-          />
-        </SidebarHeader>
+        {shouldShowBoardNavigation ? (
+          <SidebarHeader className="px-2 py-3 group-data-[collapsible=icon]/sidebar-wrapper:px-1">
+            <BoardSwitcher
+              activeBoard={activeBoard}
+              boards={boards}
+              workspaceLabel={t("workspace")}
+              createBoardShortcutLabel={t("actions.createBoardShortcut")}
+              boardsTitle={t("boards.title")}
+              emptyBoardsLabel={t("boards.empty")}
+              createBoardLabel={t("actions.createBoard")}
+              onCreateBoard={() => setIsCreateBoardOpen(true)}
+            />
+          </SidebarHeader>
+        ) : null}
 
-        <SidebarContent className="px-2 group-data-[collapsible=icon]/sidebar-wrapper:px-1">
-          <NavMain
-            sectionLabel={t("section")}
-            items={sidebarItems}
-            activeBoard={activeBoard}
-            isRequestsTab={isRequestsTab}
-            pathname={pathname}
-          />
-        </SidebarContent>
+        {shouldShowBoardNavigation ? (
+          <SidebarContent className="px-2 group-data-[collapsible=icon]/sidebar-wrapper:px-1">
+            <NavMain
+              sectionLabel={t("section")}
+              items={sidebarItems}
+              activeBoard={activeBoard}
+              isRequestsTab={isRequestsTab}
+              pathname={pathname}
+            />
+          </SidebarContent>
+        ) : null}
 
-        <SidebarFooter className="px-2 pb-3 group-data-[collapsible=icon]/sidebar-wrapper:px-1">
+        <SidebarFooter className="mt-auto px-2 pb-3 group-data-[collapsible=icon]/sidebar-wrapper:px-1">
           <NavUser
             displayName={userDisplayName}
             email={userRole}

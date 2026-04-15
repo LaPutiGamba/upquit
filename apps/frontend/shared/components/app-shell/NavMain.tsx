@@ -44,7 +44,7 @@ export function NavMain({ sectionLabel, items, activeBoard, isRequestsTab, pathn
                   className="group-data-[collapsible=icon]/sidebar-wrapper:justify-center"
                 >
                   <Link href={item.href}>
-                    <Icon />
+                    <Icon data-icon="inline-start" />
                     <span>{item.label}</span>
                   </Link>
                 </SidebarMenuButton>

@@ -50,7 +50,7 @@ export default async function RootLayout({
           <WebSocketProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
               <TooltipProvider>
-                <ViewTransition default="auto">
+                <ViewTransition default="none">
                   <AppShell>{children}</AppShell>
                 </ViewTransition>
               </TooltipProvider>
