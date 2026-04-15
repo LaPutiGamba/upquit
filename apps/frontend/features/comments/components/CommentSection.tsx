@@ -18,6 +18,7 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const syncChannelName = `comments:${requestId}`;
+  const commentCountLabel = comments.length === 1 ? "1 comment" : `${comments.length} comments`;
 
   const getDisplayName = (comment: CommentResponse) => {
     if (comment.authorDisplayName && comment.authorDisplayName.trim().length > 0) {
@@ -79,27 +80,24 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
     fetchComments();
   };
 
-  const composerStyle = isDialog
-    ? {
-        background:
-          "linear-gradient(to top, hsl(var(--background)) 62%, hsl(var(--background) / 0.82) 84%, hsl(var(--background) / 0) 100%)",
-        boxShadow: "0 -18px 34px -22px hsl(var(--foreground) / 0.6), 0 -4px 10px -10px hsl(var(--foreground) / 0.55)"
-      }
-    : {
-        background:
-          "linear-gradient(to top, hsl(var(--background)) 65%, hsl(var(--background) / 0.78) 86%, hsl(var(--background) / 0) 100%)",
-        boxShadow: "0 -14px 28px -22px hsl(var(--foreground) / 0.5)"
-      };
-
   return (
-    <div className={cn("flex h-full min-h-0 flex-col gap-0")}>
-      {/* Comments Header */}
-      <div className="pb-4">
-        <h3 className="text-lg font-semibold">Comments</h3>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className={cn("shrink-0 border-b border-border/60 pb-4", isDialog ? "" : "bg-background/95")}>
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold">Comments</h3>
+            <p className="text-sm text-muted-foreground">Add a reply and keep the thread moving.</p>
+          </div>
+
+          <span className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+            {commentCountLabel}
+          </span>
+        </div>
+
+        <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={handleCommentAdded} isDialog={isDialog} />
       </div>
 
-      {/* Comments List Container */}
-      <div className={cn("min-h-0 flex-1 overflow-y-auto space-y-3 pr-2", isDialog ? "pb-20" : "pb-24")}>
+      <div className={cn("min-h-0 flex-1 overflow-y-auto pr-2 pt-4", isDialog ? "pb-4" : "pb-4")}>
         {isLoading ? (
           <div className="flex justify-center py-8">
             <p className="text-muted-foreground">Loading comments...</p>
@@ -109,7 +107,7 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
             <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
           </div>
         ) : (
-          <ul className={cn("space-y-3")}>
+          <ul className="space-y-3">
             {comments.map((comment) => (
               <li
                 key={comment.id}
@@ -157,21 +155,13 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
                       </span>
                     )}
 
-                    <p className="text-sm text-foreground whitespace-pre-wrap wrap-anywhere">{comment.content}</p>
+                    <p className="whitespace-pre-wrap wrap-anywhere text-sm text-foreground">{comment.content}</p>
                   </div>
                 </div>
               </li>
             ))}
           </ul>
         )}
-      </div>
-
-      {/* Comment Form - Sticky Footer */}
-      <div
-        className={cn("sticky bottom-0 z-10 shrink-0", isDialog ? "-mx-6 -mb-6 p-6" : "-mx-2 px-2 pb-2 pt-3")}
-        style={composerStyle}
-      >
-        <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={handleCommentAdded} isDialog={isDialog} />
       </div>
     </div>
   );

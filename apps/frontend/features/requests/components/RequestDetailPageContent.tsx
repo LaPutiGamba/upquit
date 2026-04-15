@@ -11,7 +11,6 @@ import { UpvoteButton } from "@/features/votes/components/UpvoteButton";
 import { Link } from "@/localization/i18n/routing";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Separator } from "@/shared/components/ui/separator";
 import { Spinner } from "@/shared/components/ui/spinner";
 
 interface RequestDetailPageContentProps {
@@ -22,15 +21,15 @@ interface RequestDetailPageContentProps {
 function getStatusColor(status: string) {
   switch (status.toLowerCase()) {
     case "planned":
-      return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20";
+      return "border-primary/35 bg-primary/10 text-primary";
     case "in_progress":
-      return "bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20";
+      return "border-chart-2/35 bg-chart-2/12 text-chart-2";
     case "completed":
-      return "bg-green-500/10 text-green-500 hover:bg-green-500/20";
+      return "border-chart-1/35 bg-chart-1/12 text-chart-1";
     case "rejected":
-      return "bg-red-500/10 text-red-500 hover:bg-red-500/20";
+      return "border-destructive/35 bg-destructive/10 text-destructive";
     default:
-      return "bg-secondary text-secondary-foreground";
+      return "";
   }
 }
 
@@ -39,7 +38,6 @@ function getStatusLabel(status: string) {
 
   switch (normalized) {
     case "in_progress":
-      return "In Progress";
     case "planned":
       return "Planned";
     case "completed":
@@ -112,7 +110,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
 
   if (loading) {
     return (
-      <main className="container mx-auto max-w-5xl px-4 min-h-screen flex items-center justify-center">
+      <main className="container mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4">
         <Spinner className="size-12" />
       </main>
     );
@@ -120,7 +118,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
 
   if (notFound || !board || !request) {
     return (
-      <main className="container mx-auto max-w-5xl px-4 min-h-screen flex items-center justify-center">
+      <main className="container mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4">
         <div className="rounded-lg border border-dashed p-8 text-center">
           <p className="text-muted-foreground">Request not found.</p>
         </div>
@@ -129,9 +127,9 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="container mx-auto max-w-5xl px-4 pt-8 flex-1 flex flex-col">
-        <div className="mb-8">
+    <div className="min-h-screen bg-background">
+      <main className="container mx-auto flex max-w-6xl flex-1 flex-col px-4 py-8 md:py-10">
+        <div className="mb-6">
           <Button asChild variant="ghost" className="gap-2 pl-2 text-muted-foreground hover:text-foreground">
             <Link href={`/board/${slug}`}>
               <ArrowLeft className="size-4" />
@@ -140,16 +138,14 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
           </Button>
         </div>
 
-        <section className="rounded-xl border bg-card p-6 sm:p-8">
+        <section className="border-b pb-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
             <div className="shrink-0">
               <UpvoteButton requestId={request.id} boardId={board.id} initialVoteCount={request.voteCount ?? 0} />
             </div>
 
-            <div className="min-w-0 flex-1 space-y-4">
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{request.title}</h1>
-
-              <div className="flex flex-wrap items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className={getStatusColor(request.status)}>
                   {getStatusLabel(request.status)}
                 </Badge>
@@ -157,24 +153,19 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
                   {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : ""}
                 </span>
               </div>
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{request.title}</h1>
+              <p
+                className="mt-4 text-base leading-7 text-foreground/90"
+                style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
+              >
+                {request.description}
+              </p>
             </div>
           </div>
         </section>
 
-        <section className="mt-8 rounded-xl border bg-card p-6 sm:p-8">
-          <div className="prose prose-neutral max-w-none dark:prose-invert">
-            <p
-              className="text-base leading-7 text-foreground/90"
-              style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
-            >
-              {request.description}
-            </p>
-          </div>
-        </section>
-
-        <section className="mt-10 mb-8 flex flex-col min-h-0">
-          <Separator />
-          <div className="mt-6 flex h-[68vh] min-h-90 max-h-190 min-w-0 flex-col overflow-hidden rounded-xl border bg-card/60 p-4 sm:p-6">
+        <section className="mt-8">
+          <div className="mt-4 h-[66vh] min-h-90 max-h-190 min-w-0 overflow-hidden">
             <CommentSection requestId={request.id} boardId={board.id} />
           </div>
         </section>

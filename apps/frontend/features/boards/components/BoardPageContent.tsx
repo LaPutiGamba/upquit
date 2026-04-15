@@ -10,6 +10,9 @@ import { GiveToGetTracker } from "@/features/give-to-get/components/GiveToGetTra
 import { RequestCard } from "@/features/requests/components/RequestCard";
 import { CreateRequestForm } from "@/features/requests/components/CreateRequestForm";
 import { requestService, RequestResponse } from "@/features/requests/services/requestService";
+import { Badge } from "@/shared/components/ui/badge";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/shared/components/ui/empty";
+import { MessageSquareDashed } from "lucide-react";
 
 interface BoardPageContentProps {
   slug: string;
@@ -90,6 +93,15 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
     });
   }, [requests]);
 
+  const latestRequestDate = useMemo(() => {
+    const latest = requestsSortedByDate[0];
+    if (!latest?.createdAt) {
+      return null;
+    }
+
+    return new Date(latest.createdAt).toLocaleDateString();
+  }, [requestsSortedByDate]);
+
   if (loading) {
     return null;
   }
@@ -109,23 +121,38 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
   return (
     <main className="min-h-svh bg-background">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6 pb-10 md:p-8 md:pb-12">
-        <section className="rounded-xl border bg-card">
+        <section>
           <BoardHeader board={board} />
         </section>
 
-        <GiveToGetTracker board={board} />
+        <div>
+          <GiveToGetTracker board={board} />
+        </div>
 
         {isRequestsTab ? (
-          <section className="rounded-xl border bg-card p-5 md:p-6">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b pb-4">
-              <h2 className="text-xl font-semibold tracking-tight md:text-2xl">{t("featureRequestsTitle")}</h2>
+          <section className="flex flex-col gap-5">
+            <div className="mb-5 flex flex-col gap-4 border-b border-border/70 pb-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-col gap-2">
+                <h2 className="text-xl font-semibold tracking-tight md:text-2xl">{t("featureRequestsTitle")}</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">{requestsSortedByDate.length} total</Badge>
+                  {latestRequestDate ? <Badge variant="outline">Newest: {latestRequestDate}</Badge> : null}
+                </div>
+              </div>
+
               <CreateRequestForm boardId={board.id} giveToGetEnabled={board.giveToGetEnabled} />
             </div>
 
             {requestsSortedByDate.length === 0 ? (
-              <div className="rounded-xl border border-dashed bg-background py-12 text-center">
-                <p className="text-muted-foreground">{t("emptyRequests")}</p>
-              </div>
+              <Empty className="rounded-xl border border-dashed py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <MessageSquareDashed className="size-5" aria-hidden="true" />
+                  </EmptyMedia>
+                  <EmptyTitle>{t("featureRequestsTitle")}</EmptyTitle>
+                  <EmptyDescription>{t("emptyRequests")}</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             ) : (
               <div className="grid gap-3 md:gap-4">
                 {requestsSortedByDate.map((request) => (

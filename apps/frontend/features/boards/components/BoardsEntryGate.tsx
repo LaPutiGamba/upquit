@@ -3,7 +3,7 @@
 import { Link } from "@/localization/i18n/routing";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRightIcon, Presentation } from "lucide-react";
+import { ChevronRightIcon, Plus, Presentation } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { boardService, BoardResponse } from "@/features/boards/services/boardService";
@@ -75,10 +75,10 @@ export function BoardsEntryGate() {
   return (
     <main className="min-h-svh bg-background">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6 md:p-10">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-            <p className="text-muted-foreground">{t("subtitle")}</p>
+        <header className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">{t("title")}</h1>
+            <p className="max-w-2xl text-muted-foreground">{t("subtitle")}</p>
           </div>
 
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
@@ -88,7 +88,10 @@ export function BoardsEntryGate() {
                   {t("importBoard")}
                 </Button>
                 <DialogTrigger asChild>
-                  <Button className="hover:cursor-pointer">{t("createBoard")}</Button>
+                  <Button className="hover:cursor-pointer">
+                    <Plus data-icon="inline-start" />
+                    {t("createBoard")}
+                  </Button>
                 </DialogTrigger>
               </div>
             )}
@@ -129,16 +132,21 @@ export function BoardsEntryGate() {
           </section>
         ) : (
           <section>
-            <ItemGroup>
+            <ItemGroup className="gap-2">
               {sortedBoards.map((board) => (
-                <Item key={board.id} asChild variant="outline">
+                <Item
+                  key={board.id}
+                  asChild
+                  variant="outline"
+                  className="group rounded-lg border-border/70 bg-background px-4 py-3 transition-colors hover:bg-muted/40"
+                >
                   <Link href={`/board/${board.slug}`}>
                     <ItemContent>
-                      <ItemTitle>{board.name}</ItemTitle>
+                      <ItemTitle className="text-base">{board.name}</ItemTitle>
                       <ItemDescription>{board.description || t("noDescription")}</ItemDescription>
                     </ItemContent>
                     <ItemActions>
-                      <ChevronRightIcon className="size-4" />
+                      <ChevronRightIcon className="size-4 text-muted-foreground" />
                     </ItemActions>
                   </Link>
                 </Item>
