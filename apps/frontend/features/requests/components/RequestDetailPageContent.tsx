@@ -129,15 +129,6 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto flex max-w-6xl flex-1 flex-col px-4 py-8 md:py-10">
-        <div className="mb-6">
-          <Button asChild variant="ghost" className="gap-2 pl-2 text-muted-foreground hover:text-foreground">
-            <Link href={`/board/${slug}`}>
-              <ArrowLeft className="size-4" />
-              Back to Board
-            </Link>
-          </Button>
-        </div>
-
         <section className="border-b pb-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
             <div className="shrink-0">

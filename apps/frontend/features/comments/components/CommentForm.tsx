@@ -13,9 +13,18 @@ interface CommentFormProps {
   boardId: string;
   onCommentAdded: () => void;
   isDialog?: boolean;
+  parentId?: string;
+  onCancel?: () => void;
 }
 
-export function CommentForm({ requestId, boardId, onCommentAdded, isDialog = false }: CommentFormProps) {
+export function CommentForm({
+  requestId,
+  boardId,
+  onCommentAdded,
+  isDialog = false,
+  parentId,
+  onCancel
+}: CommentFormProps) {
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -36,12 +45,16 @@ export function CommentForm({ requestId, boardId, onCommentAdded, isDialog = fal
     if (textarea) {
       textarea.style.height = "auto";
       const scrollHeight = textarea.scrollHeight;
-
       textarea.style.height = `${Math.min(scrollHeight + 2, 384)}px`;
-
       textarea.style.overflowY = scrollHeight > 376 ? "auto" : "hidden";
     }
   }, [content]);
+
+  useEffect(() => {
+    if (parentId && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [parentId]);
 
   const submitComment = async () => {
     if (!content.trim() || isLoading) {
@@ -52,12 +65,16 @@ export function CommentForm({ requestId, boardId, onCommentAdded, isDialog = fal
     setIsLoading(true);
 
     try {
-      await commentService.createComment(requestId, boardId, content.trim());
+      await commentService.createComment(requestId, boardId, content.trim(), parentId);
 
       setContent("");
       notifyOtherTabs();
-      toast.success("Comment posted successfully");
+      toast.success(parentId ? "Reply posted successfully" : "Comment posted successfully");
       onCommentAdded();
+
+      if (onCancel) {
+        onCancel();
+      }
     } catch (error) {
       console.error("Error posting comment:", error);
       toast.error("Failed to post comment");
@@ -66,7 +83,7 @@ export function CommentForm({ requestId, boardId, onCommentAdded, isDialog = fal
     }
   };
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await submitComment();
   };
@@ -76,14 +93,19 @@ export function CommentForm({ requestId, boardId, onCommentAdded, isDialog = fal
       e.preventDefault();
       void submitComment();
     }
+
+    if (e.key === "Escape" && onCancel) {
+      e.preventDefault();
+      onCancel();
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
       <div className="relative w-full">
         <Textarea
           ref={textareaRef}
-          placeholder="Add a comment..."
+          placeholder={parentId ? "Write a reply..." : "Add a comment..."}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -103,9 +125,24 @@ export function CommentForm({ requestId, boardId, onCommentAdded, isDialog = fal
           className={cn("absolute right-1.5 top-1.5 transition-all shadow-none", !content.trim() && "opacity-50")}
         >
           <Send className="size-4" />
-          <span className="sr-only">Send comment</span>
+          <span className="sr-only">{parentId ? "Send reply" : "Send comment"}</span>
         </Button>
       </div>
+
+      {onCancel && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            disabled={isLoading}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

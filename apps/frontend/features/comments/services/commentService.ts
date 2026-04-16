@@ -22,7 +22,13 @@ export const commentService = {
     return response;
   },
 
-  async createComment(requestId: string, boardId: string, text: string, token?: string): Promise<CommentResponse> {
+  async createComment(
+    requestId: string,
+    boardId: string,
+    text: string,
+    parentId?: string | null,
+    token?: string
+  ): Promise<CommentResponse> {
     const response = await apiClient<CommentResponse>(`/comments`, {
       method: "POST",
       tenantId: boardId,
@@ -30,7 +36,7 @@ export const commentService = {
       body: JSON.stringify({
         requestId,
         content: text,
-        parentId: null,
+        parentId: parentId || null,
         isAdminReply: null
       })
     });
