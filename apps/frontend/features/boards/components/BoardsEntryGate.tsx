@@ -83,17 +83,12 @@ export function BoardsEntryGate() {
 
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             {sortedBoards.length !== 0 && (
-              <div className="flex items-center gap-2">
-                <Button variant="outline" disabled>
-                  {t("importBoard")}
+              <DialogTrigger asChild>
+                <Button className="hover:cursor-pointer">
+                  <Plus data-icon="inline-start" />
+                  {t("createBoard")}
                 </Button>
-                <DialogTrigger asChild>
-                  <Button className="hover:cursor-pointer">
-                    <Plus data-icon="inline-start" />
-                    {t("createBoard")}
-                  </Button>
-                </DialogTrigger>
-              </div>
+              </DialogTrigger>
             )}
             <DialogContent className="max-w-xl">
               <DialogHeader>

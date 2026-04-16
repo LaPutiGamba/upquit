@@ -8,7 +8,6 @@
   "BoardsEntryGate": {
     "title": "Your boards",
     "subtitle": "Manage your products feedback spaces",
-    "importBoard": "Import board",
     "createBoard": "Create board",
     "dialogTitle": "Create a new board",
     "dialogDescription": "Answer these quick questions to set up your workspace",

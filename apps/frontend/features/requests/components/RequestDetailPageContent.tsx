@@ -165,7 +165,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
         </section>
 
         <section className="mt-8">
-          <div className="mt-4 h-[66vh] min-h-90 max-h-190 min-w-0 overflow-hidden">
+          <div className="mt-4 flex flex-col h-[66vh] min-h-90 max-h-190 min-w-0 overflow-hidden">
             <CommentSection requestId={request.id} boardId={board.id} />
           </div>
         </section>

@@ -31,19 +31,20 @@ export function CommentForm({ requestId, boardId, onCommentAdded, isDialog = fal
     channel.close();
   };
 
-  // Auto-expand textarea based on content
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      const scrollHeight = Math.min(textareaRef.current.scrollHeight, 120);
-      textareaRef.current.style.height = `${scrollHeight}px`;
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      const scrollHeight = textarea.scrollHeight;
+
+      textarea.style.height = `${Math.min(scrollHeight + 2, 384)}px`;
+
+      textarea.style.overflowY = scrollHeight > 376 ? "auto" : "hidden";
     }
   }, [content]);
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!content.trim()) {
+  const submitComment = async () => {
+    if (!content.trim() || isLoading) {
       toast.error("Please enter a comment");
       return;
     }
@@ -65,19 +66,32 @@ export function CommentForm({ requestId, boardId, onCommentAdded, isDialog = fal
     }
   };
 
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await submitComment();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && e.shiftKey) {
+      e.preventDefault();
+      void submitComment();
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="flex gap-3 items-start">
+      <div className="relative w-full">
         <Textarea
           ref={textareaRef}
           placeholder="Add a comment..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={isLoading}
           className={cn(
-            "resize-none overscroll-none transition-colors",
+            "resize-none overscroll-none transition-colors w-full",
             "bg-background/70 focus:bg-background",
-            "min-h-10 max-h-28 py-2.5",
+            "min-h-11 max-h-96 py-3 pl-3 pr-12",
             isDialog && "bg-muted/30 focus:bg-muted/50"
           )}
           rows={1}
@@ -85,13 +99,10 @@ export function CommentForm({ requestId, boardId, onCommentAdded, isDialog = fal
         <Button
           type="submit"
           disabled={isLoading || !content.trim()}
-          size="icon"
-          className={cn(
-            "shrink-0 h-10 w-10 rounded-full shadow-sm transition-all mt-0.5",
-            !content.trim() && "opacity-50"
-          )}
+          size="icon-sm"
+          className={cn("absolute right-1.5 top-1.5 transition-all shadow-none", !content.trim() && "opacity-50")}
         >
-          <Send className="h-4 w-4" />
+          <Send className="size-4" />
           <span className="sr-only">Send comment</span>
         </Button>
       </div>

@@ -24,6 +24,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { toast } from "@/shared/components/ui/sonner";
+import { Plus } from "lucide-react";
 
 const createRequestSchema = z.object({
   title: z.string().trim().min(1, "Please enter a title"),
@@ -189,7 +190,7 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">New Request</Button>
+        <Button size="sm"><Plus />New Request</Button>
       </DialogTrigger>
 
       <DialogContent className="rounded-xl border">
