@@ -1,14 +1,14 @@
 import { eq } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { comments } from "../schema.js";
 import { users } from "../../../users/infrastructure/schema.js";
+import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
 import CommentRepository from "../../domain/contracts/CommentRepository.js";
 import Comment, { CommentWithAuthor } from "../../domain/entities/Comment.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 
 export default class CommentDrizzleRepository implements CommentRepository {
-  constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
+  constructor(private readonly db: CurrentDatabase) {}
 
   public async findById(id: Uuid): Promise<Comment | null> {
     const [row] = await this.db.select().from(comments).where(eq(comments.id, id.getValue())).limit(1);

@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { sql } from "drizzle-orm";
 import { db } from "../database/connection.js";
+import BoardDrizzleRepository from "../../../modules/boards/infrastructure/repositories/BoardDrizzleRepository.js";
 
 const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
 if (!jwtAccessSecret) {
   throw new Error("JWT_ACCESS_SECRET environment variable is required");
 }
+
+const boardRepository = new BoardDrizzleRepository(db);
 
 declare global {
   namespace Express {
@@ -15,24 +17,6 @@ declare global {
       tenantId?: string;
     }
   }
-}
-
-async function hasTenantAccessInDb(userId: string, tenantId: string): Promise<boolean> {
-  const result = await db.execute(sql`
-    SELECT EXISTS (
-      SELECT 1
-      FROM boards b
-      WHERE b.id::text = ${tenantId}
-        AND b.owner_id::text = ${userId}
-      UNION ALL
-      SELECT 1
-      FROM board_members bm
-      WHERE bm.board_id::text = ${tenantId}
-        AND bm.user_id::text = ${userId}
-    ) AS has_access
-  `);
-
-  return Boolean((result.rows[0] as { has_access?: boolean } | undefined)?.has_access);
 }
 
 export const JwtAuthMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -66,7 +50,8 @@ export const JwtAuthMiddleware = async (req: Request, res: Response, next: NextF
 
     if (requestedTenantId) {
       const canAccessFromToken = boardIds.includes(requestedTenantId);
-      const canAccessFromDb = canAccessFromToken || (await hasTenantAccessInDb(decoded.sub, requestedTenantId));
+      const canAccessFromDb =
+        canAccessFromToken || (await boardRepository.hasTenantAccess(decoded.sub, requestedTenantId));
 
       if (!canAccessFromDb && !isAdmin) {
         res.status(403).send({

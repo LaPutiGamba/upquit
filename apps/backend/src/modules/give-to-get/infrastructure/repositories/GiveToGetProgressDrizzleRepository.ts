@@ -1,13 +1,13 @@
 import { and, eq, sql } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { giveToGetProgress } from "../schema.js";
+import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
 import GiveToGetProgressRepository from "../../domain/contracts/GiveToGetProgressRepository.js";
 import GiveToGetProgress from "../../domain/entities/GiveToGetProgress.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 
 export default class GiveToGetProgressDrizzleRepository implements GiveToGetProgressRepository {
-  constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
+  constructor(private readonly db: CurrentDatabase) {}
 
   public async findById(id: Uuid): Promise<GiveToGetProgress | null> {
     const [row] = await this.db

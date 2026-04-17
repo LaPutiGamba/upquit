@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { users } from "../schema.js";
+import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
 import UserRepository from "../../domain/contracts/UserRepository.js";
 import User from "../../domain/entities/User.js";
@@ -8,7 +8,7 @@ import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import Email from "../../domain/value-objects/Email.js";
 
 export default class UserDrizzleRepository implements UserRepository {
-  constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
+  constructor(private readonly db: CurrentDatabase) {}
 
   public async findById(id: Uuid): Promise<User | null> {
     const [row] = await this.db

@@ -1,7 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { boards, boardMembers, categories } from "../schema.js";
 import { users } from "../../../users/infrastructure/schema.js";
+import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
 import BoardRepository from "../../domain/contracts/BoardRepository.js";
 import Board from "../../domain/entities/Board.js";
@@ -11,7 +11,7 @@ import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import Slug from "../../domain/value-objects/Slug.js";
 
 export default class BoardDrizzleRepository implements BoardRepository {
-  constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
+  constructor(private readonly db: CurrentDatabase) {}
 
   // =========================================================================
   // BOARDS
@@ -55,6 +55,26 @@ export default class BoardDrizzleRepository implements BoardRepository {
       .where(eq(boards.ownerId, userId.getValue()));
 
     return [...new Set([...memberRows, ...ownedRows].map((row) => row.boardId))];
+  }
+
+  public async hasTenantAccess(userId: string, tenantId: string): Promise<boolean> {
+    const [ownedBoard] = await this.db
+      .select({ boardId: boards.id })
+      .from(boards)
+      .where(and(eq(boards.id, tenantId), eq(boards.ownerId, userId)))
+      .limit(1);
+
+    if (ownedBoard) {
+      return true;
+    }
+
+    const [memberBoard] = await this.db
+      .select({ boardId: boardMembers.boardId })
+      .from(boardMembers)
+      .where(and(eq(boardMembers.boardId, tenantId), eq(boardMembers.userId, userId)))
+      .limit(1);
+
+    return Boolean(memberBoard);
   }
 
   public async save(board: Board): Promise<void> {

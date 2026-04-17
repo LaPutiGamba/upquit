@@ -6,6 +6,7 @@ import Slug from "../value-objects/Slug.js";
 
 export default interface BoardRepository {
   // Board Operations
+  hasTenantAccess(userId: string, tenantId: string): Promise<boolean>;
   findById(id: Uuid): Promise<Board | null>;
   findBySlug(slug: Slug): Promise<Board | null>;
   findByUserId(userId: Uuid): Promise<Board[]>;

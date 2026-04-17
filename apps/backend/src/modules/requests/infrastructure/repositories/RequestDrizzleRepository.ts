@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { requests, subscriptions } from "../schema.js";
+import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
 import RequestRepository from "../../domain/contracts/RequestRepository.js";
 import Request from "../../domain/entities/Request.js";
@@ -9,7 +9,7 @@ import { type StatusValue } from "../../domain/value-objects/RequestStatus.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 
 export default class RequestDrizzleRepository implements RequestRepository {
-  constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
+  constructor(private readonly db: CurrentDatabase) {}
 
   // =========================================================================
   // REQUESTS

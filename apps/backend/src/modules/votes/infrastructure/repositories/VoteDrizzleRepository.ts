@@ -1,13 +1,13 @@
 import { and, eq, sql } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { votes } from "../schema.js";
+import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
 import VoteRepository from "../../domain/contracts/VoteRepository.js";
 import Vote from "../../domain/entities/Vote.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 
 export default class VoteDrizzleRepository implements VoteRepository {
-  constructor(private readonly db: NodePgDatabase<Record<string, never>>) {}
+  constructor(private readonly db: CurrentDatabase) {}
 
   public async findById(id: Uuid): Promise<Vote | null> {
     const [row] = await this.db.select().from(votes).where(eq(votes.id, id.getValue())).limit(1);
