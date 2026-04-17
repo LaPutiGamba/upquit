@@ -3,6 +3,11 @@ import jwt from "jsonwebtoken";
 import { sql } from "drizzle-orm";
 import { db } from "../database/connection.js";
 
+const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
+if (!jwtAccessSecret) {
+  throw new Error("JWT_ACCESS_SECRET environment variable is required");
+}
+
 declare global {
   namespace Express {
     interface Request {
@@ -41,8 +46,7 @@ export const JwtAuthMiddleware = async (req: Request, res: Response, next: NextF
   const token = authHeader.split(" ")[1];
 
   try {
-    const secret = process.env.JWT_ACCESS_SECRET || "your-secret-key";
-    const decoded = jwt.verify(token, secret) as {
+    const decoded = jwt.verify(token, jwtAccessSecret) as {
       sub: string;
       boardIds: string[];
       isAdmin?: boolean;
