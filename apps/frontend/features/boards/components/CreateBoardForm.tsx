@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/shared/co
 import { Input } from "@/shared/components/ui/input";
 import { Field, FieldLabel } from "@/shared/components/ui/field";
 import { toast } from "@/shared/components/ui/sonner";
+import { slugify } from "@/shared/lib/utils";
 
 function createBoardSchema(t: (key: string) => string) {
   return z.object({
@@ -35,30 +36,16 @@ interface CreateBoardFormProps {
   onSuccess?: (createdBoardSlug: string) => void | Promise<void>;
 }
 
-function slugify(value: string, keepTrailingHyphen = false): string {
-  const normalized = value
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+/, "");
-
-  if (keepTrailingHyphen) {
-    return normalized;
-  }
-
-  return normalized.replace(/-+$/, "");
-}
-
 export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
   const t = useTranslations("CreateBoardForm");
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
+  const boardSchema = useMemo(() => createBoardSchema(t), [t]);
 
   const form = useForm<CreateBoardFormValues>({
     // @ts-expect-error - zodResolver type mismatch
-    resolver: zodResolver(createBoardSchema(t)),
+    resolver: zodResolver(boardSchema),
     defaultValues: {
       name: "",
       slug: "",

@@ -1,10 +1,8 @@
 "use client";
 
 import { RequestResponse } from "../services/requestService";
-import { UpvoteButton } from "@/features/votes/components/UpvoteButton";
-import { RequestHeader } from "@/features/requests/components/RequestHeader";
-import { cn } from "@/shared/lib/utils";
-import { useLocale, useTranslations } from "next-intl";
+import { RequestHeader, RequestTitle } from "@/features/requests/components/RequestHeader";
+import { RequestMetadataRow } from "@/features/requests/components/RequestMetadataRow";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +14,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { Link } from "@/localization/i18n/routing";
-import { CheckCircle2, Circle, CircleDot, Clock3, Copy, XCircle, CalendarDays, Maximize2 } from "lucide-react";
+import { Copy, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { CommentSection } from "@/features/comments/components/CommentSection";
@@ -27,65 +25,7 @@ interface RequestCardProps {
 }
 
 export function RequestCard({ request, boardSlug }: RequestCardProps) {
-  const t = useTranslations("RequestCard");
-  const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
-  const requestDateLabel = request.createdAt
-    ? new Intl.DateTimeFormat(locale, {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-      }).format(new Date(request.createdAt))
-    : "";
-  const badgeBaseClass =
-    "inline-flex h-6 items-center rounded-full border px-2.5 text-[10px] font-semibold leading-none";
-
-  const getStatusLabel = (status: string) => {
-    const normalized = status.toLowerCase();
-    switch (normalized) {
-      case "planned":
-      case "in_progress":
-      case "completed":
-      case "rejected":
-        return t(`status.${normalized}`);
-      default:
-        return status.replace("_", " ");
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "open":
-        return "border-muted-foreground/35 bg-muted/45 text-muted-foreground";
-      case "planned":
-        return "border-primary/35 bg-primary/10 text-primary";
-      case "in_progress":
-        return "border-chart-2/35 bg-chart-2/12 text-chart-2";
-      case "completed":
-        return "border-chart-1/35 bg-chart-1/12 text-chart-1";
-      case "rejected":
-        return "border-destructive/35 bg-destructive/10 text-destructive";
-      default:
-        return "";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "open":
-        return <CircleDot aria-hidden="true" strokeWidth={2.5} />;
-      case "planned":
-        return <Circle aria-hidden="true" strokeWidth={2.5} />;
-      case "in_progress":
-        return <Clock3 aria-hidden="true" strokeWidth={2.5} />;
-      case "completed":
-        return <CheckCircle2 aria-hidden="true" strokeWidth={2.5} />;
-      case "rejected":
-        return <XCircle aria-hidden="true" strokeWidth={2.5} />;
-      default:
-        return <Circle aria-hidden="true" strokeWidth={2.5} />;
-    }
-  };
 
   const handleCopyLink = async () => {
     const currentUrl = window.location.href.replace(/\/$/, "");
@@ -102,7 +42,10 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <article className="cursor-pointer rounded-lg border border-border/70 px-4 py-3 transition-colors hover:bg-muted/35">
+        <button
+          type="button"
+          className="flex w-full flex-col rounded-lg border border-border/70 px-4 py-3 text-left transition-colors hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+        >
           <div className="min-w-0">
             <div className="mb-2 min-w-0">
               <h3 className="min-w-0 truncate text-lg font-semibold tracking-tight">{request.title}</h3>
@@ -110,42 +53,15 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
 
             <p className="line-clamp-2 wrap-anywhere text-sm leading-6 text-muted-foreground">{request.description}</p>
 
-            <div className="mt-2 mb-1 flex flex-wrap items-center gap-2">
-              <span
-                className={cn(
-                  badgeBaseClass,
-                  "gap-1.5 uppercase tracking-[0.08em]",
-                  "[&_svg]:size-2.5 [&_svg]:shrink-0",
-                  getStatusColor(request.status)
-                )}
-              >
-                {getStatusIcon(request.status)}
-                {getStatusLabel(request.status)}
-              </span>
-              {requestDateLabel ? (
-                <span
-                  className={cn(
-                    badgeBaseClass,
-                    "gap-1.5 border-border/70 bg-muted/40 text-muted-foreground",
-                    "tracking-[0.04em] [&_svg]:size-2.5 [&_svg]:shrink-0"
-                  )}
-                >
-                  <CalendarDays aria-hidden="true" strokeWidth={2} />
-                  {requestDateLabel}
-                </span>
-              ) : null}
-
-              <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                <UpvoteButton
-                  requestId={request.id}
-                  boardId={request.boardId}
-                  initialVoteCount={request.voteCount ?? 0}
-                  className="h-6 rounded-full px-2.5 py-0 [&>span]:gap-1.5 [&>span>svg]:size-2.5 [&>span>span]:text-[10px]"
-                />
-              </div>
-            </div>
+            <RequestMetadataRow
+              request={request}
+              boardId={request.boardId}
+              stopPropagation
+              size="sm"
+              className="mt-2 mb-1"
+            />
           </div>
-        </article>
+        </button>
       </DialogTrigger>
 
       <DialogContent
@@ -167,20 +83,11 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
       >
         <DialogHeader className="shrink-0 px-6 py-4 pr-28">
           <DialogTitle className="sr-only">{request.title}</DialogTitle>
-          <RequestHeader
-            variant="dialog"
-            metadataPosition="bottom"
-            showMetadata={false}
-            requestId={request.id}
-            boardId={request.boardId}
-            title={request.title}
-            description={request.description}
-            status={request.status}
-            createdAt={request.createdAt}
-            initialVoteCount={request.voteCount ?? 0}
-            showDescription={false}
-            stopPropagation
-          />
+          <RequestHeader variant="dialog">
+            <RequestTitle as="h2" variant="dialog">
+              {request.title}
+            </RequestTitle>
+          </RequestHeader>
           <DialogDescription className="sr-only">
             Request details and discussion thread for {request.title}.
           </DialogDescription>
@@ -196,40 +103,13 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
                 {request.description}
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span
-                  className={cn(
-                    badgeBaseClass,
-                    "gap-1.5 uppercase tracking-[0.08em]",
-                    "[&_svg]:size-2.5 [&_svg]:shrink-0",
-                    getStatusColor(request.status)
-                  )}
-                >
-                  {getStatusIcon(request.status)}
-                  {getStatusLabel(request.status)}
-                </span>
-                {requestDateLabel ? (
-                  <span
-                    className={cn(
-                      badgeBaseClass,
-                      "gap-1.5 border-border/70 bg-muted/40 text-muted-foreground",
-                      "tracking-[0.04em] [&_svg]:size-2.5 [&_svg]:shrink-0"
-                    )}
-                  >
-                    <CalendarDays aria-hidden="true" strokeWidth={2} />
-                    {requestDateLabel}
-                  </span>
-                ) : null}
-
-                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                  <UpvoteButton
-                    requestId={request.id}
-                    boardId={request.boardId}
-                    initialVoteCount={request.voteCount ?? 0}
-                    className="h-6 rounded-full px-2.5 py-0 [&>span]:gap-1.5 [&>span>svg]:size-2.5 [&>span>span]:text-[10px]"
-                  />
-                </div>
-              </div>
+              <RequestMetadataRow
+                request={request}
+                boardId={request.boardId}
+                stopPropagation
+                size="sm"
+                className="mt-3"
+              />
             </div>
           </div>
 

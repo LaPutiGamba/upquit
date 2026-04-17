@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRequestDetailPage } from "@/features/requests/hooks/useRequestDetailPage";
 
-import { boardService, BoardResponse } from "@/features/boards/services/boardService";
 import { CommentSection } from "@/features/comments/components/CommentSection";
-import { RequestHeader } from "@/features/requests/components/RequestHeader";
-import { requestService, RequestResponse } from "@/features/requests/services/requestService";
+import { RequestDescription, RequestHeader, RequestTitle } from "@/features/requests/components/RequestHeader";
+import { RequestMetadataRow } from "@/features/requests/components/RequestMetadataRow";
 import { Spinner } from "@/shared/components/ui/spinner";
 
 interface RequestDetailPageContentProps {
@@ -15,63 +13,7 @@ interface RequestDetailPageContentProps {
 }
 
 export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentProps) {
-  const router = useRouter();
-
-  const [board, setBoard] = useState<BoardResponse | null>(null);
-  const [request, setRequest] = useState<RequestResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadRequestPage = async () => {
-      try {
-        const currentBoard = await boardService.getBoardBySlug(slug);
-
-        if (cancelled) {
-          return;
-        }
-
-        setBoard(currentBoard);
-
-        const currentRequest = await requestService.getRequestById(id, currentBoard.id);
-
-        if (cancelled) {
-          return;
-        }
-
-        setRequest(currentRequest);
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
-
-        const message = error instanceof Error ? error.message.toLowerCase() : "";
-        const unauthorized =
-          message.includes("session has expired") ||
-          message.includes("unauthorized") ||
-          message.includes("not authenticated");
-
-        if (unauthorized) {
-          router.replace("/login");
-          return;
-        }
-
-        setNotFound(true);
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void loadRequestPage();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id, router, slug]);
+  const { board, request, loading, notFound } = useRequestDetailPage(slug, id);
 
   if (loading) {
     return (
@@ -95,17 +37,13 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     <div className="min-h-screen bg-background">
       <main className="container mx-auto flex max-w-6xl flex-1 flex-col px-4 py-8 md:py-10">
         <section className="pb-8">
-          <RequestHeader
-            variant="page"
-            metadataPosition="bottom"
-            requestId={request.id}
-            boardId={board.id}
-            title={request.title}
-            description={request.description}
-            status={request.status}
-            createdAt={request.createdAt}
-            initialVoteCount={request.voteCount ?? 0}
-          />
+          <RequestHeader variant="page">
+            <RequestTitle variant="page" as="h1">
+              {request.title}
+            </RequestTitle>
+            <RequestDescription>{request.description ?? ""}</RequestDescription>
+            <RequestMetadataRow request={request} boardId={board.id} size="md" className="mt-3" />
+          </RequestHeader>
         </section>
 
         <section>

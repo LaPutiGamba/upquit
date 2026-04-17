@@ -20,6 +20,13 @@ export class ApiError extends Error {
   }
 }
 
+export class UnauthorizedError extends ApiError {
+  constructor(message = "Your session has expired. Please sign in again.") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
 export function setAccessToken(token: string | null): void {
   if (typeof window === "undefined") {
     return;
@@ -149,7 +156,7 @@ export async function apiClient<T>(endpoint: string, options: FetchOptions = {})
       const refreshedToken = await refreshAccessTokenOnce();
 
       if (!refreshedToken) {
-        throw new ApiError("Your session has expired. Please sign in again.");
+        throw new UnauthorizedError();
       }
 
       const retryHeaders = new Headers(config.headers);

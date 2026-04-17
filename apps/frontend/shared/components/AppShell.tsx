@@ -1,15 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LayoutGrid, Sparkles } from "lucide-react";
 
 import { usePathname, useRouter } from "@/localization/i18n/routing";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Field, FieldGroup, FieldLabel } from "@/shared/components/ui/field";
 import {
   Sidebar,
   SidebarContent,
@@ -20,17 +16,16 @@ import {
   SidebarRail,
   SidebarTrigger
 } from "@/shared/components/ui/sidebar";
-import { boardService, type BoardResponse } from "@/features/boards/services/boardService";
-import { CreateBoardForm } from "@/features/boards/components/CreateBoardForm";
 import { toast } from "@/shared/components/ui/sonner";
-import { authService, type UserResponse } from "@/features/authentication/services/authService";
-import { decodeJwtPayload } from "@/shared/lib/jwt";
-import { getAccessToken } from "@/shared/lib/apiClient";
+import { authService } from "@/features/authentication/services/authService";
 import { BoardSwitcher } from "@/shared/components/app-shell/BoardSwitcher";
 import { NavMain } from "@/shared/components/app-shell/NavMain";
 import { NavUser } from "@/shared/components/app-shell/NavUser";
 import { getInitials } from "@/shared/components/app-shell/utils";
 import type { SidebarItem } from "@/shared/components/app-shell/types";
+import { useAuth } from "@/shared/components/AuthProvider";
+import { CreateBoardModal } from "@/shared/components/app-shell/CreateBoardModal";
+import { UserSettingsModal } from "@/shared/components/app-shell/UserSettingsModal";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -52,74 +47,12 @@ export function AppShell({ children }: AppShellProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const t = useTranslations("AppShell");
-  const tBoards = useTranslations("BoardsEntryGate");
+  const { user, boards } = useAuth();
 
-  const [user, setUser] = useState<UserResponse | null>(null);
-  const [boards, setBoards] = useState<BoardResponse[]>([]);
   const [isCreateBoardOpen, setIsCreateBoardOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settingsDisplayName, setSettingsDisplayName] = useState("");
-  const [settingsAvatarUrl, setSettingsAvatarUrl] = useState("");
-  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   const shouldHideShell = isAuthPath(pathname) || isShelllessPath(pathname);
-
-  useEffect(() => {
-    if (shouldHideShell) {
-      return;
-    }
-
-    let isCancelled = false;
-
-    const loadShellData = async () => {
-      let token = getAccessToken();
-
-      if (!token) {
-        try {
-          const refreshed = await authService.refreshSession();
-          token = refreshed.accessToken;
-        } catch {
-          token = null;
-        }
-      }
-
-      if (!token) {
-        return;
-      }
-
-      const payload = decodeJwtPayload<{ userId?: string; sub?: string }>(token);
-      const userId = payload?.userId ?? payload?.sub;
-
-      if (!userId) {
-        return;
-      }
-
-      try {
-        const [profile, userBoards] = await Promise.all([
-          authService.getUserProfile(userId, token),
-          boardService.getMyBoards(token)
-        ]);
-
-        if (!isCancelled) {
-          setUser(profile);
-          setBoards(userBoards);
-          setSettingsDisplayName(profile.displayName);
-          setSettingsAvatarUrl(profile.avatarUrl ?? "");
-        }
-      } catch {
-        if (!isCancelled) {
-          setUser(null);
-          setBoards([]);
-        }
-      }
-    };
-
-    void loadShellData();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [shouldHideShell]);
 
   const currentBoardSlug = pathname.startsWith("/board/") ? pathname.replace("/board/", "").split("/")[0] : null;
   const activeBoard = boards.find((board) => board.slug === currentBoardSlug) ?? null;
@@ -152,11 +85,7 @@ export function AppShell({ children }: AppShellProps) {
   const userRole = user?.email || t("user.role");
   const userInitials = getInitials(userDisplayName);
 
-  const handleOpenSettings = () => {
-    setSettingsDisplayName(user?.displayName ?? "");
-    setSettingsAvatarUrl(user?.avatarUrl ?? "");
-    setIsSettingsOpen(true);
-  };
+  const handleOpenSettings = () => setIsSettingsOpen(true);
 
   const handleLogout = async () => {
     try {
@@ -169,39 +98,6 @@ export function AppShell({ children }: AppShellProps) {
       } else {
         toast.error(t("actions.logoutFailed"));
       }
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    if (!user) {
-      return;
-    }
-
-    const nextDisplayName = settingsDisplayName.trim();
-    if (nextDisplayName.length < 2) {
-      toast.error(t("settings.validation.displayName"));
-      return;
-    }
-
-    setIsSavingSettings(true);
-
-    try {
-      const updatedUser = await authService.updateUser(user.id, {
-        displayName: nextDisplayName,
-        avatarUrl: settingsAvatarUrl.trim() || null
-      });
-
-      setUser(updatedUser);
-      setIsSettingsOpen(false);
-      toast.success(t("settings.saved"));
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error(t("settings.failed"));
-      }
-    } finally {
-      setIsSavingSettings(false);
     }
   };
 
@@ -267,59 +163,8 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       </SidebarInset>
 
-      <Dialog open={isCreateBoardOpen} onOpenChange={setIsCreateBoardOpen}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle>{tBoards("dialogTitle")}</DialogTitle>
-            <DialogDescription>{tBoards("dialogDescription")}</DialogDescription>
-          </DialogHeader>
-          <CreateBoardForm
-            onSuccess={async (createdBoardSlug) => {
-              setIsCreateBoardOpen(false);
-
-              try {
-                const updatedBoards = await boardService.getMyBoards();
-                setBoards(updatedBoards);
-              } catch {
-                // Keep current boards list if refresh fails.
-              }
-
-              router.push(`/board/${createdBoardSlug}`);
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("settings.title")}</DialogTitle>
-            <DialogDescription>{t("settings.description")}</DialogDescription>
-          </DialogHeader>
-          <FieldGroup>
-            <Field>
-              <FieldLabel>{t("settings.fields.displayName")}</FieldLabel>
-              <Input value={settingsDisplayName} onChange={(event) => setSettingsDisplayName(event.target.value)} />
-            </Field>
-            <Field>
-              <FieldLabel>{t("settings.fields.avatarUrl")}</FieldLabel>
-              <Input
-                value={settingsAvatarUrl}
-                onChange={(event) => setSettingsAvatarUrl(event.target.value)}
-                placeholder="https://"
-              />
-            </Field>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setIsSettingsOpen(false)} disabled={isSavingSettings}>
-                {t("settings.actions.cancel")}
-              </Button>
-              <Button onClick={() => void handleSaveSettings()} disabled={isSavingSettings}>
-                {isSavingSettings ? t("settings.actions.saving") : t("settings.actions.save")}
-              </Button>
-            </div>
-          </FieldGroup>
-        </DialogContent>
-      </Dialog>
+      <CreateBoardModal open={isCreateBoardOpen} onOpenChange={setIsCreateBoardOpen} />
+      <UserSettingsModal open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </SidebarProvider>
   );
 }
