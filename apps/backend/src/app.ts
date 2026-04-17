@@ -13,6 +13,8 @@ import commentsRouter from "./modules/comments/infrastructure/commentsRoutes.js"
 import giveToGetRouter from "./modules/give-to-get/infrastructure/giveToGetRoutes.js";
 import requestsRouter from "./modules/requests/infrastructure/requestsRoutes.js";
 import votesRouter from "./modules/votes/infrastructure/votesRoutes.js";
+import DomainException from "./shared/domain/exceptions/DomainException.js";
+import ApplicationException from "./shared/application/exceptions/ApplicationException.js";
 
 const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 
@@ -41,16 +43,25 @@ app.use("/give-to-get", giveToGetRouter);
 app.use("/requests", requestsRouter);
 app.use("/votes", votesRouter);
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   logger.error(err);
 
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+  const errorWithMetadata =
+    typeof err === "object" && err !== null
+      ? (err as { statusCode?: number; message?: string; stack?: string })
+      : undefined;
+
+  const statusCode = errorWithMetadata?.statusCode ?? 500;
+  const isControlledError = err instanceof DomainException || err instanceof ApplicationException;
+  const message =
+    statusCode === 500 && !isControlledError
+      ? "Internal Server Error"
+      : (errorWithMetadata?.message ?? "Internal Server Error");
 
   res.status(statusCode).json({
     error: {
       message,
-      ...(process.env.NODE_ENV === "development" && { stack: err.stack })
+      ...(process.env.NODE_ENV === "development" && { stack: errorWithMetadata?.stack })
     }
   });
 });
