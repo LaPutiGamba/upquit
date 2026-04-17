@@ -15,6 +15,8 @@ interface RequestHeaderProps {
   createdAt?: string | Date | null;
   initialVoteCount: number;
   variant?: "dialog" | "page";
+  metadataPosition?: "top" | "bottom";
+  showMetadata?: boolean;
   showDescription?: boolean;
   stopPropagation?: boolean;
   className?: string;
@@ -63,6 +65,8 @@ export function RequestHeader({
   createdAt,
   initialVoteCount,
   variant = "page",
+  metadataPosition = "top",
+  showMetadata = true,
   showDescription = true,
   stopPropagation = false,
   className
@@ -92,6 +96,50 @@ export function RequestHeader({
       ? t(`status.${normalizedStatus}`)
       : status.replace("_", " ");
 
+  const metadataRow = (
+    <div className={cn("flex flex-wrap items-center gap-2", metadataPosition === "top" ? "mb-3" : "mt-3")}>
+      <span
+        className={cn(
+          badgeBaseClass,
+          "gap-1.5 uppercase tracking-[0.08em]",
+          isDialog ? "[&_svg]:size-2.5 [&_svg]:shrink-0" : "[&_svg]:size-3 [&_svg]:shrink-0",
+          getStatusColor(status)
+        )}
+      >
+        <StatusBadgeIcon status={normalizedStatus} />
+        {statusLabel}
+      </span>
+      {requestDateLabel ? (
+        <span
+          className={cn(
+            badgeBaseClass,
+            "gap-1.5 border-border/70 bg-muted/40 text-muted-foreground",
+            isDialog
+              ? "tracking-[0.04em] [&_svg]:size-2.5 [&_svg]:shrink-0"
+              : "tracking-[0.04em] [&_svg]:size-3 [&_svg]:shrink-0"
+          )}
+        >
+          <CalendarDays aria-hidden="true" strokeWidth={2.5} />
+          {requestDateLabel}
+        </span>
+      ) : null}
+
+      <div onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}>
+        <UpvoteButton
+          requestId={requestId}
+          boardId={boardId}
+          initialVoteCount={initialVoteCount}
+          className={cn(
+            isDialog ? "h-6 rounded-full px-2.5 py-0" : "h-7 rounded-full px-3 py-0",
+            isDialog
+              ? "[&>span]:gap-1.5 [&>span>svg]:size-3.5 [&>span>span]:text-[11px]"
+              : "[&>span]:gap-1.75 [&>span>svg]:size-4 [&>span>span]:text-xs"
+          )}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div
       className={cn(
@@ -101,49 +149,9 @@ export function RequestHeader({
         className
       )}
     >
-      <div className={cn(isDialog ? "flex flex-col gap-2" : "flex items-start justify-between gap-4")}>
-        <div className="min-w-0 flex-1">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <span
-              className={cn(
-                badgeBaseClass,
-                "gap-1.5 uppercase tracking-[0.08em]",
-                isDialog ? "[&_svg]:size-2.5 [&_svg]:shrink-0" : "[&_svg]:size-3 [&_svg]:shrink-0",
-                getStatusColor(status)
-              )}
-            >
-              <StatusBadgeIcon status={normalizedStatus} />
-              {statusLabel}
-            </span>
-            {requestDateLabel ? (
-              <span
-                className={cn(
-                  badgeBaseClass,
-                  "gap-1.5 border-border/70 bg-muted/40 text-muted-foreground",
-                  isDialog
-                    ? "tracking-[0.04em] [&_svg]:size-2.5 [&_svg]:shrink-0"
-                    : "tracking-[0.04em] [&_svg]:size-3 [&_svg]:shrink-0"
-                )}
-              >
-                <CalendarDays aria-hidden="true" strokeWidth={2.5} />
-                {requestDateLabel}
-              </span>
-            ) : null}
-
-            {isDialog ? (
-              <UpvoteButton
-                requestId={requestId}
-                boardId={boardId}
-                initialVoteCount={initialVoteCount}
-                className={cn(
-                  "h-6 rounded-full px-2.5 py-0",
-                  "border-border/70 bg-muted/35 text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                  "dark:bg-muted/25 dark:hover:bg-muted/40",
-                  "[&>span]:gap-1.5 [&>span>svg]:size-3.5 [&>span>span]:text-[11px]"
-                )}
-              />
-            ) : null}
-          </div>
+      <div className="flex flex-col gap-2">
+        <div className="min-w-0">
+          {showMetadata && metadataPosition === "top" ? metadataRow : null}
 
           <TitleTag
             className={cn(
@@ -164,21 +172,9 @@ export function RequestHeader({
               </p>
             </div>
           ) : null}
-        </div>
 
-        {!isDialog ? (
-          <div className="shrink-0" onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}>
-            <UpvoteButton
-              requestId={requestId}
-              boardId={boardId}
-              initialVoteCount={initialVoteCount}
-              className={cn(
-                "h-7 rounded-full px-3 py-0",
-                "[&>span]:gap-1.75 [&>span>svg]:size-4 [&>span>span]:text-xs"
-              )}
-            />
-          </div>
-        ) : null}
+          {showMetadata && metadataPosition === "bottom" ? metadataRow : null}
+        </div>
       </div>
     </div>
   );

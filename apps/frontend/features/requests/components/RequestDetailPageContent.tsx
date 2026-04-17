@@ -97,6 +97,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
         <section className="pb-8">
           <RequestHeader
             variant="page"
+            metadataPosition="bottom"
             requestId={request.id}
             boardId={board.id}
             title={request.title}

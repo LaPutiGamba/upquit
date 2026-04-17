@@ -104,19 +104,13 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
       <DialogTrigger asChild>
         <article className="cursor-pointer rounded-lg border border-border/70 px-4 py-3 transition-colors hover:bg-muted/35">
           <div className="min-w-0">
-            <div className="mb-2 flex min-w-0 items-start justify-between gap-3">
-              <h3 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{request.title}</h3>
-
-              <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                <UpvoteButton
-                  requestId={request.id}
-                  boardId={request.boardId}
-                  initialVoteCount={request.voteCount ?? 0}
-                />
-              </div>
+            <div className="mb-2 min-w-0">
+              <h3 className="min-w-0 truncate text-lg font-semibold tracking-tight">{request.title}</h3>
             </div>
 
-            <div className="mb-2 flex flex-wrap items-center gap-2">
+            <p className="line-clamp-2 wrap-anywhere text-sm leading-6 text-muted-foreground">{request.description}</p>
+
+            <div className="mt-2 mb-1 flex flex-wrap items-center gap-2">
               <span
                 className={cn(
                   badgeBaseClass,
@@ -140,9 +134,16 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
                   {requestDateLabel}
                 </span>
               ) : null}
-            </div>
 
-            <p className="line-clamp-2 wrap-anywhere text-sm leading-6 text-muted-foreground">{request.description}</p>
+              <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                <UpvoteButton
+                  requestId={request.id}
+                  boardId={request.boardId}
+                  initialVoteCount={request.voteCount ?? 0}
+                  className="h-6 rounded-full px-2.5 py-0 [&>span]:gap-1.5 [&>span>svg]:size-2.5 [&>span>span]:text-[10px]"
+                />
+              </div>
+            </div>
           </div>
         </article>
       </DialogTrigger>
@@ -168,6 +169,8 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
           <DialogTitle className="sr-only">{request.title}</DialogTitle>
           <RequestHeader
             variant="dialog"
+            metadataPosition="bottom"
+            showMetadata={false}
             requestId={request.id}
             boardId={request.boardId}
             title={request.title}
@@ -191,6 +194,41 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
               </p>
               <div className="whitespace-pre-wrap wrap-anywhere text-sm leading-relaxed text-foreground/90">
                 {request.description}
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span
+                  className={cn(
+                    badgeBaseClass,
+                    "gap-1.5 uppercase tracking-[0.08em]",
+                    "[&_svg]:size-2.5 [&_svg]:shrink-0",
+                    getStatusColor(request.status)
+                  )}
+                >
+                  {getStatusIcon(request.status)}
+                  {getStatusLabel(request.status)}
+                </span>
+                {requestDateLabel ? (
+                  <span
+                    className={cn(
+                      badgeBaseClass,
+                      "gap-1.5 border-border/70 bg-muted/40 text-muted-foreground",
+                      "tracking-[0.04em] [&_svg]:size-2.5 [&_svg]:shrink-0"
+                    )}
+                  >
+                    <CalendarDays aria-hidden="true" strokeWidth={2} />
+                    {requestDateLabel}
+                  </span>
+                ) : null}
+
+                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <UpvoteButton
+                    requestId={request.id}
+                    boardId={request.boardId}
+                    initialVoteCount={request.voteCount ?? 0}
+                    className="h-6 rounded-full px-2.5 py-0 [&>span]:gap-1.5 [&>span>svg]:size-2.5 [&>span>span]:text-[10px]"
+                  />
+                </div>
               </div>
             </div>
           </div>
