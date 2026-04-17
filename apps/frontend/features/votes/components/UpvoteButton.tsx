@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/utils";
 import { toast } from "@/shared/components/ui/sonner";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { getAccessToken } from "@/shared/lib/apiClient";
-import { ArrowUp } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useChannel } from "@/shared/hooks/useChannel";
 
@@ -15,9 +15,10 @@ interface UpvoteButtonProps {
   requestId: string;
   boardId: string;
   initialVoteCount: number;
+  className?: string;
 }
 
-export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteButtonProps) {
+export function UpvoteButton({ requestId, boardId, initialVoteCount, className }: UpvoteButtonProps) {
   const t = useTranslations("UpvoteButton");
 
   const [voteCount, setVoteCount] = useState(initialVoteCount);
@@ -111,17 +112,30 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount }: UpvoteBut
 
   return (
     <Button
-      variant={hasVoted ? "default" : "outline"}
-      size="sm"
+      variant="ghost"
+      size="xs"
       className={cn(
-        "flex flex-col hover:cursor-pointer items-center gap-1 h-auto py-2 px-3 min-w-[3.5rem]",
-        hasVoted ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+        "group/like h-auto rounded-full border px-2.5 py-1.5 shadow-xs transition-all duration-200 hover:cursor-pointer",
+        "focus-visible:ring-2 focus-visible:ring-primary/30",
+        hasVoted
+          ? "border-rose-300/70 bg-rose-50 text-rose-700 dark:border-rose-400/30 dark:bg-rose-950/40 dark:text-rose-200"
+          : "border-border/80 bg-background/70 text-muted-foreground hover:border-rose-200/80 hover:text-rose-700 dark:hover:border-rose-400/25 dark:hover:text-rose-200",
+        className
       )}
       onClick={handleVote}
       disabled={isLoading}
+      aria-pressed={hasVoted}
+      aria-label={hasVoted ? "Remove like" : "Like request"}
     >
-      <ArrowUp className={cn("h-4 w-4 transition-transform", hasVoted && "transform -translate-y-0.5")} />
-      <span className="text-xs font-semibold">{voteCount}</span>
+      <span className="flex items-center gap-1.5">
+        <Heart
+          className={cn(
+            "size-3.5 transition-all duration-200",
+            hasVoted ? "fill-current" : "group-hover/like:scale-110"
+          )}
+        />
+        <span className="text-[11px] font-semibold tabular-nums leading-none">{voteCount}</span>
+      </span>
     </Button>
   );
 }

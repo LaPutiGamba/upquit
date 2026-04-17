@@ -2,13 +2,21 @@
 
 import { RequestResponse } from "../services/requestService";
 import { UpvoteButton } from "@/features/votes/components/UpvoteButton";
-import { Badge } from "@/shared/components/ui/badge";
+import { RequestHeader } from "@/features/requests/components/RequestHeader";
+import { cn } from "@/shared/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { Link } from "@/localization/i18n/routing";
-import { Copy, Maximize2 } from "lucide-react";
+import { CheckCircle2, Circle, CircleDot, Clock3, Copy, XCircle, CalendarDays, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { CommentSection } from "@/features/comments/components/CommentSection";
@@ -22,7 +30,15 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
   const t = useTranslations("RequestCard");
   const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
-  const requestDateLabel = request.createdAt ? new Date(request.createdAt).toLocaleDateString(locale) : "";
+  const requestDateLabel = request.createdAt
+    ? new Intl.DateTimeFormat(locale, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      }).format(new Date(request.createdAt))
+    : "";
+  const badgeBaseClass =
+    "inline-flex h-6 items-center rounded-full border px-2.5 text-[10px] font-semibold leading-none";
 
   const getStatusLabel = (status: string) => {
     const normalized = status.toLowerCase();
@@ -39,6 +55,8 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
+      case "open":
+        return "border-muted-foreground/35 bg-muted/45 text-muted-foreground";
       case "planned":
         return "border-primary/35 bg-primary/10 text-primary";
       case "in_progress":
@@ -49,6 +67,23 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
         return "border-destructive/35 bg-destructive/10 text-destructive";
       default:
         return "";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "open":
+        return <CircleDot aria-hidden="true" strokeWidth={2.5} />;
+      case "planned":
+        return <Circle aria-hidden="true" strokeWidth={2.5} />;
+      case "in_progress":
+        return <Clock3 aria-hidden="true" strokeWidth={2.5} />;
+      case "completed":
+        return <CheckCircle2 aria-hidden="true" strokeWidth={2.5} />;
+      case "rejected":
+        return <XCircle aria-hidden="true" strokeWidth={2.5} />;
+      default:
+        return <Circle aria-hidden="true" strokeWidth={2.5} />;
     }
   };
 
@@ -68,28 +103,46 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <article className="cursor-pointer rounded-lg border border-border/70 px-4 py-3 transition-colors hover:bg-muted/35">
-          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
-            <div className="mt-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-              <UpvoteButton
-                requestId={request.id}
-                boardId={request.boardId}
-                initialVoteCount={request.voteCount ?? 0}
-              />
-            </div>
+          <div className="min-w-0">
+            <div className="mb-2 flex min-w-0 items-start justify-between gap-3">
+              <h3 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{request.title}</h3>
 
-            <div className="min-w-0 flex-1">
-              <div className="mb-2 flex min-w-0 items-center gap-2">
-                <h3 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{request.title}</h3>
-                <Badge variant="outline" className={getStatusColor(request.status)}>
-                  {getStatusLabel(request.status)}
-                </Badge>
-                {requestDateLabel ? <span className="text-xs text-muted-foreground">{requestDateLabel}</span> : null}
+              <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                <UpvoteButton
+                  requestId={request.id}
+                  boardId={request.boardId}
+                  initialVoteCount={request.voteCount ?? 0}
+                />
               </div>
-
-              <p className="line-clamp-2 wrap-anywhere text-sm leading-6 text-muted-foreground">
-                {request.description}
-              </p>
             </div>
+
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span
+                className={cn(
+                  badgeBaseClass,
+                  "gap-1.5 uppercase tracking-[0.08em]",
+                  "[&_svg]:size-2.5 [&_svg]:shrink-0",
+                  getStatusColor(request.status)
+                )}
+              >
+                {getStatusIcon(request.status)}
+                {getStatusLabel(request.status)}
+              </span>
+              {requestDateLabel ? (
+                <span
+                  className={cn(
+                    badgeBaseClass,
+                    "gap-1.5 border-border/70 bg-muted/40 text-muted-foreground",
+                    "tracking-[0.04em] [&_svg]:size-2.5 [&_svg]:shrink-0"
+                  )}
+                >
+                  <CalendarDays aria-hidden="true" strokeWidth={2} />
+                  {requestDateLabel}
+                </span>
+              ) : null}
+            </div>
+
+            <p className="line-clamp-2 wrap-anywhere text-sm leading-6 text-muted-foreground">{request.description}</p>
           </div>
         </article>
       </DialogTrigger>
@@ -111,32 +164,34 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
           </>
         }
       >
-        <DialogHeader className="shrink-0 px-6 py-5 pr-28">
-          <div className="flex items-start gap-3">
-            <div className="shrink-0">
-              <UpvoteButton
-                requestId={request.id}
-                boardId={request.boardId}
-                initialVoteCount={request.voteCount ?? 0}
-              />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <DialogTitle className="text-2xl tracking-tight">{request.title}</DialogTitle>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className={getStatusColor(request.status)}>
-                  {getStatusLabel(request.status)}
-                </Badge>
-                {requestDateLabel ? <span className="text-xs text-muted-foreground">{requestDateLabel}</span> : null}
-              </div>
-            </div>
-          </div>
+        <DialogHeader className="shrink-0 px-6 py-4 pr-28">
+          <DialogTitle className="sr-only">{request.title}</DialogTitle>
+          <RequestHeader
+            variant="dialog"
+            requestId={request.id}
+            boardId={request.boardId}
+            title={request.title}
+            description={request.description}
+            status={request.status}
+            createdAt={request.createdAt}
+            initialVoteCount={request.voteCount ?? 0}
+            showDescription={false}
+            stopPropagation
+          />
+          <DialogDescription className="sr-only">
+            Request details and discussion thread for {request.title}.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-none max-h-[36vh] overflow-y-auto px-6 py-5">
-            <div className="whitespace-pre-wrap wrap-anywhere text-sm leading-relaxed text-foreground/90">
-              {request.description}
+          <div className="flex-none max-h-[36vh] overflow-y-auto px-6 pt-1 pb-5">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                Description
+              </p>
+              <div className="whitespace-pre-wrap wrap-anywhere text-sm leading-relaxed text-foreground/90">
+                {request.description}
+              </div>
             </div>
           </div>
 
