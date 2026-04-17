@@ -41,8 +41,7 @@ export default class UpdateProgressOnCommentCreated {
       currentProgress = new GiveToGetProgress(newProgressId, event.userId, boardId.getValue(), 0, 1, false, null);
       await this.progressRepository.save(currentProgress);
     } else {
-      await this.progressRepository.incrementQualifyingComments(userId, boardId);
-      currentProgress = await this.progressRepository.findByUserAndBoard(userId, boardId);
+      currentProgress = await this.progressRepository.incrementQualifyingComments(userId, boardId);
     }
 
     let finalProgressToPublish = currentProgress;

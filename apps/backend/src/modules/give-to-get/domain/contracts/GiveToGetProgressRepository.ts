@@ -9,6 +9,6 @@ export default interface GiveToGetProgressRepository {
 
   incrementVotesGiven(userId: Uuid, boardId: Uuid): Promise<void>;
   decrementVotesGiven(userId: Uuid, boardId: Uuid): Promise<void>;
-  incrementQualifyingComments(userId: Uuid, boardId: Uuid): Promise<void>;
+  incrementQualifyingComments(userId: Uuid, boardId: Uuid): Promise<GiveToGetProgress | null>;
   decrementQualifyingComments(userId: Uuid, boardId: Uuid): Promise<void>;
 }

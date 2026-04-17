@@ -75,13 +75,17 @@ export default class GiveToGetProgressDrizzleRepository implements GiveToGetProg
       .where(and(eq(giveToGetProgress.userId, userId.getValue()), eq(giveToGetProgress.boardId, boardId.getValue())));
   }
 
-  public async incrementQualifyingComments(userId: Uuid, boardId: Uuid): Promise<void> {
-    await this.db
+  public async incrementQualifyingComments(userId: Uuid, boardId: Uuid): Promise<GiveToGetProgress | null> {
+    const [row] = await this.db
       .update(giveToGetProgress)
       .set({
         qualifyingComments: sql`${giveToGetProgress.qualifyingComments} + 1`
       })
-      .where(and(eq(giveToGetProgress.userId, userId.getValue()), eq(giveToGetProgress.boardId, boardId.getValue())));
+      .where(and(eq(giveToGetProgress.userId, userId.getValue()), eq(giveToGetProgress.boardId, boardId.getValue())))
+      .returning();
+
+    if (!row) return null;
+    return this.mapToDomainProgress(row);
   }
 
   public async decrementQualifyingComments(userId: Uuid, boardId: Uuid): Promise<void> {
