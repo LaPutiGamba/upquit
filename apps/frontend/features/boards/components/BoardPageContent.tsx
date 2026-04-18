@@ -41,13 +41,17 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
   return (
     <main className="min-h-svh bg-background">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6 pb-10 md:p-8 md:pb-12">
-        <section>
-          <BoardHeader board={board} />
-        </section>
+        {!isRequestsTab ? (
+          <>
+            <section>
+              <BoardHeader board={board} />
+            </section>
 
-        <div>
-          <GiveToGetTracker board={board} />
-        </div>
+            <div>
+              <GiveToGetTracker board={board} />
+            </div>
+          </>
+        ) : null}
 
         {isRequestsTab ? (
           <section className="flex flex-col gap-5">

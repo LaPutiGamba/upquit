@@ -27,6 +27,13 @@ interface RequestCardProps {
 export function RequestCard({ request, boardSlug }: RequestCardProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.currentTarget.click();
+    }
+  };
+
   const handleCopyLink = async () => {
     const currentUrl = window.location.href.replace(/\/$/, "");
     const shareUrl = `${currentUrl}/request/${request.id}`;
@@ -42,12 +49,14 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <button
-          type="button"
+        <article
+          role="button"
+          tabIndex={0}
+          onKeyDown={handleCardKeyDown}
           className="flex w-full flex-col rounded-lg border border-border/70 px-4 py-3 text-left transition-colors hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
         >
           <div className="min-w-0">
-            <div className="mb-2 min-w-0">
+            <div className="min-w-0">
               <h3 className="min-w-0 truncate text-lg font-semibold tracking-tight">{request.title}</h3>
             </div>
 
@@ -61,7 +70,7 @@ export function RequestCard({ request, boardSlug }: RequestCardProps) {
               className="mt-2 mb-1"
             />
           </div>
-        </button>
+        </article>
       </DialogTrigger>
 
       <DialogContent
