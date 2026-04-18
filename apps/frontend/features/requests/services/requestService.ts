@@ -15,6 +15,14 @@ export interface RequestResponse {
   createdAt: Date | null;
 }
 
+export type RequestStatusValue = "open" | "planned" | "in_progress" | "completed" | "rejected";
+
+export interface UpdateRequestPayload {
+  title?: string;
+  description?: string | null;
+  status?: RequestStatusValue;
+}
+
 export const requestService = {
   getRequestsByBoardId: async (boardId: string): Promise<RequestResponse[]> => {
     return await apiClient<RequestResponse[]>(`/requests?boardId=${boardId}`, {
@@ -53,6 +61,14 @@ export const requestService = {
         isHidden: false,
         adminNote: null
       })
+    });
+  },
+
+  updateRequest: async (id: string, boardId: string, payload: UpdateRequestPayload): Promise<RequestResponse> => {
+    return await apiClient<RequestResponse>(`/requests/${id}`, {
+      method: "PATCH",
+      tenantId: boardId,
+      body: JSON.stringify(payload)
     });
   }
 };

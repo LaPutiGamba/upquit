@@ -8,6 +8,7 @@ import { useBoardPage } from "@/features/boards/hooks/useBoardPage";
 import { GiveToGetTracker } from "@/features/give-to-get/components/GiveToGetTracker";
 import { RequestCard } from "@/features/requests/components/RequestCard";
 import { CreateRequestForm } from "@/features/requests/components/CreateRequestForm";
+import { useAuth } from "@/shared/components/AuthProvider";
 import { Badge } from "@/shared/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/shared/components/ui/empty";
 import { MessageSquareDashed } from "lucide-react";
@@ -19,6 +20,7 @@ interface BoardPageContentProps {
 export function BoardPageContent({ slug }: BoardPageContentProps) {
   const t = useTranslations("BoardPage");
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const { board, requests, latestRequestDate, loading, notFound } = useBoardPage(slug);
   const isRequestsTab = searchParams.get("tab") === "requests";
 
@@ -80,7 +82,13 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
             ) : (
               <div className="grid gap-3 md:gap-4">
                 {requests.map((request) => (
-                  <RequestCard key={request.id} request={request} boardSlug={slug} />
+                  <RequestCard
+                    key={request.id}
+                    request={request}
+                    boardSlug={slug}
+                    currentUserId={user?.id ?? null}
+                    isBoardAdmin={Boolean(user?.id && user.id === board.ownerId)}
+                  />
                 ))}
               </div>
             )}

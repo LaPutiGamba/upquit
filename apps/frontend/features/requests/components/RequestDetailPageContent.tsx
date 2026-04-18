@@ -1,10 +1,19 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+
 import { useRequestDetailPage } from "@/features/requests/hooks/useRequestDetailPage";
 
 import { CommentSection } from "@/features/comments/components/CommentSection";
 import { RequestDescription, RequestHeader, RequestTitle } from "@/features/requests/components/RequestHeader";
 import { RequestMetadataRow } from "@/features/requests/components/RequestMetadataRow";
+import {
+  requestService,
+  type RequestResponse,
+  type UpdateRequestPayload
+} from "@/features/requests/services/requestService";
+import { useAuth } from "@/shared/components/AuthProvider";
 import { Spinner } from "@/shared/components/ui/spinner";
 
 interface RequestDetailPageContentProps {
@@ -13,7 +22,41 @@ interface RequestDetailPageContentProps {
 }
 
 export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentProps) {
+  const { user } = useAuth();
   const { board, request, loading, notFound } = useRequestDetailPage(slug, id);
+  const [editableRequest, setEditableRequest] = useState<RequestResponse | null>(null);
+
+  useEffect(() => {
+    setEditableRequest(request);
+  }, [request]);
+
+  const canEdit = useMemo(() => {
+    if (!user || !board || !editableRequest) {
+      return false;
+    }
+
+    return editableRequest.authorId === user.id || board.ownerId === user.id;
+  }, [board, editableRequest, user]);
+
+  const handleUpdateRequest = async (payload: UpdateRequestPayload) => {
+    if (!board || !editableRequest) {
+      return;
+    }
+
+    const previousRequest = editableRequest;
+    const nextRequest = { ...editableRequest, ...payload };
+
+    setEditableRequest(nextRequest);
+
+    try {
+      const updatedRequest = await requestService.updateRequest(editableRequest.id, board.id, payload);
+      setEditableRequest(updatedRequest);
+    } catch {
+      setEditableRequest(previousRequest);
+      toast.error("Could not save request changes");
+      throw new Error("Could not save request changes");
+    }
+  };
 
   if (loading) {
     return (
@@ -23,7 +66,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     );
   }
 
-  if (notFound || !board || !request) {
+  if (notFound || !board || !editableRequest) {
     return (
       <main className="container mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4">
         <div className="rounded-lg border border-dashed p-8 text-center">
@@ -37,18 +80,35 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     <div className="min-h-screen bg-background">
       <main className="container mx-auto flex max-w-6xl flex-1 flex-col px-4 py-8 md:py-10">
         <section className="pb-8">
-          <RequestHeader variant="page">
-            <RequestTitle variant="page" as="h1">
-              {request.title}
+          <RequestHeader variant="page" canEdit={canEdit}>
+            <RequestTitle
+              variant="page"
+              as="h1"
+              canEdit={canEdit}
+              onSave={(nextTitle) => handleUpdateRequest({ title: nextTitle })}
+            >
+              {editableRequest.title}
             </RequestTitle>
-            <RequestDescription>{request.description ?? ""}</RequestDescription>
-            <RequestMetadataRow request={request} boardId={board.id} size="md" className="mt-3" />
+            <RequestDescription
+              canEdit={canEdit}
+              onSave={(nextDescription) => handleUpdateRequest({ description: nextDescription })}
+            >
+              {editableRequest.description ?? ""}
+            </RequestDescription>
+            <RequestMetadataRow
+              request={editableRequest}
+              boardId={board.id}
+              canEdit={canEdit}
+              onStatusSave={(nextStatus) => handleUpdateRequest({ status: nextStatus })}
+              size="md"
+              className="mt-3"
+            />
           </RequestHeader>
         </section>
 
         <section>
           <div className="mt-4 flex flex-col h-[66vh] min-h-90 max-h-190 min-w-0 overflow-hidden">
-            <CommentSection requestId={request.id} boardId={board.id} />
+            <CommentSection requestId={editableRequest.id} boardId={board.id} />
           </div>
         </section>
       </main>
