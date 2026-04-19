@@ -23,7 +23,7 @@ export function NavMain({ sectionLabel, items, activeBoard, currentBoardSlug, is
   const selectedBoardSlug = activeBoard?.slug ?? currentBoardSlug;
 
   return (
-    <SidebarGroup>
+    <SidebarGroup className="group-data-[collapsible=icon]:p-0">
       <SidebarGroupLabel>{sectionLabel}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
@@ -44,11 +44,11 @@ export function NavMain({ sectionLabel, items, activeBoard, currentBoardSlug, is
                   asChild
                   isActive={isActive}
                   tooltip={item.label}
-                  className="group-data-[collapsible=icon]/sidebar-wrapper:justify-center"
+                  className="group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0"
                 >
-                  <Link href={item.href}>
+                  <Link href={item.href} className="group-data-[collapsible=icon]:justify-center">
                     <Icon data-icon="inline-start" />
-                    <span>{item.label}</span>
+                    <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
