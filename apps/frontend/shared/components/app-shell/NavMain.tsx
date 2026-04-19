@@ -16,10 +16,19 @@ interface NavMainProps {
   activeBoard: BoardResponse | null;
   currentBoardSlug: string | null;
   isRequestsTab: boolean;
+  isMembersTab: boolean;
   pathname: string;
 }
 
-export function NavMain({ sectionLabel, items, activeBoard, currentBoardSlug, isRequestsTab, pathname }: NavMainProps) {
+export function NavMain({
+  sectionLabel,
+  items,
+  activeBoard,
+  currentBoardSlug,
+  isRequestsTab,
+  isMembersTab,
+  pathname
+}: NavMainProps) {
   const selectedBoardSlug = activeBoard?.slug ?? currentBoardSlug;
 
   return (
@@ -32,11 +41,16 @@ export function NavMain({ sectionLabel, items, activeBoard, currentBoardSlug, is
             const isActive =
               item.id === "dashboard"
                 ? selectedBoardSlug
-                  ? pathname === `/board/${selectedBoardSlug}` && !isRequestsTab
+                  ? pathname === `/board/${selectedBoardSlug}` && !isRequestsTab && !isMembersTab
                   : pathname === "/boards"
-                : selectedBoardSlug
-                  ? pathname === `/board/${selectedBoardSlug}` && isRequestsTab
-                  : false;
+                : item.id === "requests"
+                  ? selectedBoardSlug
+                    ? pathname === `/board/${selectedBoardSlug}` && isRequestsTab
+                    : false
+                  : selectedBoardSlug
+                    ? pathname === `/board/${selectedBoardSlug}/members` ||
+                      (pathname === `/board/${selectedBoardSlug}` && isMembersTab)
+                    : false;
 
             return (
               <SidebarMenuItem key={`${item.id}-${item.label}`}>

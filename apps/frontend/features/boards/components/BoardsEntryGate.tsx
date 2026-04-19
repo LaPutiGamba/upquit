@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 
 import { boardService, BoardResponse } from "@/features/boards/services/boardService";
 import { CreateBoardForm } from "@/features/boards/components/CreateBoardForm";
+import { useAuth } from "@/shared/components/AuthProvider";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -30,6 +31,7 @@ import { Item, ItemGroup, ItemTitle, ItemDescription, ItemContent, ItemActions }
 export function BoardsEntryGate() {
   const t = useTranslations("BoardsEntryGate");
   const router = useRouter();
+  const { user } = useAuth();
   const [boards, setBoards] = useState<BoardResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -67,6 +69,14 @@ export function BoardsEntryGate() {
   }, [router]);
 
   const sortedBoards = useMemo(() => [...boards].sort((a, b) => a.name.localeCompare(b.name)), [boards]);
+  const personalBoards = useMemo(
+    () => sortedBoards.filter((board) => board.ownerId === user?.id),
+    [sortedBoards, user?.id]
+  );
+  const joinedBoards = useMemo(
+    () => sortedBoards.filter((board) => board.ownerId !== user?.id),
+    [sortedBoards, user?.id]
+  );
 
   if (loading) {
     return null;
@@ -123,28 +133,79 @@ export function BoardsEntryGate() {
             </Empty>
           </section>
         ) : (
-          <section>
-            <ItemGroup className="gap-2">
-              {sortedBoards.map((board) => (
-                <Item
-                  key={board.id}
-                  asChild
-                  variant="outline"
-                  className="group rounded-lg border-border/70 bg-background px-4 py-3 transition-colors hover:bg-muted/40"
-                >
-                  <Link href={`/board/${board.slug}`}>
-                    <ItemContent>
-                      <ItemTitle className="text-base">{board.name}</ItemTitle>
-                      <ItemDescription>{board.description || t("noDescription")}</ItemDescription>
-                    </ItemContent>
-                    <ItemActions>
-                      <ChevronRightIcon className="size-4 text-muted-foreground" />
-                    </ItemActions>
-                  </Link>
-                </Item>
-              ))}
-            </ItemGroup>
-          </section>
+          <div className="flex flex-col gap-8">
+            <section className="flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold tracking-tight">{t("personalTitle")}</h2>
+                  <p className="text-sm text-muted-foreground">{t("personalDescription")}</p>
+                </div>
+                <span className="text-sm text-muted-foreground">{personalBoards.length}</span>
+              </div>
+              {personalBoards.length === 0 ? (
+                <p className="rounded-xl border border-dashed px-4 py-5 text-sm text-muted-foreground">
+                  {t("personalEmpty")}
+                </p>
+              ) : (
+                <ItemGroup className="gap-2">
+                  {personalBoards.map((board) => (
+                    <Item
+                      key={board.id}
+                      asChild
+                      variant="outline"
+                      className="group rounded-lg border-border/70 bg-background px-4 py-3 transition-colors hover:bg-muted/40"
+                    >
+                      <Link href={`/board/${board.slug}`}>
+                        <ItemContent>
+                          <ItemTitle className="text-base">{board.name}</ItemTitle>
+                          <ItemDescription>{board.description || t("noDescription")}</ItemDescription>
+                        </ItemContent>
+                        <ItemActions>
+                          <ChevronRightIcon className="size-4 text-muted-foreground" />
+                        </ItemActions>
+                      </Link>
+                    </Item>
+                  ))}
+                </ItemGroup>
+              )}
+            </section>
+
+            <section className="flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold tracking-tight">{t("joinedTitle")}</h2>
+                  <p className="text-sm text-muted-foreground">{t("joinedDescription")}</p>
+                </div>
+                <span className="text-sm text-muted-foreground">{joinedBoards.length}</span>
+              </div>
+              {joinedBoards.length === 0 ? (
+                <p className="rounded-xl border border-dashed px-4 py-5 text-sm text-muted-foreground">
+                  {t("joinedEmpty")}
+                </p>
+              ) : (
+                <ItemGroup className="gap-2">
+                  {joinedBoards.map((board) => (
+                    <Item
+                      key={board.id}
+                      asChild
+                      variant="outline"
+                      className="group rounded-lg border-border/70 bg-background px-4 py-3 transition-colors hover:bg-muted/40"
+                    >
+                      <Link href={`/board/${board.slug}`}>
+                        <ItemContent>
+                          <ItemTitle className="text-base">{board.name}</ItemTitle>
+                          <ItemDescription>{board.description || t("noDescription")}</ItemDescription>
+                        </ItemContent>
+                        <ItemActions>
+                          <ChevronRightIcon className="size-4 text-muted-foreground" />
+                        </ItemActions>
+                      </Link>
+                    </Item>
+                  ))}
+                </ItemGroup>
+              )}
+            </section>
+          </div>
         )}
       </div>
     </main>

@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { BoardHeader } from "@/features/boards/components/BoardHeader";
 import { useBoardPage } from "@/features/boards/hooks/useBoardPage";
+import { boardService } from "@/features/boards/services/boardService";
 import { GiveToGetTracker } from "@/features/give-to-get/components/GiveToGetTracker";
 import { RequestCard } from "@/features/requests/components/RequestCard";
 import { CreateRequestForm } from "@/features/requests/components/CreateRequestForm";
@@ -23,7 +25,41 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
   const { user } = useAuth();
   const { board, requests, latestRequestDate, loading, notFound, addRequest } = useBoardPage(slug);
   const isRequestsTab = searchParams.get("tab") === "requests";
-  const isBoardAdmin = Boolean(user?.id && board && user.id === board.ownerId);
+  const [canManageBoard, setCanManageBoard] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolvePermissions = async () => {
+      if (!board || !user) {
+        setCanManageBoard(false);
+        return;
+      }
+
+      if (board.ownerId === user.id) {
+        setCanManageBoard(true);
+        return;
+      }
+
+      try {
+        const members = await boardService.getBoardMembers(board.id);
+
+        if (!cancelled) {
+          setCanManageBoard(members.some((member) => member.userId === user.id && member.role === "admin"));
+        }
+      } catch {
+        if (!cancelled) {
+          setCanManageBoard(false);
+        }
+      }
+    };
+
+    void resolvePermissions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [board, user]);
 
   if (loading) {
     return null;
@@ -47,7 +83,7 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
         {!isRequestsTab ? (
           <>
             <section>
-              <BoardHeader board={board} canManage={isBoardAdmin} manageLabel={t("actions.editSettings")} />
+              <BoardHeader board={board} canManage={canManageBoard} manageLabel={t("actions.editSettings")} />
             </section>
 
             <div>
@@ -92,7 +128,7 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
                     request={request}
                     boardSlug={slug}
                     currentUserId={user?.id ?? null}
-                    isBoardAdmin={isBoardAdmin}
+                    isBoardAdmin={canManageBoard}
                   />
                 ))}
               </div>

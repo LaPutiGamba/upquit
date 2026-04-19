@@ -1,4 +1,4 @@
-export default class AddBoardMemberCommand {
+export default class UpdateBoardMemberRoleCommand {
   constructor(
     readonly boardId: string,
     readonly targetUserId: string,

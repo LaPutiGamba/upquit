@@ -6,9 +6,11 @@ import GetBoardBySlugQuery from "../../application/queries/GetBoardBySlugQuery.j
 import GetBoardBySlugQueryHandler from "../../application/handlers/GetBoardBySlugQueryHandler.js";
 import BoardNotFoundException from "../../application/exceptions/BoardNotFoundException.js";
 import InvalidSlugException from "../../domain/exceptions/InvalidSlugException.js";
+import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 
 export default async function GetBoardBySlugGetController(req: Request, res: Response) {
-  const queryHandler = new GetBoardBySlugQueryHandler(new BoardDrizzleRepository(db));
+  const boardRepository = new BoardDrizzleRepository(db);
+  const queryHandler = new GetBoardBySlugQueryHandler(boardRepository);
 
   try {
     if (!req.userId) {
@@ -24,10 +26,17 @@ export default async function GetBoardBySlugGetController(req: Request, res: Res
     const response = await queryHandler.execute(command);
 
     if (response.ownerId !== req.userId) {
-      return res.status(404).send({
-        error: "BOARD_NOT_FOUND",
-        message: `Board with slug ${slug} not found`
-      });
+      const membership = await boardRepository.findMemberByBoardIdAndUserId(
+        new Uuid(response.id),
+        new Uuid(req.userId)
+      );
+
+      if (!membership) {
+        return res.status(404).send({
+          error: "BOARD_NOT_FOUND",
+          message: `Board with slug ${slug} not found`
+        });
+      }
     }
 
     return res.status(200).json(response);

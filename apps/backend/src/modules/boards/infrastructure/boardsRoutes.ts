@@ -10,6 +10,8 @@ import GetBoardCategoriesGetController from "./controllers/GetBoardCategoriesGet
 import AddBoardCategoryPostController from "./controllers/AddBoardCategoryPostController.js";
 import GetBoardMembersGetController from "./controllers/GetBoardMembersGetController.js";
 import AddBoardMemberPostController from "./controllers/AddBoardMemberPostController.js";
+import RemoveBoardMemberDeleteController from "./controllers/RemoveBoardMemberDeleteController.js";
+import UpdateBoardMemberRolePatchController from "./controllers/UpdateBoardMemberRolePatchController.js";
 
 const boardsRouter = Router();
 
@@ -20,6 +22,18 @@ boardsRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, CreateBoardPostCon
 boardsRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateBoardPatchController);
 boardsRouter.post("/:id/categories", JwtAuthMiddleware, TenantDbMiddleware, AddBoardCategoryPostController);
 boardsRouter.post("/:id/members", JwtAuthMiddleware, TenantDbMiddleware, AddBoardMemberPostController);
+boardsRouter.patch(
+  "/:boardId/members/:userId",
+  JwtAuthMiddleware,
+  TenantDbMiddleware,
+  UpdateBoardMemberRolePatchController
+);
+boardsRouter.delete(
+  "/:boardId/members/:userId",
+  JwtAuthMiddleware,
+  TenantDbMiddleware,
+  RemoveBoardMemberDeleteController
+);
 
 // Public
 boardsRouter.get("/:id", GetBoardByIdGetController);

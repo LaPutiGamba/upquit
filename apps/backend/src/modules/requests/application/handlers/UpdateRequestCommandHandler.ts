@@ -22,8 +22,19 @@ export default class UpdateRequestCommandHandler {
       throw new RequestNotFoundException(command.requestId);
     }
 
-    if (request.authorId.getValue() !== command.userId) {
-      throw new UnauthorizedActionException("You can only update your own requests");
+    const isAuthor = request.authorId.getValue() === command.userId;
+
+    if (!isAuthor) {
+      const canManageBoardRequests = await this.requestRepository.isBoardOwnerOrAdmin(
+        request.boardId,
+        new Uuid(command.userId)
+      );
+
+      if (!canManageBoardRequests) {
+        throw new UnauthorizedActionException(
+          "Only request authors, board owners, or board admins can update requests"
+        );
+      }
     }
 
     const updatedRequest = new Request(

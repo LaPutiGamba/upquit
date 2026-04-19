@@ -10,6 +10,7 @@ import InvalidSlugException from "../../domain/exceptions/InvalidSlugException.j
 import InvalidHexColorException from "../../domain/exceptions/InvalidHexColorException.js";
 import InvalidGiveToGetRequirementsException from "../../domain/exceptions/InvalidGiveToGetRequirementsException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default async function UpdateBoardPatchController(req: Request, res: Response) {
   const commandHandler = new UpdateBoardCommandHandler(
@@ -24,6 +25,7 @@ export default async function UpdateBoardPatchController(req: Request, res: Resp
 
     const command = new UpdateBoardCommand(
       req.params.id as string,
+      req.userId,
       req.body.slug,
       req.body.name,
       req.body.description,
@@ -67,6 +69,12 @@ export default async function UpdateBoardPatchController(req: Request, res: Resp
     if (ex instanceof InvalidGiveToGetRequirementsException) {
       return res.status(400).send({
         error: "INVALID_GIVE_TO_GET_REQUIREMENTS",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UnauthorizedActionException) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
         message: ex.message
       });
     }

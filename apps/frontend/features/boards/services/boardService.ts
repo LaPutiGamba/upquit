@@ -16,6 +16,18 @@ export interface BoardResponse {
   createdAt: string | null;
 }
 
+export type BoardMemberRole = "admin" | "member";
+
+export interface BoardMember {
+  userId: string;
+  boardId: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
+  role: BoardMemberRole;
+  createdAt: string | null;
+}
+
 export interface CreateBoardPayload {
   name: string;
   slug: string;
@@ -70,6 +82,41 @@ export const boardService = {
     return await apiClient<BoardResponse>(`/boards/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
+      token
+    });
+  },
+
+  getBoardMembers: async (boardId: string, token?: string): Promise<BoardMember[]> => {
+    return await apiClient<BoardMember[]>(`/boards/${boardId}/members`, {
+      method: "GET",
+      token
+    });
+  },
+
+  addBoardMember: async (boardId: string, email: string, token?: string): Promise<void> => {
+    await apiClient(`/boards/${boardId}/members`, {
+      method: "POST",
+      body: JSON.stringify({ email, role: "member" }),
+      token
+    });
+  },
+
+  updateBoardMemberRole: async (
+    boardId: string,
+    userId: string,
+    role: BoardMemberRole,
+    token?: string
+  ): Promise<void> => {
+    await apiClient(`/boards/${boardId}/members/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+      token
+    });
+  },
+
+  removeBoardMember: async (boardId: string, userId: string, token?: string): Promise<void> => {
+    await apiClient(`/boards/${boardId}/members/${userId}`, {
+      method: "DELETE",
       token
     });
   }

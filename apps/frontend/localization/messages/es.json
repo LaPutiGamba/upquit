@@ -7,13 +7,19 @@
   },
   "BoardsEntryGate": {
     "title": "Tus tableros",
-    "subtitle": "Gestiona tus espacios de feedback de tus productos",
+    "subtitle": "Gestiona tus tableros personales y los tableros a los que te has unido.",
     "importBoard": "Importar tablero",
     "createBoard": "Crear tablero",
     "dialogTitle": "Crear un nuevo tablero",
     "dialogDescription": "Responde estas preguntas rápidas para configurar tu espacio",
     "emptyTitle": "Aun no hay tableros",
     "emptyDescription": "Todavía no has creado ningun tablero. Empieza creando el primero",
+    "personalTitle": "Tableros personales",
+    "personalDescription": "Tableros que posees y controlas.",
+    "personalEmpty": "Todavía no tienes tableros personales.",
+    "joinedTitle": "Tableros unidos",
+    "joinedDescription": "Tableros en los que participas como miembro.",
+    "joinedEmpty": "Todavía no te has unido a ningún tablero.",
     "noDescription": "Sin descripción todavía"
   },
   "CreateBoardForm": {
@@ -156,6 +162,7 @@
       "overview": "Resumen",
       "boards": "Tableros",
       "requests": "Solicitudes",
+      "team": "Equipo",
       "comments": "Comentarios",
       "reports": "Informes",
       "comingSoon": "Próximamente"
@@ -210,6 +217,42 @@
     "actions": {
       "goToDashboard": "Ir al dashboard",
       "editSettings": "Editar configuración"
+    }
+  },
+  "BoardMembersPage": {
+    "title": "Equipo",
+    "description": "Gestiona quién puede acceder a este tablero.",
+    "notFound": "No se encontró el tablero.",
+    "forbidden": "No tienes permiso para gestionar este tablero.",
+    "invite": {
+      "title": "Invitar a un miembro",
+      "description": "Añade a alguien al tablero por email.",
+      "placeholder": "nombre@ejemplo.com",
+      "action": "Añadir miembro",
+      "adding": "Añadiendo..."
+    },
+    "members": {
+      "title": "Miembros actuales",
+      "emptyTitle": "Aun no hay miembros",
+      "emptyDescription": "Invita a la primera persona del equipo para empezar.",
+      "role": "Rol",
+      "remove": "Eliminar"
+    },
+    "roles": {
+      "owner": "Propietario",
+      "admin": "Admin",
+      "member": "Miembro"
+    },
+    "success": {
+      "added": "Miembro añadido correctamente.",
+      "removed": "Has eliminado a {name} del tablero.",
+      "roleUpdated": "Has actualizado el rol de {name}."
+    },
+    "errors": {
+      "emailRequired": "Introduce un correo electrónico.",
+      "addFailed": "No se pudo añadir este miembro.",
+      "removeFailed": "No se pudo eliminar este miembro.",
+      "updateRoleFailed": "No se pudo actualizar el rol de este miembro."
     }
   },
   "BoardSettingsPage": {

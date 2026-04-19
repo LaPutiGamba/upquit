@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { LayoutGrid, Sparkles } from "lucide-react";
+import { LayoutGrid, Sparkles, Users2 } from "lucide-react";
 
 import { usePathname, useRouter } from "@/localization/i18n/routing";
 import {
@@ -18,6 +18,7 @@ import {
 } from "@/shared/components/ui/sidebar";
 import { toast } from "@/shared/components/ui/sonner";
 import { authService } from "@/features/authentication/services/authService";
+import { boardService } from "@/features/boards/services/boardService";
 import { BoardSwitcher } from "@/shared/components/app-shell/BoardSwitcher";
 import { NavMain } from "@/shared/components/app-shell/NavMain";
 import { NavUser } from "@/shared/components/app-shell/NavUser";
@@ -58,14 +59,51 @@ export function AppShell({ children }: AppShellProps) {
   const activeBoard = boards.find((board) => board.slug === currentBoardSlug) ?? null;
   const boardNavigationSlug = activeBoard?.slug ?? currentBoardSlug;
   const isRequestsTab = searchParams.get("tab") === "requests";
+  const isMembersTab = pathname.endsWith("/members");
   const isUserBoardsDashboard = pathname === "/boards";
   const shouldShowBoardNavigation = !isUserBoardsDashboard;
+  const [canManageActiveBoard, setCanManageActiveBoard] = useState(false);
 
   const boardDashboardHref = boardNavigationSlug ? `/board/${boardNavigationSlug}` : "/boards";
   const boardRequestsHref = boardNavigationSlug ? `/board/${boardNavigationSlug}?tab=requests` : "/boards";
+  const boardMembersHref = boardNavigationSlug ? `/board/${boardNavigationSlug}/members` : "/boards";
 
-  const sidebarItems = useMemo<SidebarItem[]>(
-    () => [
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadBoardPermissions = async () => {
+      if (!activeBoard || !user) {
+        setCanManageActiveBoard(false);
+        return;
+      }
+
+      if (activeBoard.ownerId === user.id) {
+        setCanManageActiveBoard(true);
+        return;
+      }
+
+      try {
+        const members = await boardService.getBoardMembers(activeBoard.id);
+
+        if (!cancelled) {
+          setCanManageActiveBoard(members.some((member) => member.userId === user.id && member.role === "admin"));
+        }
+      } catch {
+        if (!cancelled) {
+          setCanManageActiveBoard(false);
+        }
+      }
+    };
+
+    void loadBoardPermissions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeBoard, user]);
+
+  const sidebarItems = useMemo<SidebarItem[]>(() => {
+    const baseItems: SidebarItem[] = [
       {
         id: "dashboard",
         href: boardDashboardHref,
@@ -78,9 +116,19 @@ export function AppShell({ children }: AppShellProps) {
         label: t("navigation.requests"),
         icon: Sparkles
       }
-    ],
-    [boardDashboardHref, boardRequestsHref, t]
-  );
+    ];
+
+    if (canManageActiveBoard) {
+      baseItems.push({
+        id: "members",
+        href: boardMembersHref,
+        label: t("navigation.team"),
+        icon: Users2
+      });
+    }
+
+    return baseItems;
+  }, [boardDashboardHref, boardMembersHref, boardRequestsHref, canManageActiveBoard, t]);
 
   const userDisplayName = user?.displayName || t("user.name");
   const userRole = user?.email || t("user.role");
@@ -132,6 +180,7 @@ export function AppShell({ children }: AppShellProps) {
               activeBoard={activeBoard}
               currentBoardSlug={currentBoardSlug}
               isRequestsTab={isRequestsTab}
+              isMembersTab={isMembersTab}
               pathname={pathname}
             />
           </SidebarContent>

@@ -1,6 +1,7 @@
 export default class UpdateBoardCommand {
   constructor(
     readonly boardId: string,
+    readonly requesterUserId: string,
     readonly slug?: string,
     readonly name?: string,
     readonly description?: string | null,

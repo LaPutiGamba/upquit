@@ -7,12 +7,18 @@
   },
   "BoardsEntryGate": {
     "title": "Your boards",
-    "subtitle": "Manage your products feedback spaces",
+    "subtitle": "Manage your personal boards and the boards you have joined.",
     "createBoard": "Create board",
     "dialogTitle": "Create a new board",
     "dialogDescription": "Answer these quick questions to set up your workspace",
     "emptyTitle": "No boards yet",
     "emptyDescription": "You haven't created any boards yet. Get started by creating your first board",
+    "personalTitle": "Personal boards",
+    "personalDescription": "Boards you own and control.",
+    "personalEmpty": "No personal boards yet.",
+    "joinedTitle": "Joined boards",
+    "joinedDescription": "Boards where you are a member.",
+    "joinedEmpty": "You have not joined any boards yet.",
     "noDescription": "No description yet"
   },
   "CreateBoardForm": {
@@ -155,6 +161,7 @@
       "overview": "Overview",
       "boards": "Boards",
       "requests": "Requests",
+      "team": "Team",
       "comments": "Comments",
       "reports": "Reports",
       "comingSoon": "Coming soon"
@@ -209,6 +216,42 @@
     "actions": {
       "goToDashboard": "Go to dashboard",
       "editSettings": "Edit settings"
+    }
+  },
+  "BoardMembersPage": {
+    "title": "Team",
+    "description": "Manage who can access this board.",
+    "notFound": "Board not found.",
+    "forbidden": "You do not have permission to manage this board.",
+    "invite": {
+      "title": "Invite a member",
+      "description": "Add someone to the board by email.",
+      "placeholder": "name@example.com",
+      "action": "Add member",
+      "adding": "Adding..."
+    },
+    "members": {
+      "title": "Current members",
+      "emptyTitle": "No members yet",
+      "emptyDescription": "Invite the first teammate to get started.",
+      "role": "Role",
+      "remove": "Remove"
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "success": {
+      "added": "Member added successfully.",
+      "removed": "Removed {name} from the board.",
+      "roleUpdated": "Updated {name}'s role."
+    },
+    "errors": {
+      "emailRequired": "Enter an email address.",
+      "addFailed": "Could not add this member.",
+      "removeFailed": "Could not remove this member.",
+      "updateRoleFailed": "Could not update this member's role."
     }
   },
   "BoardSettingsPage": {

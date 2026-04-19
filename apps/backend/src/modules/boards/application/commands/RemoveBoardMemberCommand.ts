@@ -1,8 +1,7 @@
-export default class AddBoardMemberCommand {
+export default class RemoveBoardMemberCommand {
   constructor(
     readonly boardId: string,
     readonly targetUserId: string,
-    readonly role: string,
     readonly requesterUserId: string
   ) {}
 }

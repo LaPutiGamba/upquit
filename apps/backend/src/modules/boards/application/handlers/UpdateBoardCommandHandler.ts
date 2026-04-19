@@ -6,6 +6,7 @@ import InvalidGiveToGetRequirementsException from "../../domain/exceptions/Inval
 import UpdateBoardCommand from "../commands/UpdateBoardCommand.js";
 import BoardNotFoundException from "../exceptions/BoardNotFoundException.js";
 import BoardResponse, { mapBoardToResponse } from "../responses/BoardResponse.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default class UpdateBoardCommandHandler {
   constructor(
@@ -15,10 +16,32 @@ export default class UpdateBoardCommandHandler {
 
   async execute(command: UpdateBoardCommand): Promise<BoardResponse> {
     const boardId = new Uuid(command.boardId);
+    const requesterUserId = new Uuid(command.requesterUserId);
     const board = await this.boardRepository.findById(boardId);
 
     if (!board) {
       throw new BoardNotFoundException(command.boardId);
+    }
+
+    const isOwner = board.ownerId.getValue() === requesterUserId.getValue();
+
+    if (!isOwner) {
+      const requesterMembership = await this.boardRepository.findMemberByBoardIdAndUserId(boardId, requesterUserId);
+
+      if (requesterMembership?.role !== "admin") {
+        throw new UnauthorizedActionException("Only board owners or admins can update board settings");
+      }
+
+      if (
+        command.name !== undefined ||
+        command.slug !== undefined ||
+        command.isPublic !== undefined ||
+        command.allowAnonymousVotes !== undefined
+      ) {
+        throw new UnauthorizedActionException(
+          "Only board creators can update board name, slug, public visibility, and anonymous voting"
+        );
+      }
     }
 
     const effectiveGiveToGetEnabled =

@@ -12,6 +12,7 @@ import Subscription from "../../domain/entities/Subscription.js";
 import { type StatusValue } from "../../domain/value-objects/RequestStatus.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import { users } from "../../../users/infrastructure/schema.js";
+import { boardMembers, boards } from "../../../boards/infrastructure/schema.js";
 
 export default class RequestDrizzleRepository implements RequestRepository {
   constructor(private readonly db: CurrentDatabase) {}
@@ -30,6 +31,35 @@ export default class RequestDrizzleRepository implements RequestRepository {
   public async findByBoardId(boardId: Uuid): Promise<Request[]> {
     const rows = await this.db.select().from(requests).where(eq(requests.boardId, boardId.getValue()));
     return rows.map((row) => this.mapToDomainRequest(row));
+  }
+
+  public async isBoardOwnerOrAdmin(boardId: Uuid, userId: Uuid): Promise<boolean> {
+    const boardIdValue = boardId.getValue();
+    const userIdValue = userId.getValue();
+
+    const [ownedBoard] = await this.db
+      .select({ boardId: boards.id })
+      .from(boards)
+      .where(and(eq(boards.id, boardIdValue), eq(boards.ownerId, userIdValue)))
+      .limit(1);
+
+    if (ownedBoard) {
+      return true;
+    }
+
+    const [adminMembership] = await this.db
+      .select({ boardId: boardMembers.boardId })
+      .from(boardMembers)
+      .where(
+        and(
+          eq(boardMembers.boardId, boardIdValue),
+          eq(boardMembers.userId, userIdValue),
+          eq(boardMembers.role, "admin")
+        )
+      )
+      .limit(1);
+
+    return Boolean(adminMembership);
   }
 
   public async save(request: Request): Promise<void> {

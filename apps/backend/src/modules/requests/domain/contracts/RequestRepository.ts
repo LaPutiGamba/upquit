@@ -7,6 +7,7 @@ export default interface RequestRepository {
   // Request Operations
   findById(id: Uuid): Promise<Request | null>;
   findByBoardId(boardId: Uuid): Promise<Request[]>;
+  isBoardOwnerOrAdmin(boardId: Uuid, userId: Uuid): Promise<boolean>;
   save(request: Request): Promise<void>;
   update(request: Request): Promise<void>;
   addChangelogEntries(entries: RequestChangelogCreateInput[]): Promise<void>;

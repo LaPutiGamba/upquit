@@ -3,7 +3,7 @@ import { boards, boardMembers, categories } from "../schema.js";
 import { users } from "../../../users/infrastructure/schema.js";
 import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
-import BoardRepository from "../../domain/contracts/BoardRepository.js";
+import BoardRepository, { type BoardMemberRecord } from "../../domain/contracts/BoardRepository.js";
 import Board from "../../domain/entities/Board.js";
 import BoardMember from "../../domain/entities/BoardMember.js";
 import Category from "../../domain/entities/Category.js";
@@ -127,10 +127,52 @@ export default class BoardDrizzleRepository implements BoardRepository {
     });
   }
 
-  public async findMembersByBoardId(boardId: Uuid): Promise<BoardMember[]> {
-    const rows = await this.db.select().from(boardMembers).where(eq(boardMembers.boardId, boardId.getValue()));
+  public async findMembersByBoardId(boardId: Uuid): Promise<BoardMemberRecord[]> {
+    return await this.db
+      .select({
+        userId: boardMembers.userId,
+        boardId: boardMembers.boardId,
+        email: users.email,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        role: boardMembers.role,
+        createdAt: boardMembers.createdAt
+      })
+      .from(boardMembers)
+      .innerJoin(users, eq(users.id, boardMembers.userId))
+      .where(eq(boardMembers.boardId, boardId.getValue()));
+  }
 
-    return rows.map((row) => new BoardMember(row.userId, row.boardId, row.role, row.createdAt));
+  public async findMemberByBoardIdAndUserId(boardId: Uuid, userId: Uuid): Promise<BoardMemberRecord | null> {
+    const [row] = await this.db
+      .select({
+        userId: boardMembers.userId,
+        boardId: boardMembers.boardId,
+        email: users.email,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        role: boardMembers.role,
+        createdAt: boardMembers.createdAt
+      })
+      .from(boardMembers)
+      .innerJoin(users, eq(users.id, boardMembers.userId))
+      .where(and(eq(boardMembers.boardId, boardId.getValue()), eq(boardMembers.userId, userId.getValue())))
+      .limit(1);
+
+    return row ?? null;
+  }
+
+  public async updateMemberRole(boardId: Uuid, userId: Uuid, role: string): Promise<void> {
+    await this.db
+      .update(boardMembers)
+      .set({ role })
+      .where(and(eq(boardMembers.boardId, boardId.getValue()), eq(boardMembers.userId, userId.getValue())));
+  }
+
+  public async removeMember(boardId: Uuid, userId: Uuid): Promise<void> {
+    await this.db
+      .delete(boardMembers)
+      .where(and(eq(boardMembers.boardId, boardId.getValue()), eq(boardMembers.userId, userId.getValue())));
   }
 
   // =========================================================================

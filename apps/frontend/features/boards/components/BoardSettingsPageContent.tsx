@@ -93,6 +93,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
   const [notFound, setNotFound] = useState(false);
   const [forbidden, setForbidden] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const isOwner = Boolean(user?.id && ownerId && user.id === ownerId);
 
   const boardSettingsSchema = useMemo(() => createBoardSettingsSchema(t), [t]);
 
@@ -162,7 +163,13 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
           return;
         }
 
-        const canManage = Boolean(user?.id && user.id === board.ownerId);
+        const boardMembers = await boardService.getBoardMembers(board.id);
+
+        const canManage = Boolean(
+          user?.id &&
+          (user.id === board.ownerId ||
+            boardMembers.some((member) => member.userId === user.id && member.role === "admin"))
+        );
 
         if (!canManage) {
           setForbidden(true);
@@ -218,14 +225,18 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
 
     try {
       const updatedBoard = await boardService.updateBoard(boardId, {
-        name: values.name,
-        slug: values.slug,
+        ...(isOwner
+          ? {
+              name: values.name,
+              slug: values.slug,
+              ownerId: ownerId ?? undefined,
+              isPublic: values.isPublic,
+              allowAnonymousVotes: values.allowAnonymousVotes
+            }
+          : {}),
         description: values.description?.trim() ? values.description.trim() : null,
         logoUrl: values.logoUrl?.trim() ? values.logoUrl.trim() : null,
         primaryColor: values.primaryColor?.trim() ? values.primaryColor.trim() : null,
-        ownerId: ownerId ?? undefined,
-        isPublic: values.isPublic,
-        allowAnonymousVotes: values.allowAnonymousVotes,
         giveToGetEnabled: values.giveToGetEnabled,
         giveToGetVotesReq: values.giveToGetEnabled ? values.giveToGetVotesReq : 0,
         giveToGetCommentsReq: values.giveToGetEnabled ? values.giveToGetCommentsReq : 0
@@ -305,6 +316,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
                       <FormControl>
                         <Input
                           placeholder={t("placeholders.name")}
+                          disabled={!isOwner || isSaving}
                           {...field}
                           onChange={(event) => {
                             const name = event.target.value;
@@ -335,6 +347,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
                       <FormControl>
                         <Input
                           placeholder={t("placeholders.slug")}
+                          disabled={!isOwner || isSaving}
                           {...field}
                           onChange={(event) => field.onChange(slugify(event.target.value, true))}
                         />
@@ -417,7 +430,8 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
                           id="is-public"
                           checked={field.value}
                           onCheckedChange={(checked) => field.onChange(checked === true)}
-                          className="cursor-pointer"
+                          disabled={!isOwner || isSaving}
+                          className="cursor-pointer disabled:cursor-not-allowed"
                         />
                       </FormControl>
                     </Field>
@@ -433,7 +447,9 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
                     <Field orientation="horizontal" className="items-center justify-between gap-4">
                       <label htmlFor="allow-anonymous-votes" className="flex flex-1 cursor-pointer items-center gap-3">
                         <div className="flex-1">
-                          <p className="cursor-pointer text-sm font-medium leading-none">{t("fields.allowAnonymousVotes")}</p>
+                          <p className="cursor-pointer text-sm font-medium leading-none">
+                            {t("fields.allowAnonymousVotes")}
+                          </p>
                           <FieldDescription>{t("hints.allowAnonymousVotes")}</FieldDescription>
                         </div>
                       </label>
@@ -442,7 +458,8 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
                           id="allow-anonymous-votes"
                           checked={field.value}
                           onCheckedChange={(checked) => field.onChange(checked === true)}
-                          className="cursor-pointer"
+                          disabled={!isOwner || isSaving}
+                          className="cursor-pointer disabled:cursor-not-allowed"
                         />
                       </FormControl>
                     </Field>
@@ -464,7 +481,9 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
                     <Field orientation="horizontal" className="items-center justify-between gap-4">
                       <label htmlFor="give-to-get-enabled" className="flex flex-1 cursor-pointer items-center gap-3">
                         <div className="flex-1">
-                          <p className="cursor-pointer text-sm font-medium leading-none">{t("fields.giveToGetEnabled")}</p>
+                          <p className="cursor-pointer text-sm font-medium leading-none">
+                            {t("fields.giveToGetEnabled")}
+                          </p>
                           <FieldDescription>{t("hints.giveToGetEnabled")}</FieldDescription>
                         </div>
                       </label>

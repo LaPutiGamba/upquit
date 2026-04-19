@@ -7,13 +7,19 @@
   },
   "BoardsEntryGate": {
     "title": "Els teus taulers",
-    "subtitle": "Gestiona els teus espais de feedback dels teus productes",
+    "subtitle": "Gestiona els teus taulers personals i els taulers als quals t'has unit.",
     "importBoard": "Importar tauler",
     "createBoard": "Crear tauler",
     "dialogTitle": "Crea un tauler nou",
     "dialogDescription": "Respon aquestes preguntes ràpides per configurar el teu espai",
     "emptyTitle": "Encara no hi ha taulers",
     "emptyDescription": "Encara no has creat cap tauler. Comença creant el primer",
+    "personalTitle": "Taulers personals",
+    "personalDescription": "Taulers que poses i controles.",
+    "personalEmpty": "Encara no tens taulers personals.",
+    "joinedTitle": "Taulers units",
+    "joinedDescription": "Taulers en els quals participes com a membre.",
+    "joinedEmpty": "Encara no t'has unit a cap tauler.",
     "noDescription": "Encara sense descripció"
   },
   "CreateBoardForm": {
@@ -156,6 +162,7 @@
       "overview": "Vista general",
       "boards": "Taulers",
       "requests": "Sol-licituds",
+      "team": "Equip",
       "comments": "Comentaris",
       "reports": "Informes",
       "comingSoon": "Properament"
@@ -210,6 +217,42 @@
     "actions": {
       "goToDashboard": "Anar al dashboard",
       "editSettings": "Editar configuració"
+    }
+  },
+  "BoardMembersPage": {
+    "title": "Equip",
+    "description": "Gestiona qui pot accedir a aquest tauler.",
+    "notFound": "No s'ha trobat el tauler.",
+    "forbidden": "No tens permís per gestionar aquest tauler.",
+    "invite": {
+      "title": "Convida un membre",
+      "description": "Afegeix algú al tauler per correu electrònic.",
+      "placeholder": "nom@example.com",
+      "action": "Afegir membre",
+      "adding": "Afegint..."
+    },
+    "members": {
+      "title": "Membres actuals",
+      "emptyTitle": "Encara no hi ha membres",
+      "emptyDescription": "Convida la primera persona de l'equip per començar.",
+      "role": "Rol",
+      "remove": "Eliminar"
+    },
+    "roles": {
+      "owner": "Propietari",
+      "admin": "Admin",
+      "member": "Membre"
+    },
+    "success": {
+      "added": "Membre afegit correctament.",
+      "removed": "Has eliminat {name} del tauler.",
+      "roleUpdated": "Has actualitzat el rol de {name}."
+    },
+    "errors": {
+      "emailRequired": "Introdueix un correu electrònic.",
+      "addFailed": "No s'ha pogut afegir aquest membre.",
+      "removeFailed": "No s'ha pogut eliminar aquest membre.",
+      "updateRoleFailed": "No s'ha pogut actualitzar el rol d'aquest membre."
     }
   },
   "BoardSettingsPage": {
