@@ -15,7 +15,7 @@ CREATE TABLE "boards" (
 	"logo_url" text,
 	"primary_color" char(7) DEFAULT '#a6a2eb',
 	"owner_id" uuid NOT NULL,
-	"is_public" boolean DEFAULT true,
+	"is_public" boolean DEFAULT false,
 	"allow_anonymous_votes" boolean DEFAULT false,
 	"give_to_get_enabled" boolean DEFAULT true,
 	"give_to_get_votes_req" integer DEFAULT 2,

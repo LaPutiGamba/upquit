@@ -11,7 +11,7 @@ export const boards = pgTable("boards", {
   ownerId: uuid("owner_id")
     .notNull()
     .references(() => users.id),
-  isPublic: boolean("is_public").default(true),
+  isPublic: boolean("is_public").default(false),
   allowAnonymousVotes: boolean("allow_anonymous_votes").default(false),
   giveToGetEnabled: boolean("give_to_get_enabled").default(true),
   giveToGetVotesReq: integer("give_to_get_votes_req").default(2),
