@@ -5,7 +5,6 @@ import { toast } from "sonner";
 
 import { useRequestDetailPage } from "@/features/requests/hooks/useRequestDetailPage";
 
-import { CommentSection } from "@/features/comments/components/CommentSection";
 import { RequestDescription, RequestHeader, RequestTitle } from "@/features/requests/components/RequestHeader";
 import { RequestMetadataRow } from "@/features/requests/components/RequestMetadataRow";
 import {
@@ -15,6 +14,7 @@ import {
 } from "@/features/requests/services/requestService";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { Spinner } from "@/shared/components/ui/spinner";
+import { RequestActivityTabs } from "@/features/requests/components/RequestActivityTabs";
 
 interface RequestDetailPageContentProps {
   slug: string;
@@ -25,6 +25,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
   const { user } = useAuth();
   const { board, request, loading, notFound } = useRequestDetailPage(slug, id);
   const [editableRequest, setEditableRequest] = useState<RequestResponse | null>(null);
+  const [changelogRefreshKey, setChangelogRefreshKey] = useState(0);
 
   useEffect(() => {
     setEditableRequest(request);
@@ -51,6 +52,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     try {
       const updatedRequest = await requestService.updateRequest(editableRequest.id, board.id, payload);
       setEditableRequest(updatedRequest);
+      setChangelogRefreshKey((currentValue) => currentValue + 1);
     } catch {
       setEditableRequest(previousRequest);
       toast.error("Could not save request changes");
@@ -107,9 +109,12 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
         </section>
 
         <section>
-          <div className="mt-4 flex flex-col h-[66vh] min-h-90 max-h-190 min-w-0 overflow-hidden">
-            <CommentSection requestId={editableRequest.id} boardId={board.id} />
-          </div>
+          <RequestActivityTabs
+            requestId={editableRequest.id}
+            boardId={board.id}
+            refreshToken={changelogRefreshKey}
+            className="mt-4 flex h-[66vh] min-h-90 flex-col min-w-0 overflow-hidden"
+          />
         </section>
       </main>
     </div>

@@ -1,6 +1,6 @@
 import { boolean, integer, pgEnum, pgTable, primaryKey, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { users } from "../../users/infrastructure/schema";
-import { boards, categories } from "../../boards/infrastructure/schema";
+import { users } from "../../users/infrastructure/schema.js";
+import { boards, categories } from "../../boards/infrastructure/schema.js";
 
 export const requestStatusEnum = pgEnum("request_status", ["open", "planned", "in_progress", "completed", "rejected"]);
 
@@ -20,6 +20,20 @@ export const requests = pgTable("requests", {
   isPinned: boolean("is_pinned").default(false),
   isHidden: boolean("is_hidden").default(false),
   adminNote: text("admin_note"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow()
+});
+
+export const requestChangelogs = pgTable("request_changelogs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  requestId: uuid("request_id")
+    .notNull()
+    .references(() => requests.id),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id),
+  field: varchar("field", { length: 100 }).notNull(),
+  oldValue: text("old_value"),
+  newValue: text("new_value"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow()
 });
 

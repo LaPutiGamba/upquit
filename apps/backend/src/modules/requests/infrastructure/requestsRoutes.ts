@@ -4,6 +4,7 @@ import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/T
 import CreateRequestPostController from "./controllers/CreateRequestPostController.js";
 import GetRequestsByBoardIdGetController from "./controllers/GetRequestsByBoardIdGetController.js";
 import GetRequestByIdGetController from "./controllers/GetRequestByIdGetController.js";
+import GetRequestChangelogGetController from "./controllers/GetRequestChangelogGetController.js";
 import UpdateRequestPatchController from "./controllers/UpdateRequestPatchController.js";
 import SubscribeToRequestPostController from "./controllers/SubscribeToRequestPostController.js";
 import UnsubscribeFromRequestDeleteController from "./controllers/UnsubscribeFromRequestDeleteController.js";
@@ -14,6 +15,7 @@ const requestsRouter = Router();
 // Public
 requestsRouter.get("/", GetRequestsByBoardIdGetController);
 requestsRouter.get("/:id", GetRequestByIdGetController);
+requestsRouter.get("/:id/changelog", GetRequestChangelogGetController);
 
 // Protected
 requestsRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, CreateRequestPostController);

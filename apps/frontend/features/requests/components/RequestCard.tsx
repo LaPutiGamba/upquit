@@ -18,7 +18,7 @@ import { Separator } from "@/shared/components/ui/separator";
 import { Link } from "@/localization/i18n/routing";
 import { Copy, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
-import { CommentSection } from "@/features/comments/components/CommentSection";
+import { RequestActivityTabs } from "@/features/requests/components/RequestActivityTabs";
 
 interface RequestCardProps {
   request: RequestResponse;
@@ -30,6 +30,7 @@ interface RequestCardProps {
 export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }: RequestCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [editableRequest, setEditableRequest] = useState(request);
+  const [changelogRefreshKey, setChangelogRefreshKey] = useState(0);
 
   useEffect(() => {
     setEditableRequest(request);
@@ -71,6 +72,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
     try {
       const updatedRequest = await requestService.updateRequest(editableRequest.id, editableRequest.boardId, payload);
       setEditableRequest(updatedRequest);
+      setChangelogRefreshKey((currentValue) => currentValue + 1);
     } catch {
       setEditableRequest(previousRequest);
       toast.error("Could not save request changes");
@@ -168,9 +170,14 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
           </div>
 
           <Separator className="shrink-0" />
-
-          <div className="flex flex-col min-h-0 flex-1 bg-muted/25 px-6 py-4">
-            <CommentSection requestId={editableRequest.id} boardId={editableRequest.boardId} isDialog />
+          <div className="flex min-h-0 flex-1 bg-muted/25 px-6 py-4">
+            <RequestActivityTabs
+              requestId={editableRequest.id}
+              boardId={editableRequest.boardId}
+              refreshToken={changelogRefreshKey}
+              isDialog
+              className="flex min-h-0 flex-1 flex-col"
+            />
           </div>
         </div>
       </DialogContent>

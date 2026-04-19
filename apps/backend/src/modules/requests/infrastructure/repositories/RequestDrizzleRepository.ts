@@ -1,12 +1,17 @@
-import { and, eq, sql } from "drizzle-orm";
-import { requests, subscriptions } from "../schema.js";
+import { and, asc, eq, sql } from "drizzle-orm";
+import { requestChangelogs, requests, subscriptions } from "../schema.js";
 import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
 import RequestRepository from "../../domain/contracts/RequestRepository.js";
+import type {
+  RequestChangelogCreateInput,
+  RequestChangelogWithAuthor
+} from "../../domain/contracts/RequestChangelog.js";
 import Request from "../../domain/entities/Request.js";
 import Subscription from "../../domain/entities/Subscription.js";
 import { type StatusValue } from "../../domain/value-objects/RequestStatus.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
+import { users } from "../../../users/infrastructure/schema.js";
 
 export default class RequestDrizzleRepository implements RequestRepository {
   constructor(private readonly db: CurrentDatabase) {}
@@ -60,6 +65,45 @@ export default class RequestDrizzleRepository implements RequestRepository {
         adminNote: request.adminNote
       })
       .where(eq(requests.id, request.id.getValue()));
+  }
+
+  public async addChangelogEntries(entries: RequestChangelogCreateInput[]): Promise<void> {
+    if (entries.length === 0) {
+      return;
+    }
+
+    await this.db.insert(requestChangelogs).values(
+      entries.map((entry) => ({
+        requestId: entry.requestId,
+        userId: entry.userId,
+        field: entry.field,
+        oldValue: entry.oldValue,
+        newValue: entry.newValue
+      }))
+    );
+  }
+
+  public async findChangelogByRequestId(id: Uuid): Promise<RequestChangelogWithAuthor[]> {
+    const rows = await this.db
+      .select({
+        changelog: requestChangelogs,
+        userDisplayName: users.displayName
+      })
+      .from(requestChangelogs)
+      .leftJoin(users, eq(requestChangelogs.userId, users.id))
+      .where(eq(requestChangelogs.requestId, id.getValue()))
+      .orderBy(asc(requestChangelogs.createdAt), asc(requestChangelogs.id));
+
+    return rows.map((row) => ({
+      id: row.changelog.id,
+      requestId: row.changelog.requestId,
+      userId: row.changelog.userId,
+      userDisplayName: row.userDisplayName,
+      field: row.changelog.field,
+      oldValue: row.changelog.oldValue,
+      newValue: row.changelog.newValue,
+      createdAt: row.changelog.createdAt
+    }));
   }
 
   public async incrementVoteCount(id: Uuid): Promise<void> {

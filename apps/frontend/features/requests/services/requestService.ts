@@ -15,6 +15,27 @@ export interface RequestResponse {
   createdAt: Date | null;
 }
 
+export type RequestChangelogField =
+  | "title"
+  | "description"
+  | "status"
+  | "categoryId"
+  | "voteCount"
+  | "isPinned"
+  | "isHidden"
+  | "adminNote";
+
+export interface RequestChangelogResponse {
+  id: string;
+  requestId: string;
+  userId: string;
+  userDisplayName: string | null;
+  field: RequestChangelogField;
+  oldValue: string | null;
+  newValue: string | null;
+  createdAt: string | null;
+}
+
 export type RequestStatusValue = "open" | "planned" | "in_progress" | "completed" | "rejected";
 
 export interface UpdateRequestPayload {
@@ -69,6 +90,14 @@ export const requestService = {
       method: "PATCH",
       tenantId: boardId,
       body: JSON.stringify(payload)
+    });
+  },
+
+  getRequestChangelogByRequestId: async (requestId: string, boardId: string): Promise<RequestChangelogResponse[]> => {
+    return await apiClient<RequestChangelogResponse[]>(`/requests/${requestId}/changelog`, {
+      method: "GET",
+      cache: "no-store",
+      tenantId: boardId
     });
   }
 };

@@ -2,10 +2,15 @@
 
 import { cva } from "class-variance-authority";
 import { useState } from "react";
-import { CalendarDays, CheckCircle2, Circle, CircleDot, Clock3, XCircle } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import type { RequestStatusValue } from "@/features/requests/services/requestService";
+import {
+  getRequestStatusColor,
+  getRequestStatusIcon,
+  getRequestStatusLabel
+} from "@/features/requests/lib/requestStatusPresentation";
 import { UpvoteButton } from "@/features/votes/components/UpvoteButton";
 import {
   Select,
@@ -43,7 +48,7 @@ const STATUS_OPTIONS: Array<{ value: RequestStatusValue; label: string }> = [
   { value: "rejected", label: "Rejected" }
 ];
 
-function getStatusOptionClass(status: RequestStatusValue) {
+function getRequestStatusOptionClass(status: RequestStatusValue) {
   switch (status) {
     case "open":
       return "border-muted-foreground/25 bg-muted/35 text-muted-foreground data-[state=checked]:bg-muted/55 data-[state=checked]:text-foreground hover:bg-muted/45";
@@ -60,7 +65,7 @@ function getStatusOptionClass(status: RequestStatusValue) {
   }
 }
 
-function getStatusOptionLabel(status: RequestStatusValue) {
+function getRequestStatusOptionLabel(status: RequestStatusValue) {
   return status.replace("_", " ").toUpperCase();
 }
 
@@ -124,58 +129,6 @@ const upvoteButtonVariants = cva("rounded-full py-0", {
   }
 });
 
-export function getStatusLabel(status: string, t: (key: string) => string) {
-  const normalized = status.toLowerCase();
-
-  switch (normalized) {
-    case "planned":
-    case "in_progress":
-    case "completed":
-    case "rejected":
-      try {
-        return t(`status.${normalized}`);
-      } catch {
-        return status.replace("_", " ");
-      }
-    default:
-      return status.replace("_", " ");
-  }
-}
-
-export function getStatusColor(status: string) {
-  switch (status.toLowerCase()) {
-    case "open":
-      return "border-muted-foreground/35 bg-muted/45 text-muted-foreground";
-    case "planned":
-      return "border-primary/35 bg-primary/10 text-primary";
-    case "in_progress":
-      return "border-chart-2/35 bg-chart-2/12 text-chart-2";
-    case "completed":
-      return "border-chart-1/35 bg-chart-1/12 text-chart-1";
-    case "rejected":
-      return "border-destructive/35 bg-destructive/10 text-destructive";
-    default:
-      return "";
-  }
-}
-
-export function getStatusIcon(status: string, className: string) {
-  switch (status.toLowerCase()) {
-    case "open":
-      return <CircleDot aria-hidden="true" strokeWidth={2.5} className={className} />;
-    case "planned":
-      return <Circle aria-hidden="true" strokeWidth={2.5} className={className} />;
-    case "in_progress":
-      return <Clock3 aria-hidden="true" strokeWidth={2.5} className={className} />;
-    case "completed":
-      return <CheckCircle2 aria-hidden="true" strokeWidth={2.5} className={className} />;
-    case "rejected":
-      return <XCircle aria-hidden="true" strokeWidth={2.5} className={className} />;
-    default:
-      return <Circle aria-hidden="true" strokeWidth={2.5} className={className} />;
-  }
-}
-
 export function RequestMetadataRow({
   request,
   boardId,
@@ -237,14 +190,14 @@ export function RequestMetadataRow({
                 metadataBadgeVariants({ size }),
                 metadataBadgeContentVariants({ size }),
                 "uppercase tracking-[0.08em]",
-                getStatusColor(request.status)
+                getRequestStatusColor(request.status)
               )}
               disabled={isSavingStatus}
               aria-label="Select request status"
             >
               <span className={cn("inline-flex items-center", metadataBadgeContentVariants({ size }))}>
-                {getStatusIcon(request.status, metadataIconVariants({ size }))}
-                <SelectValue>{getStatusLabel(request.status, t).toUpperCase()}</SelectValue>
+                {getRequestStatusIcon(request.status, metadataIconVariants({ size }))}
+                <SelectValue>{getRequestStatusLabel(request.status, t).toUpperCase()}</SelectValue>
               </span>
             </SelectTrigger>
             <SelectContent>
@@ -254,13 +207,13 @@ export function RequestMetadataRow({
                     key={statusOption.value}
                     value={statusOption.value}
                     showIndicator={false}
-                    leadingIcon={getStatusIcon(statusOption.value, metadataIconVariants({ size }))}
+                    leadingIcon={getRequestStatusIcon(statusOption.value, metadataIconVariants({ size }))}
                     className={cn(
                       "mx-1 my-1 flex h-7 w-auto items-center rounded-full px-3 py-0 text-[11px] uppercase tracking-[0.08em]",
-                      getStatusOptionClass(statusOption.value)
+                      getRequestStatusOptionClass(statusOption.value)
                     )}
                   >
-                    <span className="truncate">{getStatusOptionLabel(statusOption.value)}</span>
+                    <span className="truncate">{getRequestStatusOptionLabel(statusOption.value)}</span>
                   </SelectItem>
                 ))}
               </SelectGroup>
@@ -273,7 +226,7 @@ export function RequestMetadataRow({
             metadataBadgeVariants({ size }),
             metadataBadgeContentVariants({ size }),
             "uppercase tracking-[0.08em]",
-            getStatusColor(request.status),
+            getRequestStatusColor(request.status),
             canEdit && "cursor-pointer transition-opacity hover:opacity-90"
           )}
           role={canEdit ? "button" : undefined}
@@ -305,8 +258,8 @@ export function RequestMetadataRow({
               : undefined
           }
         >
-          {getStatusIcon(request.status, metadataIconVariants({ size }))}
-          {getStatusLabel(request.status, t)}
+          {getRequestStatusIcon(request.status, metadataIconVariants({ size }))}
+          {getRequestStatusLabel(request.status, t)}
         </span>
       )}
 
