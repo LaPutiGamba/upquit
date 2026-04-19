@@ -15,7 +15,7 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ requestId, boardId, isDialog = false }: CommentSectionProps) {
-  const { comments, isLoading, refetch } = useComments(requestId, boardId);
+  const { comments, isLoading, addComment } = useComments(requestId, boardId);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
   const commentCount = comments.length;
@@ -68,7 +68,7 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
           </div>
         </div>
 
-        <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={refetch} isDialog={isDialog} />
+        <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={addComment} isDialog={isDialog} />
       </div>
 
       <div className={cn("min-h-0 flex-1 overflow-y-auto px-2 pt-6", isDialog ? "pb-4" : "pb-6")}>
@@ -92,7 +92,7 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
                 isDialog={isDialog}
                 replyingTo={replyingTo}
                 setReplyingTo={setReplyingTo}
-                refetch={refetch}
+                onCommentAdded={addComment}
               />
             ))}
           </ul>

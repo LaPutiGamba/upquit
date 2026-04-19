@@ -8,6 +8,7 @@ import { boardService, BoardResponse } from "@/features/boards/services/boardSer
 import { requestService, RequestResponse } from "@/features/requests/services/requestService";
 import { UnauthorizedError } from "@/shared/lib/apiClient";
 import { formatLocalizedDateTime } from "@/shared/lib/date";
+import { useChannel } from "@/shared/hooks/useChannel";
 
 interface UseBoardPageResult {
   board: BoardResponse | null;
@@ -15,7 +16,22 @@ interface UseBoardPageResult {
   latestRequestDate: string | null;
   loading: boolean;
   notFound: boolean;
+  addRequest: (request: RequestResponse) => void;
 }
+
+type RequestRealtimeMessagePayload =
+  | {
+      boardId: string;
+      request: RequestResponse;
+    }
+  | {
+      boardId: string;
+      requestId: string;
+      voteId: string;
+      userId: string;
+      action: "created" | "deleted";
+      voteCount: number | null;
+    };
 
 export function useBoardPage(slug: string): UseBoardPageResult {
   const router = useRouter();
@@ -27,6 +43,17 @@ export function useBoardPage(slug: string): UseBoardPageResult {
   const [requests, setRequests] = useState<RequestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  const addRequest = (request: RequestResponse) => {
+    setRequests((prev) => {
+      const exists = prev.some((r) => r.id === request.id);
+      if (exists) {
+        return prev;
+      }
+
+      return [request, ...prev];
+    });
+  };
 
   const requestsSortedByDate = useMemo(() => {
     return [...requests].sort((a, b) => {
@@ -99,5 +126,35 @@ export function useBoardPage(slug: string): UseBoardPageResult {
     };
   }, [isRequestsTab, router, slug]);
 
-  return { board, requests: requestsSortedByDate, latestRequestDate, loading, notFound };
+  useChannel<RequestRealtimeMessagePayload>(board ? `request.${board.id}` : null, (message) => {
+    const payload = message.payload;
+
+    if (message.event === "RequestCreated" && "request" in payload) {
+      addRequest(payload.request);
+      return;
+    }
+
+    if (message.event === "RequestUpdated") {
+      if ("request" in payload) {
+        const nextRequest = payload.request;
+        setRequests((prev) => prev.map((item) => (item.id === nextRequest.id ? nextRequest : item)));
+        return;
+      }
+
+      if ("requestId" in payload) {
+        setRequests((prev) =>
+          prev.map((item) =>
+            item.id === payload.requestId
+              ? {
+                  ...item,
+                  voteCount: payload.voteCount ?? 0
+                }
+              : item
+          )
+        );
+      }
+    }
+  });
+
+  return { board, requests: requestsSortedByDate, latestRequestDate, loading, notFound, addRequest };
 }

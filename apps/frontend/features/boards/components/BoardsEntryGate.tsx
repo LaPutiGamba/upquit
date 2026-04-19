@@ -119,9 +119,6 @@ export function BoardsEntryGate() {
                 <Button onClick={() => setCreateDialogOpen(true)} className="hover:cursor-pointer">
                   {t("createBoard")}
                 </Button>
-                <Button variant="outline" disabled>
-                  {t("importBoard")}
-                </Button>
               </EmptyContent>
             </Empty>
           </section>

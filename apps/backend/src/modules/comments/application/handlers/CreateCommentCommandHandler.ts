@@ -5,6 +5,8 @@ import CreateCommentCommand from "../commands/CreateCommentCommand.js";
 import CommentResponse, { mapCommentToResponse } from "../responses/CommentResponse.js";
 import EventBus from "../../../../shared/domain/events/EventBus.js";
 import CommentCreatedEvent from "../../domain/events/CommentCreatedEvent.js";
+import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
+import CommentNotFoundException from "../exceptions/CommentNotFoundException.js";
 
 export default class CreateCommentCommandHandler {
   constructor(
@@ -26,9 +28,18 @@ export default class CreateCommentCommandHandler {
 
     await this.commentRepository.save(comment);
 
-    const response = mapCommentToResponse(comment);
+    const createdCommentWithAuthor = await this.commentRepository.findByIdWithAuthor(new Uuid(comment.id.getValue()));
+    if (!createdCommentWithAuthor) {
+      throw new CommentNotFoundException(comment.id.getValue());
+    }
 
-    this.realtimePublisher.publish(command.requestId, "COMMENT_ADDED", {
+    const response = mapCommentToResponse(
+      createdCommentWithAuthor.comment,
+      createdCommentWithAuthor.authorDisplayName,
+      createdCommentWithAuthor.authorAvatarUrl
+    );
+
+    this.realtimePublisher.publish(command.requestId, "CommentAdded", {
       requestId: command.requestId,
       comment: response
     });

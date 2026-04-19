@@ -56,12 +56,13 @@ export function AppShell({ children }: AppShellProps) {
 
   const currentBoardSlug = pathname.startsWith("/board/") ? pathname.replace("/board/", "").split("/")[0] : null;
   const activeBoard = boards.find((board) => board.slug === currentBoardSlug) ?? null;
+  const boardNavigationSlug = activeBoard?.slug ?? currentBoardSlug;
   const isRequestsTab = searchParams.get("tab") === "requests";
   const isUserBoardsDashboard = pathname === "/boards";
   const shouldShowBoardNavigation = !isUserBoardsDashboard;
 
-  const boardDashboardHref = activeBoard ? `/board/${activeBoard.slug}` : "/boards";
-  const boardRequestsHref = activeBoard ? `/board/${activeBoard.slug}?tab=requests` : "/boards";
+  const boardDashboardHref = boardNavigationSlug ? `/board/${boardNavigationSlug}` : "/boards";
+  const boardRequestsHref = boardNavigationSlug ? `/board/${boardNavigationSlug}?tab=requests` : "/boards";
 
   const sidebarItems = useMemo<SidebarItem[]>(
     () => [
@@ -129,6 +130,7 @@ export function AppShell({ children }: AppShellProps) {
               sectionLabel={t("section")}
               items={sidebarItems}
               activeBoard={activeBoard}
+              currentBoardSlug={currentBoardSlug}
               isRequestsTab={isRequestsTab}
               pathname={pathname}
             />

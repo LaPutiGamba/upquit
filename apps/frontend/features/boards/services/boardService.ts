@@ -22,6 +22,20 @@ export interface CreateBoardPayload {
   description?: string;
 }
 
+export interface UpdateBoardPayload {
+  slug?: string;
+  name?: string;
+  description?: string | null;
+  logoUrl?: string | null;
+  primaryColor?: string | null;
+  ownerId?: string;
+  isPublic?: boolean | null;
+  allowAnonymousVotes?: boolean | null;
+  giveToGetEnabled?: boolean | null;
+  giveToGetVotesReq?: number | null;
+  giveToGetCommentsReq?: number | null;
+}
+
 export const boardService = {
   getMyBoards: async (token?: string): Promise<BoardResponse[]> => {
     return await apiClient<BoardResponse[]>("/boards/mine", {
@@ -47,6 +61,14 @@ export const boardService = {
   createBoard: async (payload: CreateBoardPayload, token?: string): Promise<BoardResponse> => {
     return await apiClient<BoardResponse>("/boards", {
       method: "POST",
+      body: JSON.stringify(payload),
+      token
+    });
+  },
+
+  updateBoard: async (id: string, payload: UpdateBoardPayload, token?: string): Promise<BoardResponse> => {
+    return await apiClient<BoardResponse>(`/boards/${id}`, {
+      method: "PATCH",
       body: JSON.stringify(payload),
       token
     });

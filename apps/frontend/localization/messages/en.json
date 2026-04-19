@@ -207,7 +207,64 @@
     "featureRequestsTitle": "Feature Requests",
     "emptyRequests": "No feature requests yet. Be the first to suggest something!",
     "actions": {
-      "goToDashboard": "Go to dashboard"
+      "goToDashboard": "Go to dashboard",
+      "editSettings": "Edit settings"
+    }
+  },
+  "BoardSettingsPage": {
+    "title": "Board settings",
+    "description": "Manage your board identity, permissions, and participation rules.",
+    "backToDashboard": "Back to dashboard",
+    "notFound": "Board not found.",
+    "forbidden": "You do not have access to edit this board.",
+    "saved": "Board settings saved.",
+    "saveFailed": "Could not save board settings.",
+    "sections": {
+      "profile": "Profile",
+      "profileDescription": "Public branding and descriptive details.",
+      "permissions": "Access and voting",
+      "giveToGet": "Give to Get"
+    },
+    "fields": {
+      "name": "Board name",
+      "slug": "Slug",
+      "description": "Description",
+      "logoUrl": "Logo URL",
+      "primaryColor": "Primary color",
+      "isPublic": "Public board",
+      "allowAnonymousVotes": "Allow anonymous votes",
+      "giveToGetEnabled": "Enable Give to Get",
+      "giveToGetVotesReq": "Votes required",
+      "giveToGetCommentsReq": "Comments required"
+    },
+    "hints": {
+      "slug": "Used in your board URL.",
+      "isPublic": "Allow anyone with the board link to view your board.",
+      "allowAnonymousVotes": "Visitors without an account can vote on requests.",
+      "giveToGetEnabled": "Require participation before users can create requests."
+    },
+    "placeholders": {
+      "name": "Example: My Amazing App",
+      "slug": "my-amazing-app",
+      "description": "Describe what this board is for...",
+      "logoUrl": "https://example.com/logo.png"
+    },
+    "validation": {
+      "nameMin": "Board name must be at least 3 characters.",
+      "slugMin": "Slug must be at least 3 characters.",
+      "slugMax": "Slug cannot exceed 63 characters.",
+      "slugPattern": "Use lowercase letters, numbers, and hyphens only.",
+      "descriptionMax": "Description cannot exceed 300 characters.",
+      "logoUrl": "Enter a valid URL for the logo.",
+      "primaryColor": "Enter a valid hex color like #1e40af.",
+      "giveToGetVotesReq": "Votes required must be 0 or greater.",
+      "giveToGetCommentsReq": "Comments required must be 0 or greater.",
+      "giveToGetMinimumRule": "When Give to Get is enabled, votes and comments required cannot both be 0."
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "save": "Save settings",
+      "saving": "Saving..."
     }
   },
   "DefaultHomePage": {

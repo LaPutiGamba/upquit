@@ -47,7 +47,7 @@ export default class UpdateRequestCommandHandler {
     const hasStatusChanged = request.status.getValue() !== updatedRequest.status.getValue();
 
     if (hasTitleChanged || hasStatusChanged) {
-      this.realtimePublisher.publish(updatedRequest.boardId.getValue(), "REQUEST_UPDATED", {
+      this.realtimePublisher.publish(updatedRequest.boardId.getValue(), "RequestUpdated", {
         boardId: updatedRequest.boardId.getValue(),
         request: response
       });

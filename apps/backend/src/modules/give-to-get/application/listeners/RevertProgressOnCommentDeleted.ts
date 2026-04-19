@@ -16,7 +16,7 @@ export default class RevertProgressOnCommentDeleted {
   ) {}
 
   async handle(event: CommentDeletedEvent): Promise<void> {
-    if (event.isAdminReply || event.parentId !== null) {
+    if (event.isAdminReply) {
       return;
     }
 

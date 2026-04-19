@@ -10,13 +10,35 @@ type UseCommentsResult = {
   comments: CommentResponse[];
   isLoading: boolean;
   refetch: () => Promise<void>;
+  addComment: (comment: CommentResponse) => void;
 };
+
+type CommentRealtimePayload =
+  | {
+      requestId: string;
+      comment: CommentResponse;
+    }
+  | {
+      requestId: string;
+      commentId: string;
+    };
 
 export function useComments(requestId: string, boardId: string): UseCommentsResult {
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const syncChannelName = `comments:${requestId}`;
+
+  const addComment = useCallback((comment: CommentResponse) => {
+    setComments((prev) => {
+      const exists = prev.some((item) => item.id === comment.id);
+      if (exists) {
+        return prev;
+      }
+
+      return [comment, ...prev];
+    });
+  }, []);
 
   const fetchComments = useCallback(async () => {
     setIsLoading(true);
@@ -40,7 +62,13 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
 
     const channel = new BroadcastChannel(syncChannelName);
     const handleSyncMessage = (event: MessageEvent) => {
-      if (event.data?.type === "COMMENT_SYNC") {
+      if (event.data?.type === "CommentSync") {
+        const action = event.data?.action;
+        if (action === "added" && event.data?.comment) {
+          addComment(event.data.comment as CommentResponse);
+          return;
+        }
+
         void fetchComments();
       }
     };
@@ -50,17 +78,36 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
       channel.removeEventListener("message", handleSyncMessage);
       channel.close();
     };
-  }, [fetchComments, syncChannelName]);
+  }, [addComment, fetchComments, syncChannelName]);
 
-  useChannel(requestId, (message) => {
-    if (message.event === "COMMENT_ADDED" || message.event === "COMMENT_DELETED") {
-      void fetchComments();
+  useChannel<CommentRealtimePayload>(requestId, (message) => {
+    const payload = message.payload;
+
+    if (message.event === "CommentAdded") {
+      if ("comment" in payload) {
+        addComment(payload.comment);
+      }
+      return;
+    }
+
+    if (message.event === "CommentDeleted") {
+      if ("commentId" in payload) {
+        setComments((prev) => prev.filter((item) => item.id !== payload.commentId));
+      }
+      return;
+    }
+
+    if (message.event === "CommentUpdated") {
+      if ("comment" in payload) {
+        setComments((prev) => prev.map((item) => (item.id === payload.comment.id ? payload.comment : item)));
+      }
     }
   });
 
   return {
     comments,
     isLoading,
-    refetch: fetchComments
+    refetch: fetchComments,
+    addComment
   };
 }

@@ -30,7 +30,7 @@ export default class CreateRequestCommandHandler {
 
     const response = mapRequestToResponse(request);
 
-    this.realtimePublisher.publish(command.boardId, "REQUEST_CREATED", {
+    this.realtimePublisher.publish(`request.${command.boardId}`, "RequestCreated", {
       boardId: command.boardId,
       request: response
     });

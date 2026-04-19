@@ -21,8 +21,9 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
   const t = useTranslations("BoardPage");
   const searchParams = useSearchParams();
   const { user } = useAuth();
-  const { board, requests, latestRequestDate, loading, notFound } = useBoardPage(slug);
+  const { board, requests, latestRequestDate, loading, notFound, addRequest } = useBoardPage(slug);
   const isRequestsTab = searchParams.get("tab") === "requests";
+  const isBoardAdmin = Boolean(user?.id && board && user.id === board.ownerId);
 
   if (loading) {
     return null;
@@ -46,7 +47,7 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
         {!isRequestsTab ? (
           <>
             <section>
-              <BoardHeader board={board} />
+              <BoardHeader board={board} canManage={isBoardAdmin} manageLabel={t("actions.editSettings")} />
             </section>
 
             <div>
@@ -66,7 +67,11 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
                 </div>
               </div>
 
-              <CreateRequestForm boardId={board.id} giveToGetEnabled={board.giveToGetEnabled} />
+              <CreateRequestForm
+                boardId={board.id}
+                giveToGetEnabled={board.giveToGetEnabled}
+                onRequestCreated={addRequest}
+              />
             </div>
 
             {requests.length === 0 ? (
@@ -87,7 +92,7 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
                     request={request}
                     boardSlug={slug}
                     currentUserId={user?.id ?? null}
-                    isBoardAdmin={Boolean(user?.id && user.id === board.ownerId)}
+                    isBoardAdmin={isBoardAdmin}
                   />
                 ))}
               </div>

@@ -8,9 +8,14 @@ import BoardNotFoundException from "../../application/exceptions/BoardNotFoundEx
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import InvalidSlugException from "../../domain/exceptions/InvalidSlugException.js";
 import InvalidHexColorException from "../../domain/exceptions/InvalidHexColorException.js";
+import InvalidGiveToGetRequirementsException from "../../domain/exceptions/InvalidGiveToGetRequirementsException.js";
+import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
 
 export default async function UpdateBoardPatchController(req: Request, res: Response) {
-  const commandHandler = new UpdateBoardCommandHandler(new BoardDrizzleRepository(db));
+  const commandHandler = new UpdateBoardCommandHandler(
+    new BoardDrizzleRepository(db),
+    new WebSocketRealtimePublisher()
+  );
 
   try {
     if (!req.userId) {
@@ -56,6 +61,12 @@ export default async function UpdateBoardPatchController(req: Request, res: Resp
     if (ex instanceof InvalidHexColorException) {
       return res.status(400).send({
         error: "INVALID_PRIMARY_COLOR",
+        message: ex.message
+      });
+    }
+    if (ex instanceof InvalidGiveToGetRequirementsException) {
+      return res.status(400).send({
+        error: "INVALID_GIVE_TO_GET_REQUIREMENTS",
         message: ex.message
       });
     }

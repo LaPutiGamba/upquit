@@ -14,11 +14,14 @@ interface NavMainProps {
   sectionLabel: string;
   items: SidebarItem[];
   activeBoard: BoardResponse | null;
+  currentBoardSlug: string | null;
   isRequestsTab: boolean;
   pathname: string;
 }
 
-export function NavMain({ sectionLabel, items, activeBoard, isRequestsTab, pathname }: NavMainProps) {
+export function NavMain({ sectionLabel, items, activeBoard, currentBoardSlug, isRequestsTab, pathname }: NavMainProps) {
+  const selectedBoardSlug = activeBoard?.slug ?? currentBoardSlug;
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{sectionLabel}</SidebarGroupLabel>
@@ -28,11 +31,11 @@ export function NavMain({ sectionLabel, items, activeBoard, isRequestsTab, pathn
             const Icon = item.icon;
             const isActive =
               item.id === "dashboard"
-                ? activeBoard
-                  ? pathname === `/board/${activeBoard.slug}` && !isRequestsTab
+                ? selectedBoardSlug
+                  ? pathname === `/board/${selectedBoardSlug}` && !isRequestsTab
                   : pathname === "/boards"
-                : activeBoard
-                  ? pathname === `/board/${activeBoard.slug}` && isRequestsTab
+                : selectedBoardSlug
+                  ? pathname === `/board/${selectedBoardSlug}` && isRequestsTab
                   : false;
 
             return (

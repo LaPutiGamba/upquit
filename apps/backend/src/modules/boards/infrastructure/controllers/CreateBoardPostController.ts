@@ -7,6 +7,7 @@ import CreateBoardCommandHandler from "../../application/handlers/CreateBoardCom
 import BoardAlreadyExistsException from "../../application/exceptions/BoardAlreadyExistsException.js";
 import InvalidSlugException from "../../domain/exceptions/InvalidSlugException.js";
 import InvalidHexColorException from "../../domain/exceptions/InvalidHexColorException.js";
+import InvalidGiveToGetRequirementsException from "../../domain/exceptions/InvalidGiveToGetRequirementsException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 
 export default async function CreateBoardPostController(req: Request, res: Response) {
@@ -49,6 +50,12 @@ export default async function CreateBoardPostController(req: Request, res: Respo
     if (ex instanceof InvalidHexColorException) {
       return res.status(400).send({
         error: "INVALID_PRIMARY_COLOR",
+        message: ex.message
+      });
+    }
+    if (ex instanceof InvalidGiveToGetRequirementsException) {
+      return res.status(400).send({
+        error: "INVALID_GIVE_TO_GET_REQUIREMENTS",
         message: ex.message
       });
     }

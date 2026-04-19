@@ -6,9 +6,13 @@ import AddBoardCategoryCommand from "../../application/commands/AddBoardCategory
 import AddBoardCategoryCommandHandler from "../../application/handlers/AddBoardCategoryCommandHandler.js";
 import BoardNotFoundException from "../../application/exceptions/BoardNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
+import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
 
 export default async function AddBoardCategoryPostController(req: Request, res: Response) {
-  const commandHandler = new AddBoardCategoryCommandHandler(new BoardDrizzleRepository(db));
+  const commandHandler = new AddBoardCategoryCommandHandler(
+    new BoardDrizzleRepository(db),
+    new WebSocketRealtimePublisher()
+  );
 
   try {
     if (!req.userId) {

@@ -28,7 +28,7 @@ export default class DeleteCommentCommandHandler {
 
     await this.commentRepository.delete(commentId);
 
-    this.realtimePublisher.publish(comment.requestId.getValue(), "COMMENT_DELETED", {
+    this.realtimePublisher.publish(comment.requestId.getValue(), "CommentDeleted", {
       requestId: comment.requestId.getValue(),
       commentId: comment.id.getValue()
     });

@@ -17,6 +17,29 @@ export default class CommentDrizzleRepository implements CommentRepository {
     return this.mapToDomainComment(row);
   }
 
+  public async findByIdWithAuthor(id: Uuid): Promise<CommentWithAuthor | null> {
+    const [row] = await this.db
+      .select({
+        comment: comments,
+        authorDisplayName: users.displayName,
+        authorAvatarUrl: users.avatarUrl
+      })
+      .from(comments)
+      .leftJoin(users, eq(comments.userId, users.id))
+      .where(eq(comments.id, id.getValue()))
+      .limit(1);
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      comment: this.mapToDomainComment(row.comment),
+      authorDisplayName: row.authorDisplayName,
+      authorAvatarUrl: row.authorAvatarUrl
+    };
+  }
+
   public async findByRequestId(requestId: Uuid): Promise<Comment[]> {
     const rows = await this.db.select().from(comments).where(eq(comments.requestId, requestId.getValue()));
     return rows.map((row) => this.mapToDomainComment(row));

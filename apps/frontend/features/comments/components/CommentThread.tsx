@@ -16,7 +16,7 @@ type CommentThreadProps = {
   isDialog: boolean;
   replyingTo: string | null;
   setReplyingTo: React.Dispatch<React.SetStateAction<string | null>>;
-  refetch: () => Promise<void>;
+  onCommentAdded: (comment: CommentResponse) => void;
 };
 
 function getDisplayName(comment: CommentResponse): string {
@@ -35,7 +35,7 @@ export function CommentThread({
   isDialog,
   replyingTo,
   setReplyingTo,
-  refetch
+  onCommentAdded
 }: CommentThreadProps) {
   const locale = useLocale();
   const hasReplies = replies.length > 0;
@@ -136,8 +136,8 @@ export function CommentThread({
                 boardId={boardId}
                 parentId={rootComment.id}
                 isDialog={isDialog}
-                onCommentAdded={() => {
-                  void refetch();
+                onCommentAdded={(comment) => {
+                  onCommentAdded(comment);
                   setReplyingTo(null);
                 }}
                 onCancel={() => setReplyingTo(null)}

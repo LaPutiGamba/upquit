@@ -6,12 +6,12 @@ import { Button } from "@/shared/components/ui/button";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Send } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { commentService } from "../services/commentService";
+import { commentService, type default as CommentResponse } from "../services/commentService";
 
 interface CommentFormProps {
   requestId: string;
   boardId: string;
-  onCommentAdded: () => void;
+  onCommentAdded: (comment: CommentResponse) => void;
   isDialog?: boolean;
   parentId?: string;
   onCancel?: () => void;
@@ -30,13 +30,13 @@ export function CommentForm({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const syncChannelName = `comments:${requestId}`;
 
-  const notifyOtherTabs = () => {
+  const notifyOtherTabs = (comment: CommentResponse) => {
     if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") {
       return;
     }
 
     const channel = new BroadcastChannel(syncChannelName);
-    channel.postMessage({ type: "COMMENT_SYNC", requestId });
+    channel.postMessage({ type: "CommentSync", action: "added", requestId, comment });
     channel.close();
   };
 
@@ -65,12 +65,12 @@ export function CommentForm({
     setIsLoading(true);
 
     try {
-      await commentService.createComment(requestId, boardId, content.trim(), parentId);
+      const createdComment = await commentService.createComment(requestId, boardId, content.trim(), parentId);
 
       setContent("");
-      notifyOtherTabs();
+      notifyOtherTabs(createdComment);
       toast.success(parentId ? "Reply posted successfully" : "Comment posted successfully");
-      onCommentAdded();
+      onCommentAdded(createdComment);
 
       if (onCancel) {
         onCancel();

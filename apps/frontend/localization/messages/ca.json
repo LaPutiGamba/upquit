@@ -208,7 +208,64 @@
     "featureRequestsTitle": "Solicituds de funcionalitats",
     "emptyRequests": "Encara no n'hi han sol·licituds. Sigues el primer a suggerir-ne una!",
     "actions": {
-      "goToDashboard": "Anar al dashboard"
+      "goToDashboard": "Anar al dashboard",
+      "editSettings": "Editar configuració"
+    }
+  },
+  "BoardSettingsPage": {
+    "title": "Configuració del tauler",
+    "description": "Gestiona la identitat del tauler, permisos i regles de participació.",
+    "backToDashboard": "Tornar al dashboard",
+    "notFound": "No s'ha trobat el tauler.",
+    "forbidden": "No tens accés per editar aquest tauler.",
+    "saved": "Configuració del tauler desada.",
+    "saveFailed": "No s'ha pogut desar la configuració del tauler.",
+    "sections": {
+      "profile": "Perfil",
+      "profileDescription": "Marca pública i detalls descriptius.",
+      "permissions": "Accés i vots",
+      "giveToGet": "Give to Get"
+    },
+    "fields": {
+      "name": "Nom del tauler",
+      "slug": "Slug",
+      "description": "Descripció",
+      "logoUrl": "URL del logo",
+      "primaryColor": "Color principal",
+      "isPublic": "Tauler públic",
+      "allowAnonymousVotes": "Permetre vots anònims",
+      "giveToGetEnabled": "Activar Give to Get",
+      "giveToGetVotesReq": "Vots requerits",
+      "giveToGetCommentsReq": "Comentaris requerits"
+    },
+    "hints": {
+      "slug": "S'utilitza a la URL del tauler.",
+      "isPublic": "Permet que qualsevol amb l'enllaç pugui veure el tauler.",
+      "allowAnonymousVotes": "Visitants sense compte poden votar sollicituds.",
+      "giveToGetEnabled": "Requereix participació abans de poder crear sollicituds."
+    },
+    "placeholders": {
+      "name": "Exemple: La Meva Increïble App",
+      "slug": "la-meva-increible-app",
+      "description": "Descriu per a què serveix aquest tauler...",
+      "logoUrl": "https://example.com/logo.png"
+    },
+    "validation": {
+      "nameMin": "El nom del tauler ha de tenir almenys 3 caràcters.",
+      "slugMin": "El slug ha de tenir almenys 3 caràcters.",
+      "slugMax": "El slug no pot superar 63 caràcters.",
+      "slugPattern": "Utilitza només minúscules, números i guions.",
+      "descriptionMax": "La descripció no pot superar 300 caràcters.",
+      "logoUrl": "Introdueix una URL vàlida per al logo.",
+      "primaryColor": "Introdueix un color hexadecimal vàlid com #1e40af.",
+      "giveToGetVotesReq": "Els vots requerits han de ser 0 o més.",
+      "giveToGetCommentsReq": "Els comentaris requerits han de ser 0 o més.",
+      "giveToGetMinimumRule": "Quan Give to Get està activat, vots i comentaris requerits no poden ser tots dos 0."
+    },
+    "actions": {
+      "cancel": "Cancel-lar",
+      "save": "Desar configuració",
+      "saving": "Desant..."
     }
   },
   "DefaultHomePage": {

@@ -37,9 +37,18 @@ export default class UpdateCommentCommandHandler {
 
     await this.commentRepository.update(updatedComment);
 
-    const response = mapCommentToResponse(updatedComment);
+    const updatedCommentWithAuthor = await this.commentRepository.findByIdWithAuthor(commentId);
+    if (!updatedCommentWithAuthor) {
+      throw new CommentNotFoundException(command.commentId);
+    }
 
-    this.realtimePublisher.publish(updatedComment.requestId.getValue(), "COMMENT_UPDATED", {
+    const response = mapCommentToResponse(
+      updatedCommentWithAuthor.comment,
+      updatedCommentWithAuthor.authorDisplayName,
+      updatedCommentWithAuthor.authorAvatarUrl
+    );
+
+    this.realtimePublisher.publish(updatedComment.requestId.getValue(), "CommentUpdated", {
       requestId: updatedComment.requestId.getValue(),
       comment: response
     });

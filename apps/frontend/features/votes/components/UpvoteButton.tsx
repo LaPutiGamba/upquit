@@ -27,6 +27,10 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount, className }
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+  useEffect(() => {
+    setVoteCount(initialVoteCount);
+  }, [initialVoteCount]);
+
   const channelName = boardId ? `request.${boardId}` : null;
 
   useChannel<{
@@ -53,6 +57,9 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount, className }
     const checkInitialVoteStatus = async () => {
       const token = getAccessToken();
       if (!token) {
+        setHasVoted(false);
+        setVoteId(null);
+        setCurrentUserId(null);
         return;
       }
 
@@ -66,7 +73,7 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount, className }
 
         setCurrentUserId(userId);
 
-        const existingVoteId = await voteService.checkVote(requestId, userId);
+        const existingVoteId = await voteService.checkVote(requestId, userId, boardId);
         if (existingVoteId) {
           setHasVoted(true);
           setVoteId(existingVoteId);
@@ -79,17 +86,24 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount, className }
     };
 
     checkInitialVoteStatus();
-  }, [requestId]);
+  }, [requestId, boardId]);
 
   const handleVote = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (isLoading) {
+      return;
+    }
+
+    const previousVoteCount = voteCount;
+    const previousHasVoted = hasVoted;
+    const previousVoteId = voteId;
     setIsLoading(true);
 
     try {
       if (hasVoted && voteId) {
-        setVoteCount((prev) => prev - 1);
+        setVoteCount((prev) => Math.max(prev - 1, 0));
         setHasVoted(false);
 
         await voteService.removeVote(voteId);
@@ -102,8 +116,9 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount, className }
         setVoteId(newVoteId);
       }
     } catch {
-      setVoteCount((prev) => (hasVoted ? prev + 1 : prev - 1));
-      setHasVoted(hasVoted);
+      setVoteCount(previousVoteCount);
+      setHasVoted(previousHasVoted);
+      setVoteId(previousVoteId);
       toast.error(getAccessToken() ? t("voteError") : t("mustLogin"));
     } finally {
       setIsLoading(false);

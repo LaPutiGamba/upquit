@@ -26,14 +26,15 @@ export const voteService = {
     });
   },
 
-  checkVote: async (requestId: string, userId: string, token?: string): Promise<string | null> => {
+  checkVote: async (requestId: string, userId: string, boardId?: string, token?: string): Promise<string | null> => {
     try {
       const response = await apiClient<VoteResponse>(`/votes?requestId=${requestId}&userId=${userId}`, {
         method: "GET",
-        token
+        token,
+        tenantId: boardId
       });
       return response.id;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

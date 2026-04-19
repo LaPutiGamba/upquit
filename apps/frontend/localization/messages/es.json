@@ -208,7 +208,64 @@
     "featureRequestsTitle": "Solicitudes de funcionalidades",
     "emptyRequests": "Aun no hay solicitudes. ¡Se el primero en sugerir algo!",
     "actions": {
-      "goToDashboard": "Ir al dashboard"
+      "goToDashboard": "Ir al dashboard",
+      "editSettings": "Editar configuración"
+    }
+  },
+  "BoardSettingsPage": {
+    "title": "Configuración del tablero",
+    "description": "Gestiona la identidad del tablero, permisos y reglas de participación.",
+    "backToDashboard": "Volver al dashboard",
+    "notFound": "No se encontró el tablero.",
+    "forbidden": "No tienes acceso para editar este tablero.",
+    "saved": "Configuración del tablero guardada.",
+    "saveFailed": "No se pudo guardar la configuración del tablero.",
+    "sections": {
+      "profile": "Perfil",
+      "profileDescription": "Marca pública y detalles descriptivos.",
+      "permissions": "Acceso y votos",
+      "giveToGet": "Give to Get"
+    },
+    "fields": {
+      "name": "Nombre del tablero",
+      "slug": "Slug",
+      "description": "Descripción",
+      "logoUrl": "URL del logo",
+      "primaryColor": "Color principal",
+      "isPublic": "Tablero público",
+      "allowAnonymousVotes": "Permitir votos anónimos",
+      "giveToGetEnabled": "Activar Give to Get",
+      "giveToGetVotesReq": "Votos requeridos",
+      "giveToGetCommentsReq": "Comentarios requeridos"
+    },
+    "hints": {
+      "slug": "Se usa en la URL del tablero.",
+      "isPublic": "Permite que cualquiera con el enlace pueda ver tu tablero.",
+      "allowAnonymousVotes": "Visitantes sin cuenta pueden votar solicitudes.",
+      "giveToGetEnabled": "Requiere participación antes de poder crear solicitudes."
+    },
+    "placeholders": {
+      "name": "Ejemplo: Mi Increíble App",
+      "slug": "mi-increible-app",
+      "description": "Describe para qué es este tablero...",
+      "logoUrl": "https://example.com/logo.png"
+    },
+    "validation": {
+      "nameMin": "El nombre del tablero debe tener al menos 3 caracteres.",
+      "slugMin": "El slug debe tener al menos 3 caracteres.",
+      "slugMax": "El slug no puede superar 63 caracteres.",
+      "slugPattern": "Usa solo minúsculas, números y guiones.",
+      "descriptionMax": "La descripción no puede superar 300 caracteres.",
+      "logoUrl": "Introduce una URL válida para el logo.",
+      "primaryColor": "Introduce un color hexadecimal válido como #1e40af.",
+      "giveToGetVotesReq": "Los votos requeridos deben ser 0 o más.",
+      "giveToGetCommentsReq": "Los comentarios requeridos deben ser 0 o más.",
+      "giveToGetMinimumRule": "Cuando Give to Get está activado, votos y comentarios requeridos no pueden ser ambos 0."
+    },
+    "actions": {
+      "cancel": "Cancelar",
+      "save": "Guardar configuración",
+      "saving": "Guardando..."
     }
   },
   "DefaultHomePage": {

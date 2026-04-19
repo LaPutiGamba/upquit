@@ -7,7 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { giveToGetService, GiveToGetProgressResponse } from "@/features/give-to-get/services/giveToGetService";
-import { requestService } from "../services/requestService";
+import { requestService, RequestResponse } from "../services/requestService";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { getAccessToken } from "@/shared/lib/apiClient";
@@ -36,7 +36,7 @@ type CreateRequestFormValues = z.infer<typeof createRequestSchema>;
 interface CreateRequestFormProps {
   boardId: string;
   giveToGetEnabled?: boolean | null;
-  onRequestCreated?: () => void | Promise<void>;
+  onRequestCreated?: (request: RequestResponse) => void | Promise<void>;
 }
 
 export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated }: CreateRequestFormProps) {
@@ -115,14 +115,18 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
     setIsSubmitting(true);
 
     try {
-      await requestService.createRequest(boardId, data.title, data.description?.trim() ? data.description : null);
+      const createdRequest = await requestService.createRequest(
+        boardId,
+        data.title,
+        data.description?.trim() ? data.description : null
+      );
 
       form.reset({ title: "", description: "" });
       setIsDialogOpen(false);
       toast.success("Request created successfully");
 
       if (onRequestCreated) {
-        await onRequestCreated();
+        await onRequestCreated(createdRequest);
       } else {
         router.refresh();
       }
@@ -190,7 +194,10 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button size="sm"><Plus />New Request</Button>
+        <Button size="sm">
+          <Plus />
+          New Request
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="rounded-xl border">

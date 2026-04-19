@@ -6,9 +6,13 @@ import AddBoardMemberCommand from "../../application/commands/AddBoardMemberComm
 import AddBoardMemberCommandHandler from "../../application/handlers/AddBoardMemberCommandHandler.js";
 import BoardNotFoundException from "../../application/exceptions/BoardNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
+import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
 
 export default async function AddBoardMemberPostController(req: Request, res: Response) {
-  const commandHandler = new AddBoardMemberCommandHandler(new BoardDrizzleRepository(db));
+  const commandHandler = new AddBoardMemberCommandHandler(
+    new BoardDrizzleRepository(db),
+    new WebSocketRealtimePublisher()
+  );
 
   try {
     if (!req.userId) {

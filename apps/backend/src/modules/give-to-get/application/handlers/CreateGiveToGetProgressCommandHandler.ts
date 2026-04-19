@@ -2,7 +2,6 @@ import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import GiveToGetProgress from "../../domain/entities/GiveToGetProgress.js";
 import GiveToGetProgressRepository from "../../domain/contracts/GiveToGetProgressRepository.js";
 import CreateGiveToGetProgressCommand from "../commands/CreateGiveToGetProgressCommand.js";
-import GiveToGetProgressAlreadyExistsException from "../exceptions/GiveToGetProgressAlreadyExistsException.js";
 import GiveToGetProgressResponse, { mapGiveToGetProgressToResponse } from "../responses/GiveToGetProgressResponse.js";
 
 export default class CreateGiveToGetProgressCommandHandler {
@@ -14,7 +13,7 @@ export default class CreateGiveToGetProgressCommandHandler {
 
     const existingProgress = await this.giveToGetProgressRepository.findByUserAndBoard(userId, boardId);
     if (existingProgress) {
-      throw new GiveToGetProgressAlreadyExistsException(command.userId, command.boardId);
+      return mapGiveToGetProgressToResponse(existingProgress);
     }
 
     const progress = new GiveToGetProgress(

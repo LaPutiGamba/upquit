@@ -16,7 +16,7 @@ export default class UpdateProgressOnCommentCreated {
   ) {}
 
   async handle(event: CommentCreatedEvent): Promise<void> {
-    if (event.isAdminReply || event.parentId !== null) {
+    if (event.isAdminReply) {
       return;
     }
 

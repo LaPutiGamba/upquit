@@ -126,7 +126,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
           </>
         }
       >
-        <DialogHeader className="shrink-0 px-6 py-4 pr-28">
+        <DialogHeader className="shrink-0 px-6 py-4 pr-35 sm:pr-38">
           <DialogTitle className="sr-only">{editableRequest.title}</DialogTitle>
           <RequestHeader variant="dialog" canEdit={canEdit}>
             <RequestTitle
