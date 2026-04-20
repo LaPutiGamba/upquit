@@ -6,7 +6,7 @@ export default class Request {
     id: string,
     boardId: string,
     authorId: string,
-    categoryId: string | null,
+    public readonly categoryIds: string[],
     public readonly title: string,
     public readonly description: string | null,
     status: StatusValue,
@@ -19,13 +19,11 @@ export default class Request {
     this.id = new Uuid(id);
     this.boardId = new Uuid(boardId);
     this.authorId = new Uuid(authorId);
-    this.categoryId = categoryId ? new Uuid(categoryId) : null;
     this.status = new RequestStatus(status);
   }
 
   public readonly id: Uuid;
   public readonly boardId: Uuid;
   public readonly authorId: Uuid;
-  public readonly categoryId: Uuid | null;
   public readonly status: RequestStatus;
 }

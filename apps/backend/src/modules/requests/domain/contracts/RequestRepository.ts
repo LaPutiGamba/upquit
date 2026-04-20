@@ -16,6 +16,11 @@ export default interface RequestRepository {
   incrementVoteCount(id: Uuid): Promise<void>;
   decrementVoteCount(id: Uuid): Promise<void>;
 
+  // Request Categories Operations
+  setRequestCategories(requestId: Uuid, categoryIds: string[]): Promise<void>;
+  getRequestCategoryIds(requestId: Uuid): Promise<string[]>;
+  removeUnusedCategories(categoryIds: string[]): Promise<void>;
+
   // Subscription Operations
   addSubscription(subscription: Subscription): Promise<void>;
   removeSubscription(userId: Uuid, requestId: Uuid): Promise<void>;

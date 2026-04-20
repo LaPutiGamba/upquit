@@ -37,11 +37,13 @@ export default class UpdateRequestCommandHandler {
       }
     }
 
+    const categoryIds = command.categoryIds !== undefined ? command.categoryIds : request.categoryIds;
+
     const updatedRequest = new Request(
       request.id.getValue(),
       request.boardId.getValue(),
       request.authorId.getValue(),
-      command.categoryId !== undefined ? command.categoryId : (request.categoryId?.getValue() ?? null),
+      categoryIds,
       command.title ?? request.title,
       command.description !== undefined ? command.description : request.description,
       command.status ?? request.status.getValue(),
@@ -53,6 +55,18 @@ export default class UpdateRequestCommandHandler {
     );
 
     await this.requestRepository.update(updatedRequest);
+
+    if (command.categoryIds !== undefined) {
+      const oldCategoryIds = request.categoryIds;
+      const newCategoryIds = command.categoryIds;
+      const removedCategoryIds = oldCategoryIds.filter((id) => !newCategoryIds.includes(id));
+
+      await this.requestRepository.setRequestCategories(requestId, newCategoryIds);
+
+      if (removedCategoryIds.length > 0) {
+        await this.requestRepository.removeUnusedCategories(removedCategoryIds);
+      }
+    }
 
     const changelogEntries = this.buildChangelogEntries(request, command);
     if (changelogEntries.length > 0) {
@@ -80,7 +94,7 @@ export default class UpdateRequestCommandHandler {
       title: request.title,
       description: request.description,
       status: request.status.getValue(),
-      categoryId: request.categoryId?.getValue() ?? null,
+      categoryIds: request.categoryIds.join(","),
       voteCount: request.voteCount,
       isPinned: request.isPinned,
       isHidden: request.isHidden,
@@ -91,7 +105,7 @@ export default class UpdateRequestCommandHandler {
       title: command.title,
       description: command.description,
       status: command.status,
-      categoryId: command.categoryId,
+      categoryIds: command.categoryIds?.join(","),
       voteCount: command.voteCount,
       isPinned: command.isPinned,
       isHidden: command.isHidden,

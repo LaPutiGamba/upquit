@@ -15,7 +15,7 @@ export default class CreateRequestCommandHandler {
       crypto.randomUUID(),
       command.boardId,
       command.authorId,
-      command.categoryId,
+      command.categoryIds,
       command.title,
       command.description,
       command.status,

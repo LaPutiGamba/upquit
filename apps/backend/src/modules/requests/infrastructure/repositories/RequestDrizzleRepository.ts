@@ -1,5 +1,5 @@
-import { and, asc, eq, sql } from "drizzle-orm";
-import { requestChangelogs, requests, subscriptions } from "../schema.js";
+import { and, asc, eq, sql, not, inArray } from "drizzle-orm";
+import { requestChangelogs, requests, subscriptions, requestCategories } from "../schema.js";
 import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
 import RequestRepository from "../../domain/contracts/RequestRepository.js";
@@ -12,7 +12,7 @@ import Subscription from "../../domain/entities/Subscription.js";
 import { type StatusValue } from "../../domain/value-objects/RequestStatus.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import { users } from "../../../users/infrastructure/schema.js";
-import { boardMembers, boards } from "../../../boards/infrastructure/schema.js";
+import { boardMembers, boards, categories } from "../../../boards/infrastructure/schema.js";
 
 export default class RequestDrizzleRepository implements RequestRepository {
   constructor(private readonly db: CurrentDatabase) {}
@@ -67,7 +67,6 @@ export default class RequestDrizzleRepository implements RequestRepository {
       id: request.id.getValue(),
       boardId: request.boardId.getValue(),
       authorId: request.authorId.getValue(),
-      categoryId: request.categoryId?.getValue() ?? null,
       title: request.title,
       description: request.description,
       status: request.status.getValue(),
@@ -77,6 +76,15 @@ export default class RequestDrizzleRepository implements RequestRepository {
       adminNote: request.adminNote,
       createdAt: request.createdAt
     });
+
+    if (request.categoryIds.length > 0) {
+      await this.db.insert(requestCategories).values(
+        request.categoryIds.map((categoryId) => ({
+          requestId: request.id.getValue(),
+          categoryId
+        }))
+      );
+    }
   }
 
   public async update(request: Request): Promise<void> {
@@ -85,7 +93,6 @@ export default class RequestDrizzleRepository implements RequestRepository {
       .set({
         boardId: request.boardId.getValue(),
         authorId: request.authorId.getValue(),
-        categoryId: request.categoryId?.getValue() ?? null,
         title: request.title,
         description: request.description,
         status: request.status.getValue(),
@@ -155,6 +162,60 @@ export default class RequestDrizzleRepository implements RequestRepository {
   }
 
   // =========================================================================
+  // REQUEST CATEGORIES
+  // =========================================================================
+
+  public async setRequestCategories(requestId: Uuid, categoryIds: string[]): Promise<void> {
+    const requestIdValue = requestId.getValue();
+
+    await this.db.delete(requestCategories).where(eq(requestCategories.requestId, requestIdValue));
+
+    if (categoryIds.length > 0) {
+      await this.db.insert(requestCategories).values(
+        categoryIds.map((categoryId) => ({
+          requestId: requestIdValue,
+          categoryId
+        }))
+      );
+    }
+  }
+
+  public async getRequestCategoryIds(requestId: Uuid): Promise<string[]> {
+    const rows = await this.db
+      .select({ categoryId: requestCategories.categoryId })
+      .from(requestCategories)
+      .where(eq(requestCategories.requestId, requestId.getValue()));
+
+    return rows.map((row) => row.categoryId);
+  }
+
+  public async removeUnusedCategories(categoryIds: string[]): Promise<void> {
+    if (categoryIds.length === 0) {
+      return;
+    }
+
+    const unusedCategories = await this.db
+      .select({ id: categories.id })
+      .from(categories)
+      .where(
+        and(
+          inArray(categories.id, categoryIds),
+          not(
+            sql`EXISTS (
+              SELECT 1 FROM ${requestCategories}
+              WHERE ${requestCategories.categoryId} = ${categories.id}
+            )`
+          )
+        )
+      );
+
+    if (unusedCategories.length > 0) {
+      const unusedCategoryIds = unusedCategories.map((cat) => cat.id);
+      await this.db.delete(categories).where(inArray(categories.id, unusedCategoryIds));
+    }
+  }
+
+  // =========================================================================
   // SUBSCRIPTIONS
   // =========================================================================
 
@@ -193,7 +254,7 @@ export default class RequestDrizzleRepository implements RequestRepository {
       row.id,
       row.boardId,
       row.authorId,
-      row.categoryId,
+      [],
       row.title,
       row.description,
       statusValue,

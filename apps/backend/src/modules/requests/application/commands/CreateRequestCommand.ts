@@ -6,7 +6,7 @@ export default class CreateRequestCommand {
     readonly authorId: string,
     readonly title: string,
     readonly description: string | null = null,
-    readonly categoryId: string | null = null,
+    readonly categoryIds: string[] = [],
     readonly status: StatusValue = "open",
     readonly voteCount: number = 0,
     readonly isPinned: boolean = false,

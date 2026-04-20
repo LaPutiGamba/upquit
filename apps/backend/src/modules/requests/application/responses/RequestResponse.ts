@@ -4,7 +4,7 @@ export default interface RequestResponse {
   id: string;
   boardId: string;
   authorId: string;
-  categoryId: string | null;
+  categoryIds: string[];
   title: string;
   description: string | null;
   status: string;
@@ -20,7 +20,7 @@ export function mapRequestToResponse(request: Request): RequestResponse {
     id: request.id.getValue(),
     boardId: request.boardId.getValue(),
     authorId: request.authorId.getValue(),
-    categoryId: request.categoryId?.getValue() ?? null,
+    categoryIds: request.categoryIds,
     title: request.title,
     description: request.description,
     status: request.status.getValue(),

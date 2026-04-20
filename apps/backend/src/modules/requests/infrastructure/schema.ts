@@ -12,7 +12,6 @@ export const requests = pgTable("requests", {
   authorId: uuid("author_id")
     .notNull()
     .references(() => users.id),
-  categoryId: uuid("category_id").references(() => categories.id),
   title: varchar("title", { length: 100 }).notNull(),
   description: text("description"),
   status: requestStatusEnum("status").default("open"),
@@ -22,6 +21,23 @@ export const requests = pgTable("requests", {
   adminNote: text("admin_note"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow()
 });
+
+export const requestCategories = pgTable(
+  "request_categories",
+  {
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => requests.id, { onDelete: "cascade" }),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => categories.id, { onDelete: "cascade" })
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.requestId, table.categoryId] })
+    };
+  }
+);
 
 export const requestChangelogs = pgTable("request_changelogs", {
   id: uuid("id").defaultRandom().primaryKey(),

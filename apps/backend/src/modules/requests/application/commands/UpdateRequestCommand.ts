@@ -6,7 +6,7 @@ export default class UpdateRequestCommand {
     readonly userId: string,
     readonly title?: string,
     readonly description?: string | null,
-    readonly categoryId?: string | null,
+    readonly categoryIds?: string[],
     readonly status?: StatusValue,
     readonly voteCount?: number,
     readonly isPinned?: boolean,
