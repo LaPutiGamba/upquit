@@ -14,6 +14,7 @@ export default class RemoveBoardMemberCommandHandler {
     const requesterUserId = new Uuid(command.requesterUserId);
 
     const board = await this.boardRepository.findById(boardId);
+    const requesterIsBoardOwner = board?.ownerId.getValue() === requesterUserId.getValue();
 
     if (!board) {
       throw new BoardNotFoundException(command.boardId);
@@ -27,7 +28,7 @@ export default class RemoveBoardMemberCommandHandler {
       throw new UnauthorizedActionException("Board admins cannot remove themselves from the team");
     }
 
-    if (board.ownerId.getValue() !== requesterUserId.getValue()) {
+    if (!requesterIsBoardOwner) {
       const requesterMembership = await this.boardRepository.findMemberByBoardIdAndUserId(boardId, requesterUserId);
 
       if (requesterMembership?.role !== "admin") {
@@ -39,6 +40,10 @@ export default class RemoveBoardMemberCommandHandler {
 
     if (!member) {
       throw new BoardMemberNotFoundException(command.targetUserId, command.boardId);
+    }
+
+    if (!requesterIsBoardOwner && member.role === "admin") {
+      throw new UnauthorizedActionException("Board admins cannot remove other admins");
     }
 
     await this.boardRepository.removeMember(boardId, targetUserId);

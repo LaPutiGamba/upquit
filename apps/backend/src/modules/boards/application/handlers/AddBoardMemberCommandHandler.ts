@@ -14,16 +14,21 @@ export default class AddBoardMemberCommandHandler {
     const requesterUserId = new Uuid(command.requesterUserId);
     const targetUserId = new Uuid(command.targetUserId);
     const board = await this.boardRepository.findById(boardId);
+    const requesterIsBoardOwner = board?.ownerId.getValue() === requesterUserId.getValue();
 
     if (!board) {
       throw new BoardNotFoundException(command.boardId);
     }
 
-    if (board.ownerId.getValue() !== requesterUserId.getValue()) {
+    if (!requesterIsBoardOwner) {
       const requesterMembership = await this.boardRepository.findMemberByBoardIdAndUserId(boardId, requesterUserId);
 
       if (requesterMembership?.role !== "admin") {
         throw new UnauthorizedActionException("Only board owners or admins can manage members");
+      }
+
+      if (command.role !== "member") {
+        throw new UnauthorizedActionException("Board admins can only add users as members");
       }
     }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/localization/i18n/routing";
 import { UserPlus2, Trash2, Shield, Crown } from "lucide-react";
@@ -42,6 +41,9 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [canManageBoard, setCanManageBoard] = useState(false);
+
+  const isBoardOwner = Boolean(user?.id && board?.ownerId && user.id === board.ownerId);
+  const isLimitedAdmin = canManageBoard && !isBoardOwner;
 
   const sortedMembers = useMemo(() => {
     return [...members].sort((leftMember, rightMember) => {
@@ -113,7 +115,7 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
     };
   }, [router, slug, user?.id]);
 
-  const handleAddMember = async (event: FormEvent<HTMLFormElement>) => {
+  const handleAddMember = async (event: SubmitEvent) => {
     event.preventDefault();
 
     if (!board) {
@@ -149,6 +151,10 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
       return;
     }
 
+    if (isLimitedAdmin && nextRole === "admin") {
+      return;
+    }
+
     setPendingMemberId(member.userId);
 
     try {
@@ -168,6 +174,10 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
 
   const handleRemoveMember = async (member: BoardMember) => {
     if (!board) {
+      return;
+    }
+
+    if (isLimitedAdmin && member.role === "admin") {
       return;
     }
 
@@ -277,12 +287,20 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
               {sortedMembers.map((member, index) => {
                 const isOwner = member.userId === board.ownerId;
                 const isCurrentUser = member.userId === user?.id;
+                const isPending = pendingMemberId === member.userId;
+                const canEditRole =
+                  !isCurrentUser && !isPending && !isSubmitting && (isBoardOwner || member.role === "admin");
+                const canRemoveMember =
+                  !isOwner &&
+                  !isCurrentUser &&
+                  !isPending &&
+                  !isSubmitting &&
+                  (!isLimitedAdmin || member.role !== "admin");
                 const roleLabel = isOwner
                   ? t("roles.owner")
                   : member.role === "admin"
                     ? t("roles.admin")
                     : t("roles.member");
-                const isPending = pendingMemberId === member.userId;
 
                 return (
                   <div key={member.userId}>
@@ -315,26 +333,28 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
                               onValueChange={(nextRole) => {
                                 void handleUpdateMemberRole(member, nextRole as BoardMemberRole);
                               }}
-                              disabled={isCurrentUser || isPending || isSubmitting}
+                              disabled={!canEditRole}
                             >
                               <SelectTrigger className="h-8 w-full text-xs sm:w-32">
                                 <SelectValue placeholder={t("members.role")} />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="member">{t("roles.member")}</SelectItem>
-                                <SelectItem value="admin">{t("roles.admin")}</SelectItem>
+                                <SelectItem value="admin" disabled={!isBoardOwner}>
+                                  {t("roles.admin")}
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                         )}
 
-                        {!isOwner && !isCurrentUser ? (
+                        {canRemoveMember ? (
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={() => void handleRemoveMember(member)}
-                            disabled={isPending || isSubmitting}
+                            disabled={!canRemoveMember}
                           >
                             <Trash2 className="size-4" />
                             {t("members.remove")}

@@ -13,6 +13,7 @@ export default class UpdateBoardMemberRoleCommandHandler {
     const targetUserId = new Uuid(command.targetUserId);
     const requesterUserId = new Uuid(command.requesterUserId);
     const board = await this.boardRepository.findById(boardId);
+    const requesterIsBoardOwner = board?.ownerId.getValue() === requesterUserId.getValue();
 
     if (!board) {
       throw new BoardNotFoundException(command.boardId);
@@ -26,11 +27,15 @@ export default class UpdateBoardMemberRoleCommandHandler {
       throw new UnauthorizedActionException("Board admins cannot change their own role");
     }
 
-    if (board.ownerId.getValue() !== requesterUserId.getValue()) {
+    if (!requesterIsBoardOwner) {
       const requesterMembership = await this.boardRepository.findMemberByBoardIdAndUserId(boardId, requesterUserId);
 
       if (requesterMembership?.role !== "admin") {
         throw new UnauthorizedActionException("Only board owners or admins can manage members");
+      }
+
+      if (command.role === "admin") {
+        throw new UnauthorizedActionException("Board admins cannot assign admin role");
       }
     }
 
