@@ -15,6 +15,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
+import { Badge } from "@/shared/components/ui/badge";
 import { Link } from "@/localization/i18n/routing";
 import { Copy, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
@@ -43,6 +44,8 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
 
     return editableRequest.authorId === currentUserId || isBoardAdmin;
   }, [currentUserId, editableRequest.authorId, isBoardAdmin]);
+
+  const categories = editableRequest.categories ?? [];
 
   const handleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -97,6 +100,21 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
             <p className="line-clamp-2 wrap-anywhere text-sm leading-6 text-muted-foreground">
               {editableRequest.description}
             </p>
+
+            {categories.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {categories.map((category) => (
+                  <Badge key={category.id} variant="outline" className="gap-1.5 border-border/70 bg-background/60">
+                    <span
+                      className="size-2 rounded-full"
+                      style={{ backgroundColor: category.hexColor }}
+                      aria-hidden="true"
+                    />
+                    <span className="max-w-40 truncate">{category.name}</span>
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
 
             <RequestMetadataRow
               request={editableRequest}
@@ -156,6 +174,21 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
               >
                 {editableRequest.description ?? ""}
               </RequestDescription>
+
+              {categories.length > 0 ? (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {categories.map((category) => (
+                    <Badge key={category.id} variant="outline" className="gap-1.5 border-border/70 bg-background/60">
+                      <span
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: category.hexColor }}
+                        aria-hidden="true"
+                      />
+                      <span className="max-w-48 truncate">{category.name}</span>
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
 
               <RequestMetadataRow
                 request={editableRequest}

@@ -25,12 +25,37 @@ export default class RequestDrizzleRepository implements RequestRepository {
     const [row] = await this.db.select().from(requests).where(eq(requests.id, id.getValue())).limit(1);
 
     if (!row) return null;
-    return this.mapToDomainRequest(row);
+
+    const categoryIds = await this.getRequestCategoryIds(id);
+    return this.mapToDomainRequest(row, categoryIds);
   }
 
   public async findByBoardId(boardId: Uuid): Promise<Request[]> {
     const rows = await this.db.select().from(requests).where(eq(requests.boardId, boardId.getValue()));
-    return rows.map((row) => this.mapToDomainRequest(row));
+
+    if (rows.length === 0) {
+      return [];
+    }
+
+    const requestIds = rows.map((row) => row.id);
+    const categoryRows = await this.db
+      .select({ requestId: requestCategories.requestId, categoryId: requestCategories.categoryId })
+      .from(requestCategories)
+      .where(inArray(requestCategories.requestId, requestIds));
+
+    const requestCategoriesMap = new Map<string, string[]>();
+    for (const requestId of requestIds) {
+      requestCategoriesMap.set(requestId, []);
+    }
+
+    for (const categoryRow of categoryRows) {
+      const currentCategoryIds = requestCategoriesMap.get(categoryRow.requestId);
+      if (currentCategoryIds) {
+        currentCategoryIds.push(categoryRow.categoryId);
+      }
+    }
+
+    return rows.map((row) => this.mapToDomainRequest(row, requestCategoriesMap.get(row.id) ?? []));
   }
 
   public async isBoardOwnerOrAdmin(boardId: Uuid, userId: Uuid): Promise<boolean> {
@@ -247,14 +272,14 @@ export default class RequestDrizzleRepository implements RequestRepository {
   // MAPPER
   // =========================================================================
 
-  private mapToDomainRequest(row: typeof requests.$inferSelect): Request {
+  private mapToDomainRequest(row: typeof requests.$inferSelect, categoryIds: string[] = []): Request {
     const statusValue = (row.status ?? "open") as StatusValue;
 
     return new Request(
       row.id,
       row.boardId,
       row.authorId,
-      [],
+      categoryIds,
       row.title,
       row.description,
       statusValue,

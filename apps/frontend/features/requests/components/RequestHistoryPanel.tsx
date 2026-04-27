@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, type ReactNode } from "react";
+import { MoveRight } from "lucide-react";
 import { Spinner } from "@/shared/components/ui/spinner";
 import type { RequestChangelogResponse } from "@/features/requests/services/requestService";
 import { formatLocalizedDateTimeWithClock } from "@/shared/lib/date";
@@ -17,9 +18,15 @@ interface RequestHistoryPanelProps {
   changelogEntries: RequestChangelogResponse[];
   changelogLoading: boolean;
   changelogError: string | null;
+  categoryNamesById: Record<string, string>;
 }
 
-export function RequestHistoryPanel({ changelogEntries, changelogLoading, changelogError }: RequestHistoryPanelProps) {
+export function RequestHistoryPanel({
+  changelogEntries,
+  changelogLoading,
+  changelogError,
+  categoryNamesById
+}: RequestHistoryPanelProps) {
   const sortedChangelogEntries = useMemo(() => {
     return [...changelogEntries].sort((a, b) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -107,71 +114,109 @@ export function RequestHistoryPanel({ changelogEntries, changelogLoading, change
     );
   };
 
+  const parseCategoryIds = (value: string | null): string[] => {
+    if (!value) {
+      return [];
+    }
+
+    return value
+      .split(",")
+      .map((categoryId) => categoryId.trim())
+      .filter(Boolean);
+  };
+
+  const formatCategoryList = (value: string | null): string => {
+    const categoryNames = parseCategoryIds(value).map(
+      (categoryId) => categoryNamesById[categoryId] ?? "Deleted category"
+    );
+
+    if (categoryNames.length === 0) {
+      return "none";
+    }
+
+    return categoryNames.join(", ");
+  };
+
+  const formatFieldLabel = (field: RequestChangelogResponse["field"]) => {
+    switch (field) {
+      case "categoryIds":
+        return "Categories";
+      case "isPinned":
+        return "Pinned";
+      case "isHidden":
+        return "Hidden";
+      case "voteCount":
+        return "Votes";
+      case "adminNote":
+        return "Admin note";
+      case "status":
+        return "Status";
+      default:
+        return field.charAt(0).toUpperCase() + field.slice(1);
+    }
+  };
+
+  const renderFieldChange = ({
+    label,
+    oldValue,
+    newValue,
+    oldNode,
+    newNode
+  }: {
+    label: string;
+    oldValue?: string | null;
+    newValue?: string | null;
+    oldNode?: ReactNode;
+    newNode?: ReactNode;
+  }): ReactNode => {
+    const oldText = oldValue ?? "empty";
+    const newText = newValue ?? "empty";
+
+    const oldDisplay = oldNode ?? (
+      <span className="min-w-0 break-all wrap-anywhere text-muted-foreground" title={oldValue ?? "empty"}>
+        {oldText}
+      </span>
+    );
+    const newDisplay = newNode ?? (
+      <span className="min-w-0 break-all wrap-anywhere" title={newValue ?? "empty"}>
+        {newText}
+      </span>
+    );
+
+    return (
+      <div className="min-w-0 space-y-1">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+        <div className="inline-flex min-w-0 flex-wrap items-center gap-2 text-sm text-foreground/95">
+          {oldDisplay}
+          <MoveRight className="size-3.5 text-muted-foreground" aria-hidden="true" />
+          {newDisplay}
+        </div>
+      </div>
+    );
+  };
+
   const renderAction = (entry: RequestChangelogResponse): ReactNode => {
     const oldValue = entry.oldValue;
     const newValue = entry.newValue;
 
+    const oldFormattedValue =
+      entry.field === "categoryIds" ? formatCategoryList(oldValue) : formatFieldValue(entry.field, oldValue);
+    const newFormattedValue =
+      entry.field === "categoryIds" ? formatCategoryList(newValue) : formatFieldValue(entry.field, newValue);
+
     switch (entry.field) {
       case "status":
-        return (
-          <span className="inline-flex flex-wrap items-center gap-2 text-sm">
-            <span>Changed status from</span>
-            {renderStatusBadge(oldValue)}
-            <span>to</span>
-            {renderStatusBadge(newValue)}
-          </span>
-        );
-      case "title":
-        if (!oldValue || oldValue === "empty") {
-          return <span>Set the title to &quot;{formatFieldValue(entry.field, newValue)}&quot;.</span>;
-        }
-        return (
-          <span>
-            Renamed this request from &quot;{formatFieldValue(entry.field, oldValue)}&quot; to &quot;
-            {formatFieldValue(entry.field, newValue)}&quot;.
-          </span>
-        );
-      case "description":
-        if (newValue === null) {
-          return <span>Cleared the description.</span>;
-        }
-        if (oldValue === null) {
-          return <span>Set the description to &quot;{formatFieldValue(entry.field, newValue)}&quot;.</span>;
-        }
-        return (
-          <span>
-            Changed the description from &quot;{formatFieldValue(entry.field, oldValue)}&quot; to &quot;
-            {formatFieldValue(entry.field, newValue)}&quot;.
-          </span>
-        );
-      case "isPinned":
-        return <span>{newValue === "true" ? "Pinned this request." : "Unpinned this request."}</span>;
-      case "isHidden":
-        return <span>{newValue === "true" ? "Marked this request as hidden." : "Made this request visible."}</span>;
-      case "adminNote":
-        if (newValue === null) {
-          return <span>Removed the admin note.</span>;
-        }
-        if (oldValue === null) {
-          return <span>Added an admin note.</span>;
-        }
-        return <span>Updated the admin note.</span>;
-      case "voteCount":
-        return (
-          <span>
-            Adjusted vote count from {formatFieldValue(entry.field, oldValue)} to{" "}
-            {formatFieldValue(entry.field, newValue)}.
-          </span>
-        );
-      case "categoryId":
-        return <span>Changed the category for this request.</span>;
+        return renderFieldChange({
+          label: formatFieldLabel(entry.field),
+          oldNode: renderStatusBadge(oldValue),
+          newNode: renderStatusBadge(newValue)
+        });
       default:
-        return (
-          <span>
-            Updated {entry.field} from {formatFieldValue(entry.field, oldValue)} to{" "}
-            {formatFieldValue(entry.field, newValue)}.
-          </span>
-        );
+        return renderFieldChange({
+          label: formatFieldLabel(entry.field),
+          oldValue: oldFormattedValue,
+          newValue: newFormattedValue
+        });
     }
   };
 
@@ -216,7 +261,7 @@ export function RequestHistoryPanel({ changelogEntries, changelogLoading, change
                   <span>{formatRelativeTime(entry.createdAt)}</span>
                 </p>
 
-                <div className="text-sm font-medium text-foreground/95">{renderAction(entry)}</div>
+                <div>{renderAction(entry)}</div>
               </div>
             </div>
           </li>

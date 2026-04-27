@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CalendarClock, MessageSquare } from "lucide-react";
 
 import { CommentSection } from "@/features/comments/components/CommentSection";
+import { boardService } from "@/features/boards/services/boardService";
 import { requestService, type RequestChangelogResponse } from "@/features/requests/services/requestService";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { RequestHistoryPanel } from "@/features/requests/components/RequestHistoryPanel";
@@ -27,6 +28,7 @@ export function RequestActivityTabs({
   const [changelogEntries, setChangelogEntries] = useState<RequestChangelogResponse[]>([]);
   const [changelogLoading, setChangelogLoading] = useState(false);
   const [changelogError, setChangelogError] = useState<string | null>(null);
+  const [categoryNamesById, setCategoryNamesById] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -36,15 +38,25 @@ export function RequestActivityTabs({
       setChangelogError(null);
 
       try {
-        const history = await requestService.getRequestChangelogByRequestId(requestId, boardId);
+        const [history, categories] = await Promise.all([
+          requestService.getRequestChangelogByRequestId(requestId, boardId),
+          boardService.getBoardCategories(boardId)
+        ]);
 
         if (!cancelled) {
           setChangelogEntries(history);
+          setCategoryNamesById(
+            categories.reduce<Record<string, string>>((accumulator, category) => {
+              accumulator[category.id] = category.name;
+              return accumulator;
+            }, {})
+          );
         }
       } catch {
         if (!cancelled) {
           setChangelogError("Could not load history");
           setChangelogEntries([]);
+          setCategoryNamesById({});
         }
       } finally {
         if (!cancelled) {
@@ -73,15 +85,24 @@ export function RequestActivityTabs({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="comments" className={cn("min-h-0 flex-1 outline-none", isDialog ? "mt-3" : "mt-4")}>
+      <TabsContent
+        value="comments"
+        forceMount
+        className={cn("min-h-0 flex-1 outline-none", isDialog ? "mt-3 flex flex-col" : "mt-4 flex flex-col")}
+      >
         <CommentSection requestId={requestId} boardId={boardId} isDialog={isDialog} />
       </TabsContent>
 
-      <TabsContent value="history" className={cn("min-h-0 flex-1 outline-none", isDialog ? "mt-3" : "mt-4")}>
+      <TabsContent
+        value="history"
+        forceMount
+        className={cn("min-h-0 flex-1 outline-none", isDialog ? "mt-3 flex flex-col" : "mt-4 flex flex-col")}
+      >
         <RequestHistoryPanel
           changelogEntries={changelogEntries}
           changelogLoading={changelogLoading}
           changelogError={changelogError}
+          categoryNamesById={categoryNamesById}
         />
       </TabsContent>
     </Tabs>

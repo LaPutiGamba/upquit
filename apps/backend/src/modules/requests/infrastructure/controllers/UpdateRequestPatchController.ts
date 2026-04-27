@@ -30,7 +30,7 @@ export default async function UpdateRequestPatchController(req: Request<UpdateRe
       req.userId,
       req.body.title,
       req.body.description,
-      req.body.categoryId,
+      req.body.categoryIds,
       req.body.status,
       req.body.voteCount,
       req.body.isPinned,

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { giveToGetService, GiveToGetProgressResponse } from "@/features/give-to-get/services/giveToGetService";
+import { CategorySelectorMultiple } from "@/features/requests/components/CategorySelectorMultiple";
 import { requestService, RequestResponse } from "../services/requestService";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
@@ -25,6 +26,8 @@ import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { toast } from "@/shared/components/ui/sonner";
 import { Plus } from "lucide-react";
+
+const sectionLabelClassName = "text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground";
 
 const createRequestSchema = z.object({
   title: z.string().trim().min(1, "Please enter a title"),
@@ -47,6 +50,7 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
 
   const form = useForm<CreateRequestFormValues>({
     // @ts-expect-error - zodResolver type mismatch
@@ -115,13 +119,15 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
     setIsSubmitting(true);
 
     try {
-      const createdRequest = await requestService.createRequest(
+      const createdRequest = await requestService.createRequest({
         boardId,
-        data.title,
-        data.description?.trim() ? data.description : null
-      );
+        title: data.title,
+        description: data.description?.trim() ? data.description : null,
+        categoryIds
+      });
 
       form.reset({ title: "", description: "" });
+      setCategoryIds([]);
       setIsDialogOpen(false);
       toast.success("Request created successfully");
 
@@ -173,6 +179,11 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
             </FormItem>
           )}
         />
+
+        <div className="mt-2 space-y-3">
+          <p className={sectionLabelClassName}>Categories</p>
+          <CategorySelectorMultiple boardId={boardId} value={categoryIds} onChange={setCategoryIds} />
+        </div>
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Creating..." : "Create Request"}

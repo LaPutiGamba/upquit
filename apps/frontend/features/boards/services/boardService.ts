@@ -48,6 +48,14 @@ export interface UpdateBoardPayload {
   giveToGetCommentsReq?: number | null;
 }
 
+export interface CategoryResponse {
+  id: string;
+  boardId: string;
+  name: string;
+  hexColor?: string;
+  createdAt: string | null;
+}
+
 export const boardService = {
   getMyBoards: async (token?: string): Promise<BoardResponse[]> => {
     return await apiClient<BoardResponse[]>("/boards/mine", {
@@ -117,6 +125,21 @@ export const boardService = {
   removeBoardMember: async (boardId: string, userId: string, token?: string): Promise<void> => {
     await apiClient(`/boards/${boardId}/members/${userId}`, {
       method: "DELETE",
+      token
+    });
+  },
+
+  getBoardCategories: async (boardId: string, token?: string): Promise<CategoryResponse[]> => {
+    return await apiClient<CategoryResponse[]>(`/boards/${boardId}/categories`, {
+      method: "GET",
+      token
+    });
+  },
+
+  addBoardCategory: async (boardId: string, name: string, token?: string): Promise<CategoryResponse> => {
+    return await apiClient<CategoryResponse>(`/boards/${boardId}/categories`, {
+      method: "POST",
+      body: JSON.stringify({ name }),
       token
     });
   }

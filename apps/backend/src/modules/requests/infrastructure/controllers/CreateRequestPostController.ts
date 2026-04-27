@@ -24,7 +24,7 @@ export default async function CreateRequestPostController(req: Request, res: Res
       req.userId,
       req.body.title,
       req.body.description ?? null,
-      req.body.categoryId ?? null,
+      Array.isArray(req.body.categoryIds) ? req.body.categoryIds : [],
       req.body.status ?? "open",
       req.body.voteCount ?? 0,
       req.body.isPinned ?? false,

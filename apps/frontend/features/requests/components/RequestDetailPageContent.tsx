@@ -5,16 +5,20 @@ import { toast } from "sonner";
 
 import { useRequestDetailPage } from "@/features/requests/hooks/useRequestDetailPage";
 
+import { CategorySelectorMultiple } from "@/features/requests/components/CategorySelectorMultiple";
 import { RequestDescription, RequestHeader, RequestTitle } from "@/features/requests/components/RequestHeader";
 import { RequestMetadataRow } from "@/features/requests/components/RequestMetadataRow";
 import {
   requestService,
+  getRequestCategoryIds,
   type RequestResponse,
   type UpdateRequestPayload
 } from "@/features/requests/services/requestService";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { RequestActivityTabs } from "@/features/requests/components/RequestActivityTabs";
+
+const sectionLabelClassName = "text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground";
 
 interface RequestDetailPageContentProps {
   slug: string;
@@ -39,6 +43,11 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     return editableRequest.authorId === user.id || board.ownerId === user.id;
   }, [board, editableRequest, user]);
 
+  const categoryIds = useMemo(
+    () => getRequestCategoryIds(editableRequest ?? { categoryIds: [], categories: [] }),
+    [editableRequest]
+  );
+
   const handleUpdateRequest = async (payload: UpdateRequestPayload) => {
     if (!board || !editableRequest) {
       return;
@@ -51,7 +60,18 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
 
     try {
       const updatedRequest = await requestService.updateRequest(editableRequest.id, board.id, payload);
-      setEditableRequest(updatedRequest);
+
+      const updatedCategoryIds = getRequestCategoryIds(updatedRequest);
+      const nextCategoryIds = getRequestCategoryIds(nextRequest);
+      const shouldKeepOptimisticCategoryIds =
+        payload.categoryIds !== undefined &&
+        updatedRequest.categoryIds === undefined &&
+        (!updatedRequest.categories || updatedRequest.categories.length === 0);
+
+      setEditableRequest({
+        ...updatedRequest,
+        categoryIds: shouldKeepOptimisticCategoryIds ? nextCategoryIds : updatedCategoryIds
+      });
       setChangelogRefreshKey((currentValue) => currentValue + 1);
     } catch {
       setEditableRequest(previousRequest);
@@ -97,13 +117,22 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
             >
               {editableRequest.description ?? ""}
             </RequestDescription>
+            <div className="mt-5 space-y-3">
+              <p className={sectionLabelClassName}>Categories</p>
+              <CategorySelectorMultiple
+                boardId={board.id}
+                value={categoryIds}
+                onChange={(nextValues) => handleUpdateRequest({ categoryIds: nextValues })}
+                disabled={!canEdit}
+              />
+            </div>
             <RequestMetadataRow
               request={editableRequest}
               boardId={board.id}
               canEdit={canEdit}
               onStatusSave={(nextStatus) => handleUpdateRequest({ status: nextStatus })}
               size="md"
-              className="mt-3"
+              className="mt-5"
             />
           </RequestHeader>
         </section>

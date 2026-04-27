@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { CommentForm } from "./CommentForm";
-import { MessageCircleMore } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useComments } from "../hooks/useComments";
 import { CommentThread } from "./CommentThread";
@@ -17,8 +16,6 @@ interface CommentSectionProps {
 export function CommentSection({ requestId, boardId, isDialog = false }: CommentSectionProps) {
   const { comments, isLoading, addComment } = useComments(requestId, boardId);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
-
-  const commentCount = comments.length;
 
   const { rootComments, repliesByParentId } = useMemo(() => {
     const roots: CommentResponse[] = [];
@@ -53,21 +50,8 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
   }, [comments]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className={cn("shrink-0 border-b border-border/60 pb-5", isDialog ? "" : "bg-background/95")}>
-        <div className="mb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-2xl font-semibold tracking-tight">Comments</h3>
-              <span className="inline-flex h-6 items-center gap-1.5 rounded-full border border-border/70 bg-muted/35 px-2.5 text-xs font-semibold text-muted-foreground">
-                <MessageCircleMore aria-hidden="true" className="size-3.5" strokeWidth={2.5} />
-                <span className="tabular-nums leading-none">{commentCount}</span>
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground">Join the conversation and share your thoughts.</p>
-          </div>
-        </div>
-
         <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={addComment} isDialog={isDialog} />
       </div>
 

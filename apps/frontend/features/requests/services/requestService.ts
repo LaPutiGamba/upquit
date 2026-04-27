@@ -1,10 +1,17 @@
 import { apiClient } from "@/shared/lib/apiClient";
 
+export interface RequestCategoryResponse {
+  id: string;
+  name: string;
+  hexColor: string;
+}
+
 export interface RequestResponse {
   id: string;
   boardId: string;
   authorId: string;
-  categoryId: string | null;
+  categoryIds?: string[];
+  categories?: RequestCategoryResponse[];
   title: string;
   description: string | null;
   status: string;
@@ -19,7 +26,7 @@ export type RequestChangelogField =
   | "title"
   | "description"
   | "status"
-  | "categoryId"
+  | "categoryIds"
   | "voteCount"
   | "isPinned"
   | "isHidden"
@@ -38,10 +45,31 @@ export interface RequestChangelogResponse {
 
 export type RequestStatusValue = "open" | "planned" | "in_progress" | "completed" | "rejected";
 
+export interface CreateRequestPayload {
+  boardId: string;
+  title: string;
+  description?: string | null;
+  categoryIds?: string[];
+  status?: RequestStatusValue;
+  voteCount?: number;
+  isPinned?: boolean;
+  isHidden?: boolean;
+  adminNote?: string | null;
+}
+
 export interface UpdateRequestPayload {
   title?: string;
   description?: string | null;
   status?: RequestStatusValue;
+  categoryIds?: string[];
+}
+
+export function getRequestCategoryIds(request: Pick<RequestResponse, "categoryIds" | "categories">): string[] {
+  if (request.categoryIds !== undefined) {
+    return request.categoryIds;
+  }
+
+  return request.categories?.map((category) => category.id) ?? [];
 }
 
 export const requestService = {
@@ -61,26 +89,20 @@ export const requestService = {
     });
   },
 
-  createRequest: async (
-    boardId: string,
-    title: string,
-    description: string | null,
-    token?: string
-  ): Promise<RequestResponse> => {
+  createRequest: async (payload: CreateRequestPayload, token?: string): Promise<RequestResponse> => {
     return await apiClient<RequestResponse>(`/requests`, {
       method: "POST",
-      tenantId: boardId,
+      tenantId: payload.boardId,
       token,
       body: JSON.stringify({
-        boardId,
-        title,
-        description: description ?? null,
-        categoryId: null,
-        status: "open",
-        voteCount: 0,
-        isPinned: false,
-        isHidden: false,
-        adminNote: null
+        ...payload,
+        description: payload.description ?? null,
+        categoryIds: payload.categoryIds ?? [],
+        status: payload.status ?? "open",
+        voteCount: payload.voteCount ?? 0,
+        isPinned: payload.isPinned ?? false,
+        isHidden: payload.isHidden ?? false,
+        adminNote: payload.adminNote ?? null
       })
     });
   },
