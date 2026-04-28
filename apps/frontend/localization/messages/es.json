@@ -309,6 +309,36 @@
       "cancel": "Cancelar",
       "save": "Guardar configuración",
       "saving": "Guardando..."
+    },
+    "dangerZone": {
+      "title": "Zona peligrosa",
+      "description": "Elimina este tablero de forma permanente. También se borrarán todas las solicitudes, comentarios y votos asociados.",
+      "deleteBoard": "Eliminar tablero",
+      "dialogTitle": "¿Estás completamente seguro?",
+      "dialogDescription": "¿Seguro que quieres eliminar este tablero? Esta acción no se puede deshacer.",
+      "success": "Tablero eliminado correctamente",
+      "failed": "No se pudo eliminar el tablero.",
+      "actions": {
+        "cancel": "Cancelar",
+        "confirmDelete": "Confirmar eliminación",
+        "confirming": "Eliminando..."
+      }
+    }
+  },
+  "RequestDetailPage": {
+    "actions": {
+      "delete": "Eliminar solicitud"
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar solicitud?",
+      "description": "¿Seguro que quieres eliminar esta solicitud? Sus comentarios y votos se borrarán de forma permanente.",
+      "success": "Solicitud eliminada correctamente",
+      "failed": "No se pudo eliminar la solicitud.",
+      "actions": {
+        "cancel": "Cancelar",
+        "confirmDelete": "Confirmar eliminación",
+        "confirming": "Eliminando..."
+      }
     }
   },
   "DefaultHomePage": {

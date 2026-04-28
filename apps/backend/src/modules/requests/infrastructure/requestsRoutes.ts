@@ -9,6 +9,7 @@ import UpdateRequestPatchController from "./controllers/UpdateRequestPatchContro
 import SubscribeToRequestPostController from "./controllers/SubscribeToRequestPostController.js";
 import UnsubscribeFromRequestDeleteController from "./controllers/UnsubscribeFromRequestDeleteController.js";
 import IsSubscribedToRequestGetController from "./controllers/IsSubscribedToRequestGetController.js";
+import DeleteRequestDeleteController from "./controllers/DeleteRequestDeleteController.js";
 
 const requestsRouter = Router();
 
@@ -20,6 +21,7 @@ requestsRouter.get("/:id/changelog", GetRequestChangelogGetController);
 // Protected
 requestsRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, CreateRequestPostController);
 requestsRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateRequestPatchController);
+requestsRouter.delete("/:id", JwtAuthMiddleware, TenantDbMiddleware, DeleteRequestDeleteController);
 requestsRouter.post("/:id/subscriptions", JwtAuthMiddleware, TenantDbMiddleware, SubscribeToRequestPostController);
 requestsRouter.delete(
   "/:id/subscriptions",

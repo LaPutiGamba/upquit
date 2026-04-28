@@ -94,6 +94,13 @@ export const boardService = {
     });
   },
 
+  deleteBoard: async (id: string, token?: string): Promise<void> => {
+    await apiClient(`/boards/${id}`, {
+      method: "DELETE",
+      token
+    });
+  },
+
   getBoardMembers: async (boardId: string, token?: string): Promise<BoardMember[]> => {
     return await apiClient<BoardMember[]>(`/boards/${boardId}/members`, {
       method: "GET",

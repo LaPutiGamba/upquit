@@ -23,6 +23,7 @@ export default interface BoardRepository {
   findBoardIdsByUserId(userId: Uuid): Promise<string[]>;
   save(board: Board): Promise<void>;
   update(board: Board): Promise<void>;
+  delete(id: string): Promise<void>;
 
   // Member Operations
   addMember(member: BoardMember): Promise<void>;

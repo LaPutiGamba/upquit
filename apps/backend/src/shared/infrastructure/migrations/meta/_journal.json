@@ -29,6 +29,13 @@
       "when": 1774815600000,
       "tag": "0003_request_categories_many_to_many",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1777420800000,
+      "tag": "0004_cascade_delete_foreign_keys",
+      "breakpoints": true
     }
   ]
 }

@@ -115,6 +115,12 @@ export const requestService = {
     });
   },
 
+  deleteRequest: async (id: string): Promise<void> => {
+    await apiClient<void>(`/requests/${id}`, {
+      method: "DELETE"
+    });
+  },
+
   getRequestChangelogByRequestId: async (requestId: string, boardId: string): Promise<RequestChangelogResponse[]> => {
     return await apiClient<RequestChangelogResponse[]>(`/requests/${requestId}/changelog`, {
       method: "GET",

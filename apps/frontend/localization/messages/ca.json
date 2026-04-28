@@ -309,6 +309,36 @@
       "cancel": "Cancel-lar",
       "save": "Desar configuració",
       "saving": "Desant..."
+    },
+    "dangerZone": {
+      "title": "Zona de perill",
+      "description": "Elimina aquest tauler de manera permanent. També s'esborraran totes les sol·licituds, comentaris i vots associats.",
+      "deleteBoard": "Eliminar tauler",
+      "dialogTitle": "Estàs completament segur?",
+      "dialogDescription": "Vols eliminar aquest tauler? Aquesta acció no es pot desfer.",
+      "success": "Tauler eliminat correctament",
+      "failed": "No s'ha pogut eliminar el tauler.",
+      "actions": {
+        "cancel": "Cancel-lar",
+        "confirmDelete": "Confirmar eliminació",
+        "confirming": "Eliminant..."
+      }
+    }
+  },
+  "RequestDetailPage": {
+    "actions": {
+      "delete": "Eliminar sol·licitud"
+    },
+    "deleteDialog": {
+      "title": "Eliminar sol·licitud?",
+      "description": "Vols eliminar aquesta sol·licitud? Els seus comentaris i vots s'esborraran de manera permanent.",
+      "success": "Sol·licitud eliminada correctament",
+      "failed": "No s'ha pogut eliminar la sol·licitud.",
+      "actions": {
+        "cancel": "Cancel-lar",
+        "confirmDelete": "Confirmar eliminació",
+        "confirming": "Eliminant..."
+      }
     }
   },
   "DefaultHomePage": {

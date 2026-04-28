@@ -129,6 +129,10 @@ export default class RequestDrizzleRepository implements RequestRepository {
       .where(eq(requests.id, request.id.getValue()));
   }
 
+  public async delete(id: string): Promise<void> {
+    await this.db.delete(requests).where(eq(requests.id, id));
+  }
+
   public async addChangelogEntries(entries: RequestChangelogCreateInput[]): Promise<void> {
     if (entries.length === 0) {
       return;

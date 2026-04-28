@@ -114,6 +114,10 @@ export default class BoardDrizzleRepository implements BoardRepository {
       .where(eq(boards.id, board.id.getValue()));
   }
 
+  public async delete(id: string): Promise<void> {
+    await this.db.delete(boards).where(eq(boards.id, id));
+  }
+
   // =========================================================================
   // BOARD MEMBERS
   // =========================================================================

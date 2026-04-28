@@ -1,5 +1,5 @@
 import { boolean, char, integer, pgTable, primaryKey, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { users } from "../../users/infrastructure/schema";
+import { users } from "../../users/infrastructure/schema.js";
 
 export const boards = pgTable("boards", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -27,14 +27,12 @@ export const boardMembers = pgTable(
       .references(() => users.id),
     boardId: uuid("board_id")
       .notNull()
-      .references(() => boards.id),
+      .references(() => boards.id, { onDelete: "cascade" }),
     role: varchar("role", { length: 50 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow()
   },
   (table) => {
-    return {
-      pk: primaryKey({ columns: [table.userId, table.boardId] })
-    };
+    return [primaryKey({ columns: [table.userId, table.boardId] })];
   }
 );
 
@@ -42,7 +40,7 @@ export const categories = pgTable("categories", {
   id: uuid("id").defaultRandom().primaryKey(),
   boardId: uuid("board_id")
     .notNull()
-    .references(() => boards.id),
+    .references(() => boards.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 100 }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow()
 });

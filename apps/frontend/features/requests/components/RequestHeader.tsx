@@ -41,14 +41,16 @@ const requestTitleVariants = cva("text-balance font-semibold tracking-tight text
 interface RequestHeaderProps extends VariantProps<typeof requestHeaderVariants> {
   children: ReactNode;
   canEdit?: boolean;
+  actions?: ReactNode;
   className?: string;
 }
 
-export function RequestHeader({ variant = "page", canEdit = false, className, children }: RequestHeaderProps) {
+export function RequestHeader({ variant = "page", canEdit = false, actions, className, children }: RequestHeaderProps) {
   return (
     <div className={cn(requestHeaderVariants({ variant }), className)} data-can-edit={canEdit}>
-      <div className="flex flex-col gap-2">
-        <div className="min-w-0">{children}</div>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">{children}</div>
+        {actions ? <div className="shrink-0">{actions}</div> : null}
       </div>
     </div>
   );

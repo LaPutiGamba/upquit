@@ -8,7 +8,7 @@ export const requests = pgTable("requests", {
   id: uuid("id").defaultRandom().primaryKey(),
   boardId: uuid("board_id")
     .notNull()
-    .references(() => boards.id),
+    .references(() => boards.id, { onDelete: "cascade" }),
   authorId: uuid("author_id")
     .notNull()
     .references(() => users.id),
@@ -33,9 +33,7 @@ export const requestCategories = pgTable(
       .references(() => categories.id, { onDelete: "cascade" })
   },
   (table) => {
-    return {
-      pk: primaryKey({ columns: [table.requestId, table.categoryId] })
-    };
+    return [primaryKey({ columns: [table.requestId, table.categoryId] })];
   }
 );
 
@@ -43,7 +41,7 @@ export const requestChangelogs = pgTable("request_changelogs", {
   id: uuid("id").defaultRandom().primaryKey(),
   requestId: uuid("request_id")
     .notNull()
-    .references(() => requests.id),
+    .references(() => requests.id, { onDelete: "cascade" }),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id),
@@ -61,12 +59,10 @@ export const subscriptions = pgTable(
       .references(() => users.id),
     requestId: uuid("request_id")
       .notNull()
-      .references(() => requests.id),
+      .references(() => requests.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow()
   },
   (table) => {
-    return {
-      pk: primaryKey({ columns: [table.userId, table.requestId] })
-    };
+    return [primaryKey({ columns: [table.userId, table.requestId] })];
   }
 );

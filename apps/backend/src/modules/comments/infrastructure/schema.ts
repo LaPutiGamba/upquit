@@ -1,12 +1,12 @@
 import { boolean, AnyPgColumn, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { users } from "../../users/infrastructure/schema";
-import { requests } from "../../requests/infrastructure/schema";
+import { users } from "../../users/infrastructure/schema.js";
+import { requests } from "../../requests/infrastructure/schema.js";
 
 export const comments = pgTable("comments", {
   id: uuid("id").defaultRandom().primaryKey(),
   requestId: uuid("request_id")
     .notNull()
-    .references(() => requests.id),
+    .references(() => requests.id, { onDelete: "cascade" }),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id),

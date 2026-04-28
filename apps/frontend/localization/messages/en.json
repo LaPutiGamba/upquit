@@ -308,6 +308,36 @@
       "cancel": "Cancel",
       "save": "Save settings",
       "saving": "Saving..."
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Delete this board permanently. This will also remove all associated requests, comments, and votes.",
+      "deleteBoard": "Delete Board",
+      "dialogTitle": "Are you absolutely sure?",
+      "dialogDescription": "Are you sure you want to delete this board? This action cannot be undone.",
+      "success": "Board deleted successfully",
+      "failed": "Could not delete the board.",
+      "actions": {
+        "cancel": "Cancel",
+        "confirmDelete": "Confirm Delete",
+        "confirming": "Deleting..."
+      }
+    }
+  },
+  "RequestDetailPage": {
+    "actions": {
+      "delete": "Delete Request"
+    },
+    "deleteDialog": {
+      "title": "Delete request?",
+      "description": "Are you sure you want to delete this request? Its comments and votes will be permanently deleted.",
+      "success": "Request deleted successfully",
+      "failed": "Could not delete the request.",
+      "actions": {
+        "cancel": "Cancel",
+        "confirmDelete": "Confirm Delete",
+        "confirming": "Deleting..."
+      }
     }
   },
   "DefaultHomePage": {

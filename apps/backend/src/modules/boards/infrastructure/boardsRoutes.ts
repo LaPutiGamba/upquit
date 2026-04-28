@@ -12,6 +12,7 @@ import GetBoardMembersGetController from "./controllers/GetBoardMembersGetContro
 import AddBoardMemberPostController from "./controllers/AddBoardMemberPostController.js";
 import RemoveBoardMemberDeleteController from "./controllers/RemoveBoardMemberDeleteController.js";
 import UpdateBoardMemberRolePatchController from "./controllers/UpdateBoardMemberRolePatchController.js";
+import DeleteBoardDeleteController from "./controllers/DeleteBoardDeleteController.js";
 
 const boardsRouter = Router();
 
@@ -22,6 +23,7 @@ boardsRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, CreateBoardPostCon
 boardsRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateBoardPatchController);
 boardsRouter.post("/:id/categories", JwtAuthMiddleware, TenantDbMiddleware, AddBoardCategoryPostController);
 boardsRouter.post("/:id/members", JwtAuthMiddleware, TenantDbMiddleware, AddBoardMemberPostController);
+boardsRouter.delete("/:id", JwtAuthMiddleware, TenantDbMiddleware, DeleteBoardDeleteController);
 boardsRouter.patch(
   "/:boardId/members/:userId",
   JwtAuthMiddleware,

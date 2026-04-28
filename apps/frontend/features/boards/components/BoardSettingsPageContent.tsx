@@ -13,6 +13,14 @@ import { Checkbox } from "@/shared/components/ui/checkbox";
 import { ColorPicker } from "@/shared/components/ui/color-picker";
 import { Field, FieldDescription, FieldLabel } from "@/shared/components/ui/field";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/shared/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { toast } from "@/shared/components/ui/sonner";
@@ -93,6 +101,8 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
   const [notFound, setNotFound] = useState(false);
   const [forbidden, setForbidden] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const isOwner = Boolean(user?.id && ownerId && user.id === ownerId);
 
   const boardSettingsSchema = useMemo(() => createBoardSettingsSchema(t), [t]);
@@ -254,6 +264,30 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
       }
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteBoard = async () => {
+    if (!boardId) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await boardService.deleteBoard(boardId);
+      await refreshBoards();
+      toast.success(t("dangerZone.success"));
+      router.replace("/");
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error(t("dangerZone.failed"));
+      }
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -547,6 +581,54 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
             </div>
           </form>
         </Form>
+
+        {isOwner && boardId ? (
+          <section className="relative mt-4 rounded-xl border border-destructive/20 bg-destructive/5 p-5 pt-6 shadow-sm shadow-destructive/5">
+            <div
+              className="absolute left-4 top-0 inline-block -translate-y-1/2 px-3 py-0.5 text-lg font-semibold leading-none tracking-tight text-destructive"
+              style={{
+                background: "linear-gradient(to bottom, var(--background) 50%, transparent 50%)"
+              }}
+            >
+              {t("dangerZone.title")}
+            </div>
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-2xl text-sm text-muted-foreground">{t("dangerZone.description")}</p>
+
+              <Button
+                type="button"
+                variant="destructive"
+                className="shrink-0 sm:self-center"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                {t("dangerZone.deleteBoard")}
+              </Button>
+            </div>
+
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("dangerZone.dialogTitle")}</DialogTitle>
+                  <DialogDescription>{t("dangerZone.dialogDescription")}</DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                    {t("dangerZone.actions.cancel")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => void handleDeleteBoard()}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? t("dangerZone.actions.confirming") : t("dangerZone.actions.confirmDelete")}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </section>
+        ) : null}
       </div>
     </main>
   );
