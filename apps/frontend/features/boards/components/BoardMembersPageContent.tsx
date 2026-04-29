@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/localization/i18n/routing";
 import { UserPlus2, Trash2, Shield, Crown } from "lucide-react";
@@ -115,7 +115,7 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
     };
   }, [router, slug, user?.id]);
 
-  const handleAddMember = async (event: SubmitEvent) => {
+  const handleAddMember = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!board) {

@@ -1,44 +1,68 @@
+name: upquit
+
 services:
-  # PostgreSQL Database Service
-  db:
-    image: dhi.io/postgres:17-debian13
-    container_name: upquit-postgres
+  postgres:
+    image: postgres:16-alpine
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: localpassword
-      POSTGRES_DB: upquit_dev
+    env_file:
+      - apps/backend/.env
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # Redis Cache Service
-  redis:
-    image: dhi.io/redis:8-debian13
-    container_name: upquit-redis
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redisdata:/data
+  migrator:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: builder
+    env_file:
+      - apps/backend/.env
+    command: sh -c "pnpm --filter upquit-backend run db:migrate && pnpm --filter upquit-backend run db:seed"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
-  # Node.js Backend Service
   backend:
-    image: dhi.io/node:24-debian13
-    container_name: upquit-backend
-    working_dir: /usr/src/app
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    restart: always
+    env_file:
+      - apps/backend/.env
     environment:
-      - DATABASE_URL=postgres://postgres:localpassword@db:5432/upquit_dev
-    volumes:
-      - .:/usr/src/app
+      NODE_ENV: production
+      PORT: 8080
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8080}
+    restart: always
+    env_file:
+      - apps/frontend/.env
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8080}
     ports:
       - "3000:3000"
     depends_on:
-      - db
-      - redis
-    command: node -e "setInterval(() => {}, 86400000)"
+      - backend
 
 volumes:
   pgdata:
-  redisdata:
