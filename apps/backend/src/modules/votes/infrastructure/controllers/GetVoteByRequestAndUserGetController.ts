@@ -24,10 +24,7 @@ export default async function GetVoteByRequestAndUserGetController(req: Request,
     return res.status(200).json(response);
   } catch (ex) {
     if (ex instanceof VoteNotFoundException) {
-      return res.status(404).send({
-        error: "VOTE_NOT_FOUND",
-        message: ex.message
-      });
+      return res.sendStatus(204);
     }
     if (ex instanceof InvalidUuidException) {
       return res.status(400).send({

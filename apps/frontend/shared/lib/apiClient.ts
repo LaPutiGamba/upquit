@@ -1,4 +1,7 @@
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+const BACKEND_URL =
+  typeof window !== "undefined"
+    ? process.env.NEXT_PUBLIC_BACKEND_URL!
+    : process.env.INTERNAL_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL!;
 const REFRESH_ENDPOINT = "/users/refresh";
 const TOKEN_REFRESH_EXCLUDED_ENDPOINTS = new Set([REFRESH_ENDPOINT, "/users/login"]);
 

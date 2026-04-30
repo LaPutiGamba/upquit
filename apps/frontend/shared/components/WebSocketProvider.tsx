@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, ReactNode } from "react";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL!;
 const WS_URL = BACKEND_URL.startsWith("https")
   ? BACKEND_URL.replace(/^https/, "wss")
   : BACKEND_URL.replace(/^http/, "ws");

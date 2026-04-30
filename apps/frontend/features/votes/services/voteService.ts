@@ -28,12 +28,12 @@ export const voteService = {
 
   checkVote: async (requestId: string, userId: string, boardId?: string, token?: string): Promise<string | null> => {
     try {
-      const response = await apiClient<VoteResponse>(`/votes?requestId=${requestId}&userId=${userId}`, {
+      const response = await apiClient<VoteResponse | null>(`/votes?requestId=${requestId}&userId=${userId}`, {
         method: "GET",
         token,
         tenantId: boardId
       });
-      return response.id;
+      return response?.id ?? null;
     } catch {
       return null;
     }

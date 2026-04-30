@@ -10,7 +10,7 @@ export default class ResendEmailSender implements EmailSender {
   }
 
   async sendVerificationEmail(email: string, userId: string, name: string): Promise<void> {
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify?id=${userId}`;
+    const verificationUrl = `${process.env.FRONTEND_URL!}/verify?id=${userId}`;
 
     const { error } = await this.resend.emails.send({
       from: "UpQuit <onboarding@resend.dev>", // TODO: Update email

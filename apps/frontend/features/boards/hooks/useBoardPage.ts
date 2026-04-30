@@ -9,6 +9,7 @@ import { requestService, RequestResponse } from "@/features/requests/services/re
 import { UnauthorizedError } from "@/shared/lib/apiClient";
 import { formatLocalizedDateTime } from "@/shared/lib/date";
 import { useChannel } from "@/shared/hooks/useChannel";
+import { useAuth } from "@/shared/components/AuthProvider";
 
 interface UseBoardPageResult {
   board: BoardResponse | null;
@@ -37,6 +38,7 @@ export function useBoardPage(slug: string): UseBoardPageResult {
   const router = useRouter();
   const searchParams = useSearchParams();
   const locale = useLocale();
+  const { isAuthLoading } = useAuth();
   const isRequestsTab = searchParams.get("tab") === "requests";
 
   const [board, setBoard] = useState<BoardResponse | null>(null);
@@ -75,6 +77,10 @@ export function useBoardPage(slug: string): UseBoardPageResult {
   }, [locale, requestsSortedByDate]);
 
   useEffect(() => {
+    if (isAuthLoading) {
+      return;
+    }
+
     let cancelled = false;
 
     const loadBoardPage = async () => {
@@ -124,7 +130,7 @@ export function useBoardPage(slug: string): UseBoardPageResult {
     return () => {
       cancelled = true;
     };
-  }, [isRequestsTab, router, slug]);
+  }, [isAuthLoading, isRequestsTab, router, slug]);
 
   useChannel<RequestRealtimeMessagePayload>(board ? `request.${board.id}` : null, (message) => {
     const payload = message.payload;
