@@ -40,11 +40,11 @@ Write-Host ""
 Write-Host "Updating $ENV_FILE..."
 
 $content = Get-Content $ENV_FILE -Raw
-$content = $content -replace '^JWT_ACCESS_SECRET=.*', "JWT_ACCESS_SECRET=$JWT_ACCESS_SECRET"
-$content = $content -replace '^JWT_REFRESH_SECRET=.*', "JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET"
-$content = $content -replace '^POSTGRES_PASSWORD=.*', "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
+$content = $content -replace '(?m)^JWT_ACCESS_SECRET=.*', "JWT_ACCESS_SECRET=$JWT_ACCESS_SECRET"
+$content = $content -replace '(?m)^JWT_REFRESH_SECRET=.*', "JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET"
+$content = $content -replace '(?m)^POSTGRES_PASSWORD=.*', "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
 if ($RESEND_API_KEY) {
-    $content = $content -replace '^RESEND_API_KEY=.*', "RESEND_API_KEY=$RESEND_API_KEY"
+    $content = $content -replace '(?m)^RESEND_API_KEY=.*', "RESEND_API_KEY=$RESEND_API_KEY"
 }
 $content | Set-Content $ENV_FILE
 

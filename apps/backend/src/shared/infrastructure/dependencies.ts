@@ -48,11 +48,14 @@ import CreateUserCommandHandler from "../../modules/users/application/handlers/C
 import InMemoryAsyncEventBus from "./events/InMemoryAsyncEventBus.js";
 import WebSocketRealtimePublisher from "./services/WebSocketRealtimePublisher.js";
 import ResendEmailSender from "./services/ResendEmailSender.js";
+import ConsoleEmailSender from "./services/ConsoleEmailSender.js";
 import BcryptPasswordHasher from "../../modules/users/infrastructure/services/BcryptPasswordHasher.js";
 
 export const eventBus = new InMemoryAsyncEventBus();
 export const realtimePublisher = new WebSocketRealtimePublisher();
-export const emailSender = new ResendEmailSender(process.env.RESEND_API_KEY!);
+export const emailSender = process.env.RESEND_API_KEY
+  ? new ResendEmailSender(process.env.RESEND_API_KEY)
+  : new ConsoleEmailSender();
 export const passwordHasher = new BcryptPasswordHasher();
 
 // ========================
