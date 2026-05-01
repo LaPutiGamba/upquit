@@ -326,7 +326,7 @@
   },
   "RequestDetailPage": {
     "actions": {
-      "delete": "Delete Request"
+      "delete": "Delete"
     },
     "deleteDialog": {
       "title": "Delete request?",

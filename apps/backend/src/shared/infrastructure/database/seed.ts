@@ -1,4 +1,3 @@
-import "dotenv/config";
 import bcrypt from "bcrypt";
 import { pathToFileURL } from "node:url";
 import { sql } from "drizzle-orm";

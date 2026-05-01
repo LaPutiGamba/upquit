@@ -46,6 +46,24 @@ if [ -n "$RESEND_API_KEY" ]; then
 fi
 
 echo ""
+echo "Creating symlink for frontend..."
+FRONTEND_ENV="apps/frontend/.env"
+if [ -L "$FRONTEND_ENV" ]; then
+  rm "$FRONTEND_ENV"
+fi
+ln -s "../.env" "$FRONTEND_ENV"
+echo "  - Created symlink: $FRONTEND_ENV -> ../.env"
+
+echo ""
+echo "Creating symlink for backend..."
+BACKEND_ENV="apps/backend/.env"
+if [ -L "$BACKEND_ENV" ]; then
+  rm "$BACKEND_ENV"
+fi
+ln -s "../.env" "$BACKEND_ENV"
+echo "  - Created symlink: $BACKEND_ENV -> ../.env"
+
+echo ""
 echo "Done. Generated secrets:"
 echo "  - JWT_ACCESS_SECRET"
 echo "  - JWT_REFRESH_SECRET"

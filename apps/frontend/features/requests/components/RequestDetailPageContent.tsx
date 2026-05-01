@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { Trash2 } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 import { useRouter } from "@/localization/i18n/routing";
 
 import { boardService } from "@/features/boards/services/boardService";
@@ -28,6 +28,12 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/shared/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { RequestActivityTabs } from "@/features/requests/components/RequestActivityTabs";
 
@@ -187,10 +193,23 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
             canEdit={canEdit}
             actions={
               canDelete ? (
-                <Button type="button" variant="destructive" size="sm" onClick={() => setIsDeleteDialogOpen(true)}>
-                  <Trash2 className="size-4" />
-                  {t("actions.delete")}
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon-sm">
+                      <MoreHorizontal className="size-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                    >
+                      <Trash2 className="size-4" />
+                      {t("actions.delete")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : null
             }
           >
