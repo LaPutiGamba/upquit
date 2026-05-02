@@ -7,6 +7,7 @@ RUN corepack enable
 FROM base AS builder
 WORKDIR /app
 COPY . .
+COPY ../../.env /app/apps/frontend/.env
 
 ARG NEXT_PUBLIC_BACKEND_URL
 ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL

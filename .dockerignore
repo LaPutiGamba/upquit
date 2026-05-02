@@ -7,11 +7,6 @@ node_modules
 apps/*/node_modules
 packages/*/node_modules
 
-# Ignore sensitive environment variables (pass these via Render's dashboard)
-.env
-.env.*
-*.secret
-
 # Ignore frontend build files (Render will only run the Node.js backend)
 apps/frontend/.expo/
 apps/frontend/web-build/
