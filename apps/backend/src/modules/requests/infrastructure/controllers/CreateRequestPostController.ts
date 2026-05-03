@@ -7,11 +7,13 @@ import CreateRequestCommandHandler from "../../application/handlers/CreateReques
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import InvalidRequestStatusException from "../../domain/exceptions/InvalidRequestStatusException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
+import { eventBus } from "../../../../shared/infrastructure/dependencies.js";
 
 export default async function CreateRequestPostController(req: Request, res: Response) {
   const commandHandler = new CreateRequestCommandHandler(
     new RequestDrizzleRepository(db),
-    new WebSocketRealtimePublisher()
+    new WebSocketRealtimePublisher(),
+    eventBus
   );
 
   try {

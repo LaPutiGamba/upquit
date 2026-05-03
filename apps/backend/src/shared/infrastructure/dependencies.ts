@@ -8,12 +8,14 @@ import RequestDrizzleRepository from "../../modules/requests/infrastructure/repo
 import GiveToGetProgressDrizzleRepository from "../../modules/give-to-get/infrastructure/repositories/GiveToGetProgressDrizzleRepository.js";
 import BoardDrizzleRepository from "../../modules/boards/infrastructure/repositories/BoardDrizzleRepository.js";
 import UserDrizzleRepository from "../../modules/users/infrastructure/repositories/UserDrizzleRepository.js";
+import NotificationDrizzleRepository from "../../modules/notifications/infrastructure/repositories/NotificationDrizzleRepository.js";
 
 export const voteRepository = new VoteDrizzleRepository(db);
 export const requestRepository = new RequestDrizzleRepository(db);
 export const giveToGetProgressRepository = new GiveToGetProgressDrizzleRepository(db);
 export const boardRepository = new BoardDrizzleRepository(db);
 export const userRepository = new UserDrizzleRepository(db);
+export const notificationRepository = new NotificationDrizzleRepository(db);
 
 // ========================
 // Domain Events
@@ -23,6 +25,7 @@ import VoteDeletedEvent from "../../modules/votes/domain/events/VoteDeletedEvent
 import CommentCreatedEvent from "../../modules/comments/domain/events/CommentCreatedEvent.js";
 import CommentDeletedEvent from "../../modules/comments/domain/events/CommentDeletedEvent.js";
 import UserCreatedEvent from "../../modules/users/domain/events/UserCreatedEvent.js";
+import RequestCreatedEvent from "../../modules/requests/domain/events/RequestCreatedEvent.js";
 
 // ========================
 // Event Listeners
@@ -34,6 +37,9 @@ import RevertProgressOnVoteDeleted from "../../modules/give-to-get/application/l
 import UpdateProgressOnCommentCreated from "../../modules/give-to-get/application/listeners/UpdateProgressOnCommentCreated.js";
 import RevertProgressOnCommentDeleted from "../../modules/give-to-get/application/listeners/RevertProgressOnCommentDeleted.js";
 import SendVerificationEmailOnUserCreated from "../../modules/users/application/listeners/SendVerificationEmailOnUserCreated.js";
+import CreateNotificationsOnVoteCreated from "../../modules/notifications/application/listeners/CreateNotificationsOnVoteCreated.js";
+import CreateNotificationsOnCommentCreated from "../../modules/notifications/application/listeners/CreateNotificationsOnCommentCreated.js";
+import CreateNotificationsOnRequestCreated from "../../modules/notifications/application/listeners/CreateNotificationsOnRequestCreated.js";
 
 // ========================
 // Command Handlers
@@ -86,6 +92,22 @@ export const revertProgressOnCommentDeletedListener = new RevertProgressOnCommen
   realtimePublisher
 );
 export const sendVerificationEmailListener = new SendVerificationEmailOnUserCreated(emailSender);
+export const createNotificationsOnVoteCreatedListener = new CreateNotificationsOnVoteCreated(
+  notificationRepository,
+  boardRepository,
+  realtimePublisher
+);
+export const createNotificationsOnCommentCreatedListener = new CreateNotificationsOnCommentCreated(
+  notificationRepository,
+  boardRepository,
+  requestRepository,
+  realtimePublisher
+);
+export const createNotificationsOnRequestCreatedListener = new CreateNotificationsOnRequestCreated(
+  notificationRepository,
+  boardRepository,
+  realtimePublisher
+);
 
 // ========================
 // Subscribe Listeners to Events
@@ -99,6 +121,13 @@ eventBus.subscribe("comment.created", (event: CommentCreatedEvent) =>
 );
 eventBus.subscribe("comment.deleted", (event: CommentDeletedEvent) =>
   revertProgressOnCommentDeletedListener.handle(event)
+);
+eventBus.subscribe("vote.created", (event: VoteCreatedEvent) => createNotificationsOnVoteCreatedListener.handle(event));
+eventBus.subscribe("comment.created", (event: CommentCreatedEvent) =>
+  createNotificationsOnCommentCreatedListener.handle(event)
+);
+eventBus.subscribe("request.created", (event: RequestCreatedEvent) =>
+  createNotificationsOnRequestCreatedListener.handle(event)
 );
 eventBus.subscribe("user.created", (event: UserCreatedEvent) => sendVerificationEmailListener.handle(event));
 

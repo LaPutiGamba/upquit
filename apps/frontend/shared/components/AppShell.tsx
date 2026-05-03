@@ -20,6 +20,7 @@ import { toast } from "@/shared/components/ui/sonner";
 import { authService } from "@/features/authentication/services/authService";
 import { boardService } from "@/features/boards/services/boardService";
 import { BoardSwitcher } from "@/shared/components/app-shell/BoardSwitcher";
+import NotificationBell from "@/features/notifications/components/NotificationBell";
 import { NavMain } from "@/shared/components/app-shell/NavMain";
 import { NavUser } from "@/shared/components/app-shell/NavUser";
 import { getInitials } from "@/shared/components/app-shell/utils";
@@ -33,7 +34,7 @@ interface AppShellProps {
 }
 
 const AUTH_PATHS = ["/login", "/register", "/verify", "/verify-email"];
-const SHELLLESS_PATHS = ["/"];
+const SHELLLESS_PATHS = ["/", "/notifications"];
 
 function isAuthPath(pathname: string): boolean {
   return AUTH_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -209,6 +210,9 @@ export function AppShell({ children }: AppShellProps) {
           <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border/65 bg-background/84 px-4 backdrop-blur-md">
             <SidebarTrigger className="-ml-1" />
             <p className="text-sm font-semibold tracking-tight md:hidden">UpQuit</p>
+            <div className="ml-auto flex items-center gap-2">
+              <NotificationBell />
+            </div>
           </header>
           <div className="flex-1">{children}</div>
         </div>

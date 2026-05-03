@@ -13,6 +13,7 @@ import commentsRouter from "./modules/comments/infrastructure/commentsRoutes.js"
 import giveToGetRouter from "./modules/give-to-get/infrastructure/giveToGetRoutes.js";
 import requestsRouter from "./modules/requests/infrastructure/requestsRoutes.js";
 import votesRouter from "./modules/votes/infrastructure/votesRoutes.js";
+import notificationsRouter from "./modules/notifications/infrastructure/notificationsRoutes.js";
 import DomainException from "./shared/domain/exceptions/DomainException.js";
 import ApplicationException from "./shared/application/exceptions/ApplicationException.js";
 
@@ -24,12 +25,10 @@ app.use(helmet());
 app.use(
   cors({
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      const allowedOrigins = [
-        process.env.FRONTEND_URL,
-        "http://localhost:3000",
-        "http://127.0.0.1:3000"
-      ].filter(Boolean);
-      
+      const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:3000", "http://127.0.0.1:3000"].filter(
+        Boolean
+      );
+
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -54,6 +53,7 @@ app.use("/comments", commentsRouter);
 app.use("/give-to-get", giveToGetRouter);
 app.use("/requests", requestsRouter);
 app.use("/votes", votesRouter);
+app.use("/notifications", notificationsRouter);
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   logger.error(err);

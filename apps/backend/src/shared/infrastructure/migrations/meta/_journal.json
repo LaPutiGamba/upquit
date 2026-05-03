@@ -36,6 +36,13 @@
       "when": 1777420800000,
       "tag": "0004_cascade_delete_foreign_keys",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1777843956632,
+      "tag": "0005_notifications",
+      "breakpoints": true
     }
   ]
 }

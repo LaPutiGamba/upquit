@@ -3,11 +3,14 @@ import RealtimePublisher from "../../../../shared/domain/contracts/RealtimePubli
 import RequestRepository from "../../domain/contracts/RequestRepository.js";
 import CreateRequestCommand from "../commands/CreateRequestCommand.js";
 import RequestResponse, { mapRequestToResponse } from "../responses/RequestResponse.js";
+import EventBus from "../../../../shared/domain/events/EventBus.js";
+import RequestCreatedEvent from "../../domain/events/RequestCreatedEvent.js";
 
 export default class CreateRequestCommandHandler {
   constructor(
     private readonly requestRepository: RequestRepository,
-    private readonly realtimePublisher: RealtimePublisher
+    private readonly realtimePublisher: RealtimePublisher,
+    private readonly eventBus: EventBus
   ) {}
 
   async execute(command: CreateRequestCommand): Promise<RequestResponse> {
@@ -34,6 +37,15 @@ export default class CreateRequestCommandHandler {
       boardId: command.boardId,
       request: response
     });
+
+    await this.eventBus.publish([
+      new RequestCreatedEvent(
+        request.id.getValue(),
+        request.boardId.getValue(),
+        request.authorId.getValue(),
+        request.title
+      )
+    ]);
 
     return response;
   }
