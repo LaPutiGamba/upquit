@@ -64,13 +64,26 @@ export function useNotifications(boardId?: string) {
     };
   }, [userId, boardId]);
 
-  useChannel<{ type?: string; payload?: { title?: string; body?: string } }>(
+  useChannel<{ title?: string; body?: string } | { type?: string; payload?: { title?: string; body?: string } }>(
     userId ? `notification.${userId}` : null,
     (msg) => {
-      const payload = msg.payload?.payload ?? msg.payload;
-      const title = payload?.title ?? "New notification";
-      const body = payload?.body ?? "You have a new update.";
-      const isSticky = STICKY_NOTIFICATION_TYPES.has(msg.payload?.type ?? "");
+      const payload = msg.payload;
+
+      let title = "New notification";
+      let body = "You have a new update.";
+      let typeVal = "";
+
+      if (payload && typeof payload === "object" && "payload" in payload) {
+        title = payload.payload?.title ?? title;
+        body = payload.payload?.body ?? body;
+        typeVal = payload.type ?? "";
+      } else if (payload && typeof payload === "object") {
+        const direct = payload as { title?: string; body?: string };
+        title = direct.title ?? title;
+        body = direct.body ?? body;
+      }
+
+      const isSticky = STICKY_NOTIFICATION_TYPES.has(typeVal);
 
       toast.info(title, {
         description: body,
