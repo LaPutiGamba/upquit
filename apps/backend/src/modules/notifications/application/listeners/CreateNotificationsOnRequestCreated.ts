@@ -4,11 +4,13 @@ import Notification from "../../domain/entities/Notification.js";
 import BoardRepository from "../../../boards/domain/contracts/BoardRepository.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import RealtimePublisher from "../../../../shared/domain/contracts/RealtimePublisher.js";
+import UserRepository from "../../../users/domain/contracts/UserRepository.js";
 
 export default class CreateNotificationsOnRequestCreated {
   constructor(
     private readonly notificationRepository: INotificationRepository,
     private readonly boardRepository: BoardRepository,
+    private readonly userRepository: UserRepository,
     private readonly realtimePublisher: RealtimePublisher
   ) {}
 
@@ -27,6 +29,9 @@ export default class CreateNotificationsOnRequestCreated {
 
     recipients.delete(event.authorId);
 
+    const actor = await this.userRepository.findById(new Uuid(event.authorId));
+    const boardSlug = board.slug.getValue();
+
     for (const recipientId of recipients) {
       const notification = new Notification({
         id: crypto.randomUUID(),
@@ -35,8 +40,17 @@ export default class CreateNotificationsOnRequestCreated {
         type: "request.created",
         payload: {
           title: "New request",
-          body: `"${event.title}" was just created.`,
-          requestId: event.requestId
+          body: `@${actor?.displayName ?? "Someone"} created the request \"${event.title}\"!`,
+          actor: {
+            id: event.authorId,
+            displayName: actor?.displayName ?? null,
+            avatarUrl: actor?.avatarUrl ?? null,
+            profileUrl: `/users/${event.authorId}`
+          },
+          requestId: event.requestId,
+          requestTitle: event.title,
+          boardSlug,
+          url: `/board/${boardSlug}/request/${event.requestId}`
         },
         read: false,
         createdAt: new Date().toISOString()

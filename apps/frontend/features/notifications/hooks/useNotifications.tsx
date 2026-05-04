@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { toast } from "@/shared/components/ui/sonner";
+import { useRouter } from "@/localization/i18n/routing";
 import {
   getNotifications,
   getUnreadCount,
@@ -19,6 +20,7 @@ export function useNotifications(boardId?: string) {
   const userId = user?.id ?? null;
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unread, setUnread] = useState(0);
+  const router = useRouter();
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -85,9 +87,30 @@ export function useNotifications(boardId?: string) {
 
       const isSticky = STICKY_NOTIFICATION_TYPES.has(typeVal);
 
+      // clickable toast when payload contains a url
+      const rawPayload = payload as Record<string, unknown>;
+      const nestedUrl =
+        typeof (rawPayload?.payload as Record<string, unknown>)?.url === "string"
+          ? (rawPayload?.payload as Record<string, unknown>)?.url
+          : undefined;
+      const directUrl = typeof rawPayload?.url === "string" ? rawPayload.url : undefined;
+      const url = (nestedUrl ?? directUrl) as string | undefined;
+
       toast.info(title, {
         description: body,
-        duration: isSticky ? Infinity : 4000
+        duration: isSticky ? Infinity : 4000,
+        action: url
+          ? {
+              label: "Open",
+              onClick: () => {
+                try {
+                  router.push(url);
+                } catch {
+                  // noop
+                }
+              }
+            }
+          : undefined
       });
 
       void (async () => {

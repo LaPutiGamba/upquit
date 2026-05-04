@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "@/localization/i18n/routing";
 import { Bell, ArrowLeft } from "lucide-react";
+import { Link } from "@/localization/i18n/routing";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { useNotifications } from "@/features/notifications/hooks/useNotifications";
 import { Button } from "@/shared/components/ui/button";
@@ -78,7 +79,7 @@ export default function NotificationsPage() {
                 size="sm"
                 variant="outline"
                 onClick={() => void markAll()}
-                disabled={filteredNotifications.length === 0}
+                disabled={filteredNotifications.length === 0 || filteredUnread === 0}
               >
                 Mark all as read
               </Button>
@@ -98,49 +99,60 @@ export default function NotificationsPage() {
               </p>
             </div>
           ) : (
-            filteredNotifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`rounded-lg border p-4 transition-colors ${
-                  notification.read ? "bg-background opacity-70" : "bg-accent/10 border-accent/50 hover:bg-accent/20"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-semibold text-base">{notification.payload?.title ?? notification.type}</p>
-                      {!notification.read && (
-                        <Badge variant="default" className="text-xs">
-                          New
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">{notification.payload?.body ?? ""}</p>
-                    <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                      {notification.boardId && (
-                        <p>
-                          Board:{" "}
-                          <span className="font-medium">
-                            {boardNameById.get(notification.boardId) ?? notification.boardId}
-                          </span>
-                        </p>
-                      )}
-                      <p>{new Date(notification.createdAt).toLocaleString()}</p>
-                    </div>
+            filteredNotifications.map((notification) => {
+              const href =
+                notification.payload?.url ??
+                (notification.payload?.requestId && notification.payload?.boardSlug
+                  ? `/board/${notification.payload.boardSlug}/request/${notification.payload.requestId}`
+                  : undefined);
+
+              const content = (
+                <>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-semibold text-base">{notification.payload?.title ?? notification.type}</p>
+                    {!notification.read && (
+                      <Badge variant="default" className="text-xs">
+                        New
+                      </Badge>
+                    )}
                   </div>
-                  {!notification.read && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => void markAsRead(notification.id)}
-                      className="flex-shrink-0"
-                    >
-                      Mark read
-                    </Button>
-                  )}
+                  <p className="text-sm text-muted-foreground mb-2">{notification.payload?.body ?? ""}</p>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                    {notification.boardId && (
+                      <p>
+                        Board:{" "}
+                        <span className="font-medium">
+                          {boardNameById.get(notification.boardId) ?? notification.boardId}
+                        </span>
+                      </p>
+                    )}
+                    <p>{new Date(notification.createdAt).toLocaleString()}</p>
+                  </div>
+                </>
+              );
+
+              return href ? (
+                <Link
+                  key={notification.id}
+                  href={href}
+                  onClick={() => void markAsRead(notification.id)}
+                  className={`block rounded-lg border p-4 transition-colors ${
+                    notification.read ? "bg-background opacity-70" : "bg-accent/10 border-accent/50 hover:bg-accent/20"
+                  }`}
+                >
+                  {content}
+                </Link>
+              ) : (
+                <div
+                  key={notification.id}
+                  className={`rounded-lg border p-4 transition-colors ${
+                    notification.read ? "bg-background opacity-70" : "bg-accent/10 border-accent/50 hover:bg-accent/20"
+                  }`}
+                >
+                  {content}
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </CardContent>
       </Card>

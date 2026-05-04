@@ -95,17 +95,21 @@ export const sendVerificationEmailListener = new SendVerificationEmailOnUserCrea
 export const createNotificationsOnVoteCreatedListener = new CreateNotificationsOnVoteCreated(
   notificationRepository,
   boardRepository,
+  requestRepository,
+  userRepository,
   realtimePublisher
 );
 export const createNotificationsOnCommentCreatedListener = new CreateNotificationsOnCommentCreated(
   notificationRepository,
   boardRepository,
   requestRepository,
+  userRepository,
   realtimePublisher
 );
 export const createNotificationsOnRequestCreatedListener = new CreateNotificationsOnRequestCreated(
   notificationRepository,
   boardRepository,
+  userRepository,
   realtimePublisher
 );
 
