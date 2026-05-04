@@ -36,6 +36,11 @@ No other dependencies required.
 .\setup.ps1; docker compose -f compose.yml up -d
 ```
 
+Note: During setup the scripts will ask whether this is a local development machine. If you answer "no", they'll attempt to auto-detect your machine's LAN IP and set `FRONTEND_URL` and `NEXT_PUBLIC_BACKEND_URL` in `.env` so other devices on the same network can access the frontend and backend by IP (for example: `http://192.168.1.100:3000`).
+
+> [!IMPORTANT]
+> In local development when accessing with an external IP (for example: `http://192.168.1.100:3000`) change in the `compose.yml` backend service the `NODE_ENV` variable from `production` to `development`.
+
 ---
 
 ## Setup
@@ -86,8 +91,8 @@ No other dependencies required.
 
 | Service | URL |
 |---------|-----|
-| Frontend | http://localhost:3000 |
-| Backend API | http://localhost:8080 |
+| Frontend | http://localhost:3000 (or http://<MACHINE_IP>:3000 when deployed on a LAN) |
+| Backend API | http://localhost:8080 (or http://<MACHINE_IP>:8080 when deployed on a LAN) |
 
 ---
 

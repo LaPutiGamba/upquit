@@ -49,6 +49,35 @@ if ($RESEND_API_KEY) {
 $content | Set-Content $ENV_FILE
 
 Write-Host ""
+Write-Host "Is this a local development machine? (y/N)"
+$IS_LOCAL = Read-Host
+if ($IS_LOCAL -notmatch '^[Yy]') {
+    $AUTO_IP = ""
+    try {
+        $addresses = [System.Net.Dns]::GetHostEntry([System.Net.Dns]::GetHostName()).AddressList | Where-Object { $_.AddressFamily -eq 'InterNetwork' -and -not $_.IsLoopback }
+        if ($addresses -and $addresses.Length -gt 0) {
+            $AUTO_IP = $addresses[0].ToString()
+            Write-Host "Auto-detected IP: $AUTO_IP"
+        }
+    } catch {
+    }
+
+    Write-Host "Enter the machine IP to expose services on (leave empty to use auto-detected IP):"
+    $MACHINE_IP = Read-Host
+    if (-not $MACHINE_IP) { $MACHINE_IP = $AUTO_IP }
+
+    if ($MACHINE_IP) {
+        Write-Host "Setting FRONTEND_URL and NEXT_PUBLIC_BACKEND_URL to use $MACHINE_IP"
+        $content = Get-Content $ENV_FILE -Raw
+        $content = $content -replace '(?m)^FRONTEND_URL=.*', "FRONTEND_URL=http://$MACHINE_IP:3000"
+        $content = $content -replace '(?m)^NEXT_PUBLIC_BACKEND_URL=.*', "NEXT_PUBLIC_BACKEND_URL=http://$MACHINE_IP:8080"
+        $content | Set-Content $ENV_FILE
+    } else {
+        Write-Host "No machine IP provided or detected; keeping defaults (localhost)."
+    }
+}
+
+Write-Host ""
 Write-Host "Creating symlinks for apps..."
 
 $TARGETS = @("apps/frontend/.env", "apps/backend/.env")

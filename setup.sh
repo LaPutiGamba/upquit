@@ -46,6 +46,35 @@ if [ -n "$RESEND_API_KEY" ]; then
 fi
 
 echo ""
+echo "Is this a local development machine? (y/N)"
+read -r IS_LOCAL
+if [[ ! "$IS_LOCAL" =~ ^[Yy] ]]; then
+  AUTO_IP=""
+  AUTO_IP=$(ip route get 1.1.1.1 2>/dev/null | awk -F'src ' '/src/{print $2; exit}' | awk '{print $1}')
+  if [ -z "$AUTO_IP" ]; then
+    AUTO_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+  fi
+
+  if [ -n "$AUTO_IP" ]; then
+    echo "Auto-detected IP: $AUTO_IP"
+  fi
+
+  echo "Enter the machine IP to expose services on (leave empty to use auto-detected IP):"
+  read -r MACHINE_IP
+  if [ -z "$MACHINE_IP" ]; then
+    MACHINE_IP="$AUTO_IP"
+  fi
+
+  if [ -n "$MACHINE_IP" ]; then
+    echo "Setting FRONTEND_URL and NEXT_PUBLIC_BACKEND_URL to use $MACHINE_IP"
+    sed -i "s|^FRONTEND_URL=.*|FRONTEND_URL=http://$MACHINE_IP:3000|" "$ENV_FILE"
+    sed -i "s|^NEXT_PUBLIC_BACKEND_URL=.*|NEXT_PUBLIC_BACKEND_URL=http://$MACHINE_IP:8080|" "$ENV_FILE"
+  else
+    echo "No machine IP provided or detected; keeping defaults (localhost)."
+  fi
+fi
+
+echo ""
 echo "Creating symlink for frontend..."
 FRONTEND_ENV="apps/frontend/.env"
 if [ -L "$FRONTEND_ENV" ]; then
