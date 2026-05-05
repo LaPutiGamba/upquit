@@ -6,6 +6,8 @@ import UpdateUserCommand from "../../application/commands/UpdateUserCommand.js";
 import UpdateUserCommandHandler from "../../application/handlers/UpdateUserCommandHandler.js";
 import UserNotFoundException from "../../application/exceptions/UserNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
+import UsernameAlreadyExistsException from "../../application/exceptions/UsernameAlreadyExistsException.js";
+import InvalidUsernameException from "../../domain/exceptions/InvalidUsernameException.js";
 
 export default async function UpdateUserPatchController(req: Request, res: Response) {
   const commandHandler = new UpdateUserCommandHandler(new UserDrizzleRepository(db));
@@ -24,6 +26,7 @@ export default async function UpdateUserPatchController(req: Request, res: Respo
 
     const command = new UpdateUserCommand(
       req.params.id as string,
+      req.body.username,
       req.body.displayName,
       req.body.avatarUrl,
       req.body.emailVerified
@@ -41,6 +44,18 @@ export default async function UpdateUserPatchController(req: Request, res: Respo
     if (ex instanceof InvalidUuidException) {
       return res.status(400).send({
         error: "INVALID_USER_ID",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UsernameAlreadyExistsException) {
+      return res.status(409).send({
+        error: "USERNAME_ALREADY_EXISTS",
+        message: ex.message
+      });
+    }
+    if (ex instanceof InvalidUsernameException) {
+      return res.status(400).send({
+        error: "INVALID_USERNAME",
         message: ex.message
       });
     }

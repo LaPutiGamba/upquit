@@ -4,6 +4,7 @@ import Email from "../value-objects/Email.js";
 export default class User {
   constructor(
     id: string,
+    public readonly username: string,
     email: string,
     public readonly displayName: string,
     public readonly passwordHash: string | null,

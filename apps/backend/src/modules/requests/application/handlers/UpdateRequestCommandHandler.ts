@@ -22,7 +22,7 @@ export default class UpdateRequestCommandHandler {
       throw new RequestNotFoundException(command.requestId);
     }
 
-    const isAuthor = request.authorId.getValue() === command.userId;
+    const isAuthor = request.author.id.getValue() === command.userId;
 
     if (!isAuthor) {
       const canManageBoardRequests = await this.requestRepository.isBoardOwnerOrAdmin(
@@ -41,8 +41,8 @@ export default class UpdateRequestCommandHandler {
 
     const updatedRequest = new Request(
       request.id.getValue(),
+      request.author,
       request.boardId.getValue(),
-      request.authorId.getValue(),
       categoryIds,
       command.title ?? request.title,
       command.description !== undefined ? command.description : request.description,
@@ -73,7 +73,8 @@ export default class UpdateRequestCommandHandler {
       await this.requestRepository.addChangelogEntries(changelogEntries);
     }
 
-    const response = mapRequestToResponse(updatedRequest);
+    const updatedRequestWithAuthor = await this.requestRepository.findById(updatedRequest.id);
+    const response = mapRequestToResponse(updatedRequestWithAuthor!);
     const hasTitleChanged = request.title !== updatedRequest.title;
     const hasStatusChanged = request.status.getValue() !== updatedRequest.status.getValue();
 

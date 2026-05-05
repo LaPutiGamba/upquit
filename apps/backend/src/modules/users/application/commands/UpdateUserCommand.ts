@@ -1,6 +1,7 @@
 export default class UpdateUserCommand {
   constructor(
     readonly userId: string,
+    readonly username?: string,
     readonly displayName?: string,
     readonly avatarUrl?: string | null,
     readonly emailVerified?: boolean

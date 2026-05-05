@@ -1,7 +1,7 @@
-export default class InvalidCredentialsException extends Error {
+import ApplicationException from "../../../../shared/application/exceptions/ApplicationException.js";
+
+export default class InvalidCredentialsException extends ApplicationException {
   constructor() {
     super("Invalid email or password");
-    this.name = this.constructor.name;
-    Error.captureStackTrace(this, this.constructor);
   }
 }

@@ -94,6 +94,9 @@
   },
   "RegisterForm": {
     "validation": {
+      "username": "Username must be 3 to 30 characters.",
+      "usernamePattern": "Use lowercase letters, numbers, dots, underscores, or hyphens.",
+      "usernameTaken": "That username is already taken.",
       "displayName": "Display name must be at least 2 characters.",
       "email": "Please enter a valid email address.",
       "password": "Password must be at least 8 characters.",
@@ -108,6 +111,11 @@
     "title": "Create your account",
     "subtitle": "Enter your details below to create your account",
     "fields": {
+      "username": {
+        "label": "Username",
+        "placeholder": "yourname",
+        "description": "This will be your public profile URL."
+      },
       "displayName": {
         "label": "Display Name",
         "placeholder": "Your name"
@@ -185,9 +193,12 @@
       "saved": "Profile updated successfully.",
       "failed": "Could not save your profile settings.",
       "validation": {
-        "displayName": "Display name must be at least 2 characters."
+        "displayName": "Display name must be at least 2 characters.",
+        "username": "Username must be 3 to 30 characters."
       },
       "fields": {
+        "username": "Username",
+        "usernamePlaceholder": "yourname",
         "displayName": "Display name",
         "avatarUrl": "Avatar URL"
       },
@@ -402,6 +413,16 @@
     "footer": {
       "kicker": "Built for teams that prioritize with context",
       "text": "Create a workspace, invite collaborators, and start shaping your roadmap in one place."
+    }
+  },
+  "users": {
+    "profile": {
+      "deleted": "This user has been deleted.",
+      "joinedOn": "Joined",
+      "publicBoards": "Public Boards",
+      "publicRequests": "Public Requests",
+      "noPublicBoards": "No public boards yet.",
+      "noPublicRequests": "No public requests yet."
     }
   }
 }

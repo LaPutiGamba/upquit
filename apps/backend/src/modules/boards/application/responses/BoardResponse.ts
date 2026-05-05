@@ -8,6 +8,10 @@ export default interface BoardResponse {
   logoUrl: string | null;
   primaryColor: string | null;
   ownerId: string;
+  ownerDisplayName: string | null;
+  ownerAvatarUrl: string | null;
+  ownerUsername: string | null;
+  ownerIsActive: boolean | null;
   isPublic: boolean | null;
   allowAnonymousVotes: boolean | null;
   giveToGetEnabled: boolean | null;
@@ -25,6 +29,10 @@ export function mapBoardToResponse(board: Board): BoardResponse {
     logoUrl: board.logoUrl,
     primaryColor: board.primaryColor?.getValue() ?? null,
     ownerId: board.ownerId.getValue(),
+    ownerDisplayName: board.owner?.displayName ?? null,
+    ownerAvatarUrl: board.owner?.avatarUrl ?? null,
+    ownerUsername: board.owner?.username ?? null,
+    ownerIsActive: board.owner?.isActive ?? null,
     isPublic: board.isPublic,
     allowAnonymousVotes: board.allowAnonymousVotes,
     giveToGetEnabled: board.giveToGetEnabled,

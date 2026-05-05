@@ -23,6 +23,18 @@ export function BoardHeader({ board, canManage, manageLabel }: BoardHeaderProps)
         <div className="flex min-w-0 flex-col gap-1">
           <h1 className="truncate text-2xl font-semibold tracking-tight">{board.name}</h1>
           {board.description && <p className="text-sm text-muted-foreground line-clamp-2">{board.description}</p>}
+          {board.ownerUsername ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Owned by</span>
+              {board.ownerIsActive === false ? (
+                <span className="font-medium text-foreground">[Deleted user]</span>
+              ) : (
+                <Link href={`/users/${board.ownerUsername}`} className="font-medium text-foreground hover:underline">
+                  {board.ownerDisplayName ?? board.ownerUsername}
+                </Link>
+              )}
+            </div>
+          ) : null}
         </div>
       </div>
 

@@ -10,6 +10,10 @@ export interface RequestResponse {
   id: string;
   boardId: string;
   authorId: string;
+  authorDisplayName?: string | null;
+  authorAvatarUrl?: string | null;
+  authorUsername?: string | null;
+  authorIsActive?: boolean | null;
   categoryIds?: string[];
   categories?: RequestCategoryResponse[];
   title: string;

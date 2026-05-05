@@ -148,7 +148,14 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
       >
         <DialogHeader className="shrink-0 px-6 py-4 pr-35 sm:pr-38">
           <DialogTitle className="sr-only">{editableRequest.title}</DialogTitle>
-          <RequestHeader variant="dialog" canEdit={canEdit}>
+          <RequestHeader
+            variant="dialog"
+            canEdit={canEdit}
+            authorDisplayName={editableRequest.authorDisplayName}
+            authorAvatarUrl={editableRequest.authorAvatarUrl}
+            authorUsername={editableRequest.authorUsername}
+            authorIsActive={editableRequest.authorIsActive}
+          >
             <RequestTitle
               as="h2"
               variant="dialog"

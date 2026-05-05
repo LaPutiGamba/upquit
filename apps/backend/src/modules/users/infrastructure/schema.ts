@@ -3,6 +3,7 @@ import { boolean, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
+  username: varchar("username", { length: 50 }).notNull().unique(),
   passwordHash: varchar("password_hash", { length: 255 }),
   displayName: varchar("display_name", { length: 100 }).notNull(),
   avatarUrl: text("avatar_url"),

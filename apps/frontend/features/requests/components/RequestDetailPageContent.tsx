@@ -32,7 +32,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/shared/components/ui/dropdown-menu";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { RequestActivityTabs } from "@/features/requests/components/RequestActivityTabs";
@@ -191,6 +191,10 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
           <RequestHeader
             variant="page"
             canEdit={canEdit}
+            authorDisplayName={editableRequest.authorDisplayName}
+            authorAvatarUrl={editableRequest.authorAvatarUrl}
+            authorUsername={editableRequest.authorUsername}
+            authorIsActive={editableRequest.authorIsActive}
             actions={
               canDelete ? (
                 <DropdownMenu>
@@ -201,10 +205,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => setIsDeleteDialogOpen(true)}
-                    >
+                    <DropdownMenuItem variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
                       <Trash2 className="size-4" />
                       {t("actions.delete")}
                     </DropdownMenuItem>

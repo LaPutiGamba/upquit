@@ -104,6 +104,7 @@ export async function seedDatabase() {
       .values([
         {
           id: ids.users.admin,
+          username: "admin",
           email: "admin@upquit.test",
           displayName: "UpQuit Admin",
           avatarUrl: "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
@@ -113,6 +114,7 @@ export async function seedDatabase() {
         },
         {
           id: ids.users.alice,
+          username: "alice",
           email: "alice@upquit.test",
           displayName: "Alice Rivera",
           avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
@@ -122,6 +124,7 @@ export async function seedDatabase() {
         },
         {
           id: ids.users.bob,
+          username: "bob",
           email: "bob@upquit.test",
           displayName: "Bob Chen",
           avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
@@ -131,6 +134,7 @@ export async function seedDatabase() {
         },
         {
           id: ids.users.arian,
+          username: "arian",
           email: "arian_aragonferriz@iescarlesvallbona.cat",
           displayName: "Arià Aragón",
           avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
@@ -140,6 +144,7 @@ export async function seedDatabase() {
         },
         {
           id: ids.users.dave,
+          username: "dave",
           email: "dave@upquit.test",
           displayName: "Dave Patel",
           avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d",

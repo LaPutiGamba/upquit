@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { db } from "../../../../shared/infrastructure/database/connection.js";
 
 import UserDrizzleRepository from "../repositories/UserDrizzleRepository.js";
+import BoardDrizzleRepository from "../../../boards/infrastructure/repositories/BoardDrizzleRepository.js";
 import DeactivateUserCommand from "../../application/commands/DeactivateUserCommand.js";
 import DeactivateUserCommandHandler from "../../application/handlers/DeactivateUserCommandHandler.js";
 import UserNotFoundException from "../../application/exceptions/UserNotFoundException.js";
@@ -9,7 +10,10 @@ import UserAlreadyDeactivatedException from "../../application/exceptions/UserAl
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 
 export default async function DeactivateUserPostController(req: Request, res: Response) {
-  const commandHandler = new DeactivateUserCommandHandler(new UserDrizzleRepository(db));
+  const commandHandler = new DeactivateUserCommandHandler(
+    new UserDrizzleRepository(db),
+    new BoardDrizzleRepository(db)
+  );
 
   try {
     if (!req.userId) {

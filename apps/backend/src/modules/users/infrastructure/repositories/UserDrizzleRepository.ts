@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { users } from "../schema.js";
 import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
@@ -16,6 +16,39 @@ export default class UserDrizzleRepository implements UserRepository {
       .from(users)
       .where(and(eq(users.id, id.getValue()), eq(users.isActive, true)))
       .limit(1);
+
+    if (!row) return null;
+    return this.mapToDomainUser(row);
+  }
+
+  public async findByUsername(username: string): Promise<User | null> {
+    const [row] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.username, username), eq(users.isActive, true)))
+      .limit(1);
+
+    if (!row) return null;
+
+    return this.mapToDomainUser(row);
+  }
+
+  public async findByUsernameIncludingInactive(username: string): Promise<User | null> {
+    const [row] = await this.db.select().from(users).where(eq(users.username, username)).limit(1);
+
+    if (!row) return null;
+    return this.mapToDomainUser(row);
+  }
+
+  public async findFirstActiveUser(excludeUserId?: Uuid): Promise<User | null> {
+    const query = excludeUserId
+      ? this.db
+          .select()
+          .from(users)
+          .where(and(eq(users.isActive, true), ne(users.id, excludeUserId.getValue())))
+      : this.db.select().from(users).where(eq(users.isActive, true));
+
+    const [row] = await query.limit(1);
 
     if (!row) return null;
     return this.mapToDomainUser(row);
@@ -50,6 +83,7 @@ export default class UserDrizzleRepository implements UserRepository {
     await this.db.insert(users).values({
       id: user.id.getValue(),
       email: user.email.getValue(),
+      username: user.username,
       passwordHash: user.passwordHash,
       displayName: user.displayName,
       avatarUrl: user.avatarUrl,
@@ -66,6 +100,7 @@ export default class UserDrizzleRepository implements UserRepository {
       .update(users)
       .set({
         email: user.email.getValue(),
+        username: user.username,
         passwordHash: user.passwordHash,
         displayName: user.displayName,
         avatarUrl: user.avatarUrl,
@@ -84,6 +119,7 @@ export default class UserDrizzleRepository implements UserRepository {
   private mapToDomainUser(row: typeof users.$inferSelect): User {
     return new User(
       row.id,
+      row.username,
       row.email,
       row.displayName,
       row.passwordHash,

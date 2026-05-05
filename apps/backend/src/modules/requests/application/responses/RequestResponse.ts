@@ -4,6 +4,10 @@ export default interface RequestResponse {
   id: string;
   boardId: string;
   authorId: string;
+  authorDisplayName: string | null;
+  authorAvatarUrl: string | null;
+  authorUsername: string | null;
+  authorIsActive: boolean | null;
   categoryIds: string[];
   title: string;
   description: string | null;
@@ -19,7 +23,11 @@ export function mapRequestToResponse(request: Request): RequestResponse {
   return {
     id: request.id.getValue(),
     boardId: request.boardId.getValue(),
-    authorId: request.authorId.getValue(),
+    authorId: request.author.id.getValue(),
+    authorDisplayName: request.author?.displayName ?? null,
+    authorAvatarUrl: request.author?.avatarUrl ?? null,
+    authorUsername: request.author?.username ?? null,
+    authorIsActive: request.author?.isActive ?? null,
     categoryIds: request.categoryIds,
     title: request.title,
     description: request.description,

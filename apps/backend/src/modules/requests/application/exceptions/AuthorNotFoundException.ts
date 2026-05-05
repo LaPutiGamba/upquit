@@ -1,7 +1,7 @@
 import ApplicationException from "../../../../shared/application/exceptions/ApplicationException.js";
 
-export default class RequestNotFoundException extends ApplicationException {
+export default class AuthorNotFoundException extends ApplicationException {
   constructor(identifier: string) {
-    super(`Request not found: ${identifier}`);
+    super(`Request author not found: ${identifier}`);
   }
 }

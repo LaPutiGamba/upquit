@@ -1,5 +1,6 @@
 export default class CreateUserCommand {
   constructor(
+    readonly username: string,
     readonly email: string,
     readonly displayName: string,
     readonly password: string | null = null,

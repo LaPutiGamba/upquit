@@ -20,6 +20,7 @@ export default interface BoardRepository {
   findById(id: Uuid): Promise<Board | null>;
   findBySlug(slug: Slug): Promise<Board | null>;
   findByUserId(userId: Uuid): Promise<Board[]>;
+  findByOwnerId(ownerId: Uuid): Promise<Board[]>;
   findBoardIdsByUserId(userId: Uuid): Promise<string[]>;
   save(board: Board): Promise<void>;
   update(board: Board): Promise<void>;

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { db } from "../../../../shared/infrastructure/database/connection.js";
 
 import RequestDrizzleRepository from "../repositories/RequestDrizzleRepository.js";
+import UserDrizzleRepository from "../../../users/infrastructure/repositories/UserDrizzleRepository.js";
 import CreateRequestCommand from "../../application/commands/CreateRequestCommand.js";
 import CreateRequestCommandHandler from "../../application/handlers/CreateRequestCommandHandler.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
@@ -12,6 +13,7 @@ import { eventBus } from "../../../../shared/infrastructure/dependencies.js";
 export default async function CreateRequestPostController(req: Request, res: Response) {
   const commandHandler = new CreateRequestCommandHandler(
     new RequestDrizzleRepository(db),
+    new UserDrizzleRepository(db),
     new WebSocketRealtimePublisher(),
     eventBus
   );

@@ -12,6 +12,8 @@ import {
   type ReactNode
 } from "react";
 
+import { Link } from "@/localization/i18n/routing";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { cn } from "@/shared/lib/utils";
 
 const requestHeaderVariants = cva("", {
@@ -42,14 +44,48 @@ interface RequestHeaderProps extends VariantProps<typeof requestHeaderVariants> 
   children: ReactNode;
   canEdit?: boolean;
   actions?: ReactNode;
+  authorDisplayName?: string | null;
+  authorAvatarUrl?: string | null;
+  authorUsername?: string | null;
+  authorIsActive?: boolean | null;
   className?: string;
 }
 
-export function RequestHeader({ variant = "page", canEdit = false, actions, className, children }: RequestHeaderProps) {
+export function RequestHeader({
+  variant = "page",
+  canEdit = false,
+  actions,
+  authorDisplayName,
+  authorAvatarUrl,
+  authorUsername,
+  authorIsActive,
+  className,
+  children
+}: RequestHeaderProps) {
+  const authorLabel = authorIsActive === false ? "[Deleted user]" : (authorDisplayName ?? authorUsername);
+  const isAuthorLinkable = Boolean(authorUsername && authorIsActive !== false);
+
   return (
     <div className={cn(requestHeaderVariants({ variant }), className)} data-can-edit={canEdit}>
       <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-2">{children}</div>
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          {authorLabel ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Avatar className="size-6">
+                {authorAvatarUrl ? <AvatarImage src={authorAvatarUrl} alt={authorLabel} /> : null}
+                <AvatarFallback className="text-[10px] font-semibold uppercase">{authorLabel.charAt(0)}</AvatarFallback>
+              </Avatar>
+              {isAuthorLinkable ? (
+                <Link href={`/users/${authorUsername}`} className="font-medium text-foreground hover:underline">
+                  {authorLabel}
+                </Link>
+              ) : (
+                <span className="font-medium text-foreground">{authorLabel}</span>
+              )}
+            </div>
+          ) : null}
+          {children}
+        </div>
         {actions ? <div className="shrink-0">{actions}</div> : null}
       </div>
     </div>

@@ -18,6 +18,7 @@ export default class VerifyUserEmailCommandHandler {
 
     const verifiedUser = new User(
       user.id.getValue(),
+      user.username,
       user.email.getValue(),
       user.displayName,
       user.passwordHash,

@@ -10,6 +10,7 @@ import type {
 import Request from "../../domain/entities/Request.js";
 import Subscription from "../../domain/entities/Subscription.js";
 import { type StatusValue } from "../../domain/value-objects/RequestStatus.js";
+import User from "../../../users/domain/entities/User.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import { users } from "../../../users/infrastructure/schema.js";
 import { boardMembers, boards, categories } from "../../../boards/infrastructure/schema.js";
@@ -22,22 +23,41 @@ export default class RequestDrizzleRepository implements RequestRepository {
   // =========================================================================
 
   public async findById(id: Uuid): Promise<Request | null> {
-    const [row] = await this.db.select().from(requests).where(eq(requests.id, id.getValue())).limit(1);
+    const [row] = await this.db
+      .select({
+        request: requests,
+        author: users
+      })
+      .from(requests)
+      .leftJoin(users, eq(requests.authorId, users.id))
+      .where(eq(requests.id, id.getValue()))
+      .limit(1);
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     const categoryIds = await this.getRequestCategoryIds(id);
-    return this.mapToDomainRequest(row, categoryIds);
+    const author = row.author ? this.mapToDomainUser(row.author) : null;
+
+    return this.mapToDomainRequest(row.request, categoryIds, author);
   }
 
   public async findByBoardId(boardId: Uuid): Promise<Request[]> {
-    const rows = await this.db.select().from(requests).where(eq(requests.boardId, boardId.getValue()));
+    const rows = await this.db
+      .select({
+        request: requests,
+        author: users
+      })
+      .from(requests)
+      .leftJoin(users, eq(requests.authorId, users.id))
+      .where(eq(requests.boardId, boardId.getValue()));
 
     if (rows.length === 0) {
       return [];
     }
 
-    const requestIds = rows.map((row) => row.id);
+    const requestIds = rows.map((row) => row.request.id);
     const categoryRows = await this.db
       .select({ requestId: requestCategories.requestId, categoryId: requestCategories.categoryId })
       .from(requestCategories)
@@ -55,7 +75,10 @@ export default class RequestDrizzleRepository implements RequestRepository {
       }
     }
 
-    return rows.map((row) => this.mapToDomainRequest(row, requestCategoriesMap.get(row.id) ?? []));
+    return rows.map((row) => {
+      const author = row.author ? this.mapToDomainUser(row.author) : null;
+      return this.mapToDomainRequest(row.request, requestCategoriesMap.get(row.request.id) ?? [], author);
+    });
   }
 
   public async isBoardOwnerOrAdmin(boardId: Uuid, userId: Uuid): Promise<boolean> {
@@ -91,7 +114,7 @@ export default class RequestDrizzleRepository implements RequestRepository {
     await this.db.insert(requests).values({
       id: request.id.getValue(),
       boardId: request.boardId.getValue(),
-      authorId: request.authorId.getValue(),
+      authorId: request.author.id.getValue(),
       title: request.title,
       description: request.description,
       status: request.status.getValue(),
@@ -117,7 +140,7 @@ export default class RequestDrizzleRepository implements RequestRepository {
       .update(requests)
       .set({
         boardId: request.boardId.getValue(),
-        authorId: request.authorId.getValue(),
+        authorId: request.author.id.getValue(),
         title: request.title,
         description: request.description,
         status: request.status.getValue(),
@@ -276,13 +299,17 @@ export default class RequestDrizzleRepository implements RequestRepository {
   // MAPPER
   // =========================================================================
 
-  private mapToDomainRequest(row: typeof requests.$inferSelect, categoryIds: string[] = []): Request {
+  private mapToDomainRequest(
+    row: typeof requests.$inferSelect,
+    categoryIds: string[] = [],
+    author: User
+  ): Request {
     const statusValue = (row.status ?? "open") as StatusValue;
 
     return new Request(
       row.id,
+      author,
       row.boardId,
-      row.authorId,
       categoryIds,
       row.title,
       row.description,
@@ -291,6 +318,22 @@ export default class RequestDrizzleRepository implements RequestRepository {
       row.isPinned,
       row.isHidden,
       row.adminNote,
+      row.createdAt
+    );
+  }
+
+  private mapToDomainUser(row: typeof users.$inferSelect): User {
+    return new User(
+      row.id,
+      row.username,
+      row.email,
+      row.displayName,
+      row.passwordHash,
+      row.avatarUrl,
+      !row.emailVerified,
+      row.oauthProvider,
+      row.oauthId,
+      !row.isActive,
       row.createdAt
     );
   }

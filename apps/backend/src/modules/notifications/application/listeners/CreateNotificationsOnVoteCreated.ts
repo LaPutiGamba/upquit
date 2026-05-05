@@ -26,7 +26,7 @@ export default class CreateNotificationsOnVoteCreated {
     const boardSlug = board.slug.getValue();
 
     const members = await this.boardRepository.findMembersByBoardId(new Uuid(event.boardId));
-    const recipients = new Set<string>([board.ownerId.getValue()]);
+    const recipients = new Set<string>([board.owner.id.getValue()]);
 
     for (const member of members) {
       if (member.role === "admin") {
@@ -47,9 +47,10 @@ export default class CreateNotificationsOnVoteCreated {
           body: `@${actor?.displayName ?? "Someone"} has upvoted your request \"${requestTitle ?? "request"}\"!`,
           actor: {
             id: event.userId,
+            username: actor?.username ?? null,
             displayName: actor?.displayName ?? null,
             avatarUrl: actor?.avatarUrl ?? null,
-            profileUrl: `/users/${event.userId}`
+            profileUrl: actor?.username ? `/users/${actor.username}` : null
           },
           requestId: event.requestId,
           requestTitle,

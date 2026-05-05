@@ -8,6 +8,10 @@ export interface BoardResponse {
   logoUrl: string | null;
   primaryColor: string | null;
   ownerId: string;
+  ownerDisplayName?: string | null;
+  ownerAvatarUrl?: string | null;
+  ownerUsername?: string | null;
+  ownerIsActive?: boolean | null;
   isPublic: boolean | null;
   allowAnonymousVotes: boolean | null;
   giveToGetEnabled: boolean | null;

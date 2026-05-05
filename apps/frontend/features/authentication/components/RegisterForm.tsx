@@ -16,11 +16,16 @@ import { Input } from "@/shared/components/ui/input";
 import { toast } from "@/shared/components/ui/sonner";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from "@/shared/components/ui/field";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function registerSchema(t: (key: string) => string) {
   return z
     .object({
+      username: z
+        .string()
+        .min(3, t("validation.username"))
+        .max(30, t("validation.username"))
+        .regex(/^[a-z0-9][a-z0-9._-]{1,28}[a-z0-9]$/, t("validation.usernamePattern")),
       displayName: z.string().min(2, t("validation.displayName")),
       email: z.email(t("validation.email")),
       password: z.string().min(8, t("validation.password")),
@@ -33,6 +38,7 @@ function registerSchema(t: (key: string) => string) {
 }
 
 type RegisterFormValues = {
+  username: string;
   displayName: string;
   email: string;
   password: string;
@@ -49,11 +55,13 @@ function getErrorMessage(error: unknown, fallbackMessage: string): string {
 export default function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
   const t = useTranslations("RegisterForm");
   const router = useRouter();
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
   const form = useForm<RegisterFormValues>({
     // @ts-expect-error - zodResolver is not correctly typed for some reason
     resolver: zodResolver(registerSchema(t)),
     defaultValues: {
+      username: "",
       displayName: "",
       email: "",
       password: "",
@@ -84,6 +92,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
   const onSubmit = async (data: RegisterFormValues) => {
     try {
       const submitData = {
+        username: data.username,
         displayName: data.displayName,
         email: data.email,
         password: data.password
@@ -94,6 +103,29 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
       router.push("/login");
     } catch (error) {
       toast.error(getErrorMessage(error, t("errors.generic")));
+    }
+  };
+
+  const checkUsernameAvailability = async (username: string) => {
+    const normalizedUsername = username.trim().toLowerCase();
+
+    if (normalizedUsername.length < 3) {
+      return;
+    }
+
+    setIsCheckingUsername(true);
+
+    try {
+      const response = await authService.checkUsernameAvailability(normalizedUsername);
+      if (!response.available) {
+        form.setError("username", { message: t("validation.usernameTaken") });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        form.setError("username", { message: error.message });
+      }
+    } finally {
+      setIsCheckingUsername(false);
     }
   };
 
@@ -108,6 +140,36 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   <h1 className="text-2xl font-bold">{t("title")}</h1>
                   <p className="text-sm text-balance text-muted-foreground">{t("subtitle")}</p>
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem className="space-y-0">
+                      <Field>
+                        <FieldLabel htmlFor="username">{t("fields.username.label")}</FieldLabel>
+                        <FormControl>
+                          <Input
+                            id="username"
+                            placeholder={t("fields.username.placeholder")}
+                            autoComplete="username"
+                            {...field}
+                            onChange={(event) => {
+                              field.onChange(event.target.value.toLowerCase());
+                              form.clearErrors("username");
+                            }}
+                            onBlur={(event) => {
+                              field.onBlur();
+                              void checkUsernameAvailability(event.target.value);
+                            }}
+                          />
+                        </FormControl>
+                        <FieldDescription>{t("fields.username.description")}</FieldDescription>
+                        <FormMessage />
+                      </Field>
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -199,8 +261,8 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                 </Field>
 
                 <Field>
-                  <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? t("actions.creating") : t("actions.create")}
+                  <Button type="submit" disabled={form.formState.isSubmitting || isCheckingUsername}>
+                    {form.formState.isSubmitting || isCheckingUsername ? t("actions.creating") : t("actions.create")}
                   </Button>
                 </Field>
 

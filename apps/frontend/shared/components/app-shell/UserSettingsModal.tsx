@@ -20,6 +20,7 @@ export function UserSettingsModal({ open, onOpenChange }: UserSettingsModalProps
   const t = useTranslations("AppShell");
   const { user, setUser } = useAuth();
 
+  const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -29,6 +30,7 @@ export function UserSettingsModal({ open, onOpenChange }: UserSettingsModalProps
       return;
     }
 
+    setUsername(user?.username ?? "");
     setDisplayName(user?.displayName ?? "");
     setAvatarUrl(user?.avatarUrl ?? "");
   }, [open, user]);
@@ -44,10 +46,17 @@ export function UserSettingsModal({ open, onOpenChange }: UserSettingsModalProps
       return;
     }
 
+    const nextUsername = username.trim().toLowerCase();
+    if (nextUsername.length < 3) {
+      toast.error(t("settings.validation.username"));
+      return;
+    }
+
     setIsSaving(true);
 
     try {
       const updatedUser = await authService.updateUser(user.id, {
+        username: nextUsername,
         displayName: nextDisplayName,
         avatarUrl: avatarUrl.trim() || null
       });
@@ -74,6 +83,15 @@ export function UserSettingsModal({ open, onOpenChange }: UserSettingsModalProps
           <DialogDescription>{t("settings.description")}</DialogDescription>
         </DialogHeader>
         <FieldGroup>
+          <Field>
+            <FieldLabel>{t("settings.fields.username")}</FieldLabel>
+            <Input
+              value={username}
+              onChange={(event) => setUsername(event.target.value.toLowerCase())}
+              placeholder={t("settings.fields.usernamePlaceholder")}
+              autoComplete="username"
+            />
+          </Field>
           <Field>
             <FieldLabel>{t("settings.fields.displayName")}</FieldLabel>
             <Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} />

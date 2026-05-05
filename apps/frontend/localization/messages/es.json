@@ -95,6 +95,9 @@
   },
   "RegisterForm": {
     "validation": {
+      "username": "El nombre de usuario debe tener entre 3 y 30 caracteres.",
+      "usernamePattern": "Usa letras minúsculas, números, puntos, guiones bajos o guiones.",
+      "usernameTaken": "Ese nombre de usuario ya está en uso.",
       "displayName": "El nombre visible debe tener al menos 2 carácteres",
       "email": "Introduce un correo electrónico válido",
       "password": "La contraseña debe tener al menos 8 carácteres",
@@ -109,6 +112,11 @@
     "title": "Crea tu cuenta",
     "subtitle": "Introduce tus datos para crear tu cuenta",
     "fields": {
+      "username": {
+        "label": "Nombre de usuario",
+        "placeholder": "tunombre",
+        "description": "Será la URL pública de tu perfil."
+      },
       "displayName": {
         "label": "Nombre",
         "placeholder": "Tu nombre"
@@ -186,11 +194,14 @@
       "saved": "Perfil actualizado correctamente.",
       "failed": "No se pudo guardar la configuración del perfil.",
       "validation": {
-        "displayName": "El nombre visible debe tener al menos 2 carácteres"
+        "displayName": "El nombre visible debe tener al menos 2 carácteres.",
+        "username": "El nombre de usuario debe tener entre 3 y 30 caracteres."
       },
       "fields": {
         "displayName": "Nombre visible",
-        "avatarUrl": "URL del avatar"
+        "avatarUrl": "URL del avatar",
+        "username": "Nombre de usuario",
+        "usernamePlaceholder": "tunombre"
       },
       "actions": {
         "cancel": "Cancelar",
@@ -403,6 +414,16 @@
     "footer": {
       "kicker": "Hecho para equipos que priorizan con contexto",
       "text": "Crea un workspace, invita colaboradores y empieza a moldear tu roadmap en un solo lugar."
+    }
+  },
+  "users": {
+    "profile": {
+      "deleted": "Este usuario ha sido eliminado.",
+      "joinedOn": "Se unió",
+      "publicBoards": "Tableros públicos",
+      "publicRequests": "Solicitudes públicas",
+      "noPublicBoards": "Sin tableros públicos aún.",
+      "noPublicRequests": "Sin solicitudes públicas aún."
     }
   }
 }

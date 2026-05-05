@@ -7,6 +7,7 @@ import BoardRepository, { type BoardMemberRecord } from "../../domain/contracts/
 import Board from "../../domain/entities/Board.js";
 import BoardMember from "../../domain/entities/BoardMember.js";
 import Category from "../../domain/entities/Category.js";
+import User from "../../../users/domain/entities/User.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import Slug from "../../domain/value-objects/Slug.js";
 
@@ -18,17 +19,37 @@ export default class BoardDrizzleRepository implements BoardRepository {
   // =========================================================================
 
   public async findById(id: Uuid): Promise<Board | null> {
-    const [row] = await this.db.select().from(boards).where(eq(boards.id, id.getValue())).limit(1);
+    const [row] = await this.db
+      .select({
+        board: boards,
+        owner: users
+      })
+      .from(boards)
+      .leftJoin(users, eq(boards.ownerId, users.id))
+      .where(eq(boards.id, id.getValue()))
+      .limit(1);
 
     if (!row) return null;
-    return this.mapToDomainBoard(row);
+
+    const owner = row.owner ? this.mapToDomainUser(row.owner) : null;
+    return this.mapToDomainBoard(row.board, owner);
   }
 
   public async findBySlug(slug: Slug): Promise<Board | null> {
-    const [row] = await this.db.select().from(boards).where(eq(boards.slug, slug.getValue())).limit(1);
+    const [row] = await this.db
+      .select({
+        board: boards,
+        owner: users
+      })
+      .from(boards)
+      .leftJoin(users, eq(boards.ownerId, users.id))
+      .where(eq(boards.slug, slug.getValue()))
+      .limit(1);
 
     if (!row) return null;
-    return this.mapToDomainBoard(row);
+
+    const owner = row.owner ? this.mapToDomainUser(row.owner) : null;
+    return this.mapToDomainBoard(row.board, owner);
   }
 
   public async findByUserId(userId: Uuid): Promise<Board[]> {
@@ -39,6 +60,11 @@ export default class BoardDrizzleRepository implements BoardRepository {
     }
 
     const rows = await this.db.select().from(boards).where(inArray(boards.id, boardIds));
+    return rows.map((row) => this.mapToDomainBoard(row));
+  }
+
+  public async findByOwnerId(ownerId: Uuid): Promise<Board[]> {
+    const rows = await this.db.select().from(boards).where(eq(boards.ownerId, ownerId.getValue()));
     return rows.map((row) => this.mapToDomainBoard(row));
   }
 
@@ -202,7 +228,7 @@ export default class BoardDrizzleRepository implements BoardRepository {
   // MAPPER
   // =========================================================================
 
-  private mapToDomainBoard(row: typeof boards.$inferSelect): Board {
+  private mapToDomainBoard(row: typeof boards.$inferSelect, owner: User | null = null): Board {
     return new Board(
       row.id,
       row.slug,
@@ -216,6 +242,23 @@ export default class BoardDrizzleRepository implements BoardRepository {
       row.giveToGetEnabled,
       row.giveToGetVotesReq,
       row.giveToGetCommentsReq,
+      owner,
+      row.createdAt
+    );
+  }
+
+  private mapToDomainUser(row: typeof users.$inferSelect): User {
+    return new User(
+      row.id,
+      row.username,
+      row.email,
+      row.displayName,
+      row.passwordHash,
+      row.avatarUrl,
+      !row.emailVerified,
+      row.oauthProvider,
+      row.oauthId,
+      !row.isActive,
       row.createdAt
     );
   }

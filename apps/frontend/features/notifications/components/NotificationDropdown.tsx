@@ -3,6 +3,7 @@
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/shared/components/ui/dropdown-menu";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "@/localization/i18n/routing";
 import { CheckCheck } from "lucide-react";
@@ -38,6 +39,15 @@ export default function NotificationDropdown({
               (n.payload?.requestId && n.payload?.boardSlug
                 ? `/board/${n.payload.boardSlug}/request/${n.payload.requestId}`
                 : undefined);
+            const actor = n.payload?.actor as
+              | {
+                  displayName?: string | null;
+                  avatarUrl?: string | null;
+                  profileUrl?: string | null;
+                  username?: string | null;
+                }
+              | undefined;
+            const actorLabel = actor?.profileUrl ? (actor.displayName ?? actor.username) : "[Deleted user]";
 
             return href ? (
               <DropdownMenuItem key={n.id} asChild className="h-auto w-full rounded-none p-0">
@@ -60,6 +70,36 @@ export default function NotificationDropdown({
                         </Badge>
                       )}
                     </div>
+                    {actor ? (
+                      actor.profileUrl ? (
+                        <Link
+                          href={actor.profileUrl}
+                          className="flex items-center gap-2 text-xs text-muted-foreground hover:underline"
+                        >
+                          <Avatar className="size-5">
+                            {actor.avatarUrl ? (
+                              <AvatarImage src={actor.avatarUrl} alt={actor.displayName ?? actor.username ?? "User"} />
+                            ) : null}
+                            <AvatarFallback className="text-[10px] font-semibold uppercase">
+                              {(actor.displayName ?? actor.username ?? "U").charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{actorLabel}</span>
+                        </Link>
+                      ) : (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Avatar className="size-5">
+                            {actor.avatarUrl ? (
+                              <AvatarImage src={actor.avatarUrl} alt={actor.displayName ?? actor.username ?? "User"} />
+                            ) : null}
+                            <AvatarFallback className="text-[10px] font-semibold uppercase">
+                              {(actor.displayName ?? actor.username ?? "U").charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{actorLabel}</span>
+                        </div>
+                      )
+                    ) : null}
                     <div className="text-xs leading-relaxed text-muted-foreground">{n.payload?.body}</div>
                     <div className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(n.createdAt), {

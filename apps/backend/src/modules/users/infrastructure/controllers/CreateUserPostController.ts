@@ -3,7 +3,9 @@ import { Request, Response } from "express";
 import CreateUserCommand from "../../application/commands/CreateUserCommand.js";
 import CreateUserCommandHandler from "../../application/handlers/CreateUserCommandHandler.js";
 import UserAlreadyExistsException from "../../application/exceptions/UserAlreadyExistsException.js";
+import UsernameAlreadyExistsException from "../../application/exceptions/UsernameAlreadyExistsException.js";
 import InvalidEmailException from "../../domain/exceptions/InvalidEmailException.js";
+import InvalidUsernameException from "../../domain/exceptions/InvalidUsernameException.js";
 
 export default async function CreateUserPostController(
   req: Request,
@@ -12,6 +14,7 @@ export default async function CreateUserPostController(
 ) {
   try {
     const command = new CreateUserCommand(
+      req.body.username,
       req.body.email,
       req.body.displayName,
       req.body.password ?? null,
@@ -29,9 +32,21 @@ export default async function CreateUserPostController(
         message: ex.message
       });
     }
+    if (ex instanceof UsernameAlreadyExistsException) {
+      return res.status(409).send({
+        error: "USERNAME_ALREADY_EXISTS",
+        message: ex.message
+      });
+    }
     if (ex instanceof InvalidEmailException) {
       return res.status(400).send({
         error: "INVALID_EMAIL",
+        message: ex.message
+      });
+    }
+    if (ex instanceof InvalidUsernameException) {
+      return res.status(400).send({
+        error: "INVALID_USERNAME",
         message: ex.message
       });
     }

@@ -7,6 +7,8 @@ import UserAlreadyExistsException from "../exceptions/UserAlreadyExistsException
 import UserResponse, { mapUserToResponse } from "../responses/UserResponse.js";
 import EventBus from "../../../../shared/domain/events/EventBus.js";
 import UserCreatedEvent from "../../domain/events/UserCreatedEvent.js";
+import UsernameAlreadyExistsException from "../exceptions/UsernameAlreadyExistsException.js";
+import Username from "../../domain/value-objects/Username.js";
 
 export default class CreateUserCommandHandler {
   constructor(
@@ -17,16 +19,23 @@ export default class CreateUserCommandHandler {
 
   async execute(command: CreateUserCommand): Promise<UserResponse> {
     const email = new Email(command.email);
+    const username = new Username(command.username).getValue();
 
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
       throw new UserAlreadyExistsException(command.email);
     }
 
+    const existingByUsername = await this.userRepository.findByUsernameIncludingInactive(username);
+    if (existingByUsername) {
+      throw new UsernameAlreadyExistsException(username);
+    }
+
     const passwordHash = command.password !== null ? await this.passwordHasher.hash(command.password) : null;
 
     const user = new User(
       crypto.randomUUID(),
+      username,
       command.email,
       command.displayName,
       passwordHash,

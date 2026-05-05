@@ -95,6 +95,9 @@
   },
   "RegisterForm": {
     "validation": {
+      "username": "El nom d'usuari ha de tenir entre 3 i 30 caràcters.",
+      "usernamePattern": "Fes servir lletres minúscules, números, punts, guions baixos o guions.",
+      "usernameTaken": "Aquest nom d'usuari ja està en ús.",
       "displayName": "El nom visible ha de tenir almenys 2 caràcters",
       "email": "Introdueix un correu electrònic vàlid",
       "password": "La contrasenya ha de tenir almenys 8 caràcters",
@@ -109,6 +112,11 @@
     "title": "Crea el teu compte",
     "subtitle": "Introdueix les teves dades per crear el compte",
     "fields": {
+      "username": {
+        "label": "Nom d'usuari",
+        "placeholder": "elteunom",
+        "description": "Serà la URL pública del teu perfil."
+      },
       "displayName": {
         "label": "Nom",
         "placeholder": "El teu nom"
@@ -152,7 +160,7 @@
   },
   "AppShell": {
     "workspace": "Espai de producte",
-    "section": "Pla",
+    "section": "Plan",
     "boards": {
       "title": "Taulers",
       "empty": "Encara no hi ha taulers"
@@ -186,11 +194,14 @@
       "saved": "Perfil actualitzat correctament.",
       "failed": "No s'ha pogut desar la configuració del perfil.",
       "validation": {
-        "displayName": "El nom visible ha de tenir almenys 2 caràcters"
+        "displayName": "El nom visible ha de tenir almenys 2 caràcters.",
+        "username": "El nom d'usuari ha de tenir entre 3 i 30 caràcters."
       },
       "fields": {
         "displayName": "Nom visible",
-        "avatarUrl": "URL de l'avatar"
+        "avatarUrl": "URL de l'avatar",
+        "username": "Nom d'usuari",
+        "usernamePlaceholder": "elteunom"
       },
       "actions": {
         "cancel": "Cancel-lar",
@@ -403,6 +414,16 @@
     "footer": {
       "kicker": "Fet per equips que prioritzen amb context",
       "text": "Crea un workspace, convida col-laboradors i comenca a donar forma al teu roadmap en un sol lloc"
+    }
+  },
+  "users": {
+    "profile": {
+      "deleted": "Aquest usuari ha estat eliminat",
+      "joinedOn": "S'ha unit",
+      "publicBoards": "Quadres públics",
+      "publicRequests": "Sol·licituds públiques",
+      "noPublicBoards": "Cap quadre public encara",
+      "noPublicRequests": "Cap sol·licitud publica encara"
     }
   }
 }

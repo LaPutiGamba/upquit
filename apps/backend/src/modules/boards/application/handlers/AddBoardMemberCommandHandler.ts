@@ -14,7 +14,7 @@ export default class AddBoardMemberCommandHandler {
     const requesterUserId = new Uuid(command.requesterUserId);
     const targetUserId = new Uuid(command.targetUserId);
     const board = await this.boardRepository.findById(boardId);
-    const requesterIsBoardOwner = board?.ownerId.getValue() === requesterUserId.getValue();
+    const requesterIsBoardOwner = board?.owner.id.getValue() === requesterUserId.getValue();
 
     if (!board) {
       throw new BoardNotFoundException(command.boardId);

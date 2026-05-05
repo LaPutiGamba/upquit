@@ -24,7 +24,7 @@ export default class CreateNotificationsOnCommentCreated {
     if (!board) return;
 
     const members = await this.boardRepository.findMembersByBoardId(new Uuid(boardId));
-    const recipients = new Set<string>([board.ownerId.getValue(), request.authorId.getValue()]);
+    const recipients = new Set<string>([board.owner.id.getValue(), request.authorId.getValue()]);
 
     for (const member of members) {
       if (member.role === "admin") {
@@ -48,9 +48,10 @@ export default class CreateNotificationsOnCommentCreated {
           body: `@${actor?.displayName ?? "Someone"} commented on your request \"${requestTitle}\".`,
           actor: {
             id: event.userId,
+            username: actor?.username ?? null,
             displayName: actor?.displayName ?? null,
             avatarUrl: actor?.avatarUrl ?? null,
-            profileUrl: `/users/${event.userId}`
+            profileUrl: actor?.username ? `/users/${actor.username}` : null
           },
           requestId: event.requestId,
           requestTitle,

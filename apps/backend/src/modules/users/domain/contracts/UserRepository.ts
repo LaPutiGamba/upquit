@@ -7,6 +7,9 @@ export default interface UserRepository {
   findByIdIncludingInactive(id: Uuid): Promise<User | null>;
   findByEmail(email: Email): Promise<User | null>;
   findByEmailIncludingInactive(email: Email): Promise<User | null>;
+  findByUsername(username: string): Promise<User | null>;
+  findByUsernameIncludingInactive(username: string): Promise<User | null>;
+  findFirstActiveUser(excludeUserId?: Uuid): Promise<User | null>;
   save(user: User): Promise<void>;
   update(user: User): Promise<void>;
 }

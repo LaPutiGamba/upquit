@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { createUserCommandHandler } from "../../../shared/infrastructure/dependencies.js";
 import CreateUserPostController from "./controllers/CreateUserPostController.js";
+import GetUsernameAvailabilityGetController from "./controllers/GetUsernameAvailabilityGetController.js";
+import GetUserByUsernameGetController from "./controllers/GetUserByUsernameGetController.js";
 import GetUserByIdGetController from "./controllers/GetUserByIdGetController.js";
 import GetUserByEmailGetController from "./controllers/GetUserByEmailGetController.js";
 import UpdateUserPatchController from "./controllers/UpdateUserPatchController.js";
@@ -16,6 +18,8 @@ const usersRouter = Router();
 
 // Public
 usersRouter.post("/register", (req, res) => CreateUserPostController(req, res, createUserCommandHandler));
+usersRouter.get("/username-available", GetUsernameAvailabilityGetController);
+usersRouter.get("/username/:username", GetUserByUsernameGetController);
 usersRouter.post("/login", AuthenticateUserPostController);
 usersRouter.post("/refresh", RefreshAccessTokenPostController);
 usersRouter.post("/logout", LogoutUserPostController);

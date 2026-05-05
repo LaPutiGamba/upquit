@@ -19,7 +19,7 @@ export default class CreateNotificationsOnRequestCreated {
     if (!board) return;
 
     const members = await this.boardRepository.findMembersByBoardId(new Uuid(event.boardId));
-    const recipients = new Set<string>([board.ownerId.getValue()]);
+    const recipients = new Set<string>([board.owner.id.getValue()]);
 
     for (const member of members) {
       if (member.role === "admin") {
@@ -43,9 +43,10 @@ export default class CreateNotificationsOnRequestCreated {
           body: `@${actor?.displayName ?? "Someone"} created the request \"${event.title}\"!`,
           actor: {
             id: event.authorId,
+            username: actor?.username ?? null,
             displayName: actor?.displayName ?? null,
             avatarUrl: actor?.avatarUrl ?? null,
-            profileUrl: `/users/${event.authorId}`
+            profileUrl: actor?.username ? `/users/${actor.username}` : null
           },
           requestId: event.requestId,
           requestTitle: event.title,
