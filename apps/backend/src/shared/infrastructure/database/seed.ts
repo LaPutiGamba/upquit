@@ -1,6 +1,6 @@
+import "dotenv/config";
 import bcrypt from "bcrypt";
 import { pathToFileURL } from "node:url";
-import { sql } from "drizzle-orm";
 import { db } from "./connection.js";
 import {
   boardMembers,
