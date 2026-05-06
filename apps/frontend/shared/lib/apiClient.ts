@@ -52,7 +52,9 @@ function shouldAttemptTokenRefresh(endpoint: string): boolean {
   }
 
   const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  return !TOKEN_REFRESH_EXCLUDED_ENDPOINTS.has(normalizedEndpoint);
+
+  const basePath = normalizedEndpoint.split("?")[0];
+  return !TOKEN_REFRESH_EXCLUDED_ENDPOINTS.has(basePath);
 }
 
 async function parseJsonResponse(response: Response): Promise<Record<string, unknown> | null> {

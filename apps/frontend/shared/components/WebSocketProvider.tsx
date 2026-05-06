@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, ReactNode } from "react";
+import { createContext, useContext, useCallback, useEffect, useRef, ReactNode } from "react";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL!;
 const WS_URL = BACKEND_URL.startsWith("https")
@@ -25,18 +25,27 @@ type SubscriberCallback = (data: IncomingBroadcastMessage<unknown>) => void;
 
 export function WebSocketProvider({ children }: { children: ReactNode }) {
   const wsRef = useRef<WebSocket | null>(null);
-
   const subscribersRef = useRef<Map<string, Set<SubscriberCallback>>>(new Map());
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
+  const connect = useCallback(function connect() {
+    if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
+      return;
+    }
+
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
+
+    ws.onopen = () => {
+      subscribersRef.current.forEach((_, channel) => {
+        ws.send(JSON.stringify({ type: "SUBSCRIBE", channel }));
+      });
+    };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data) as IncomingBroadcastMessage<unknown>;
         const callbacks = subscribersRef.current.get(data.channel);
-
         if (callbacks) {
           callbacks.forEach((cb) => cb(data));
         }
@@ -45,12 +54,22 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    return () => {
-      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-        ws.close();
-      }
+    ws.onclose = () => {
+      reconnectTimeoutRef.current = setTimeout(connect, 3000);
     };
   }, []);
+
+  useEffect(() => {
+    connect();
+    return () => {
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
+        // Prevent auto-reconnect on intentional unmount
+        wsRef.current.onclose = null;
+        wsRef.current.close();
+      }
+    };
+  }, [connect]);
 
   const subscribe = <T,>(channel: string, callback: (data: IncomingBroadcastMessage<T>) => void) => {
     if (!subscribersRef.current.has(channel)) {

@@ -1,6 +1,9 @@
-export default class EmailDeliveryFailedException extends Error {
+import InfrastructureException from "./InfrastructureException.js";
+
+export default class EmailDeliveryFailedException extends InfrastructureException {
+  public readonly errorCode = "EMAIL_DELIVERY_FAILED";
+
   constructor(message: string) {
-    super(message);
-    this.name = "EmailDeliveryFailedException";
+    super(`Email Delivery Error: ${message}`);
   }
 }

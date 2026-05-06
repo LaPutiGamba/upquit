@@ -1,5 +1,6 @@
 import { Server as HttpServer } from "http";
 import { RawData, WebSocketServer as WsServer, WebSocket } from "ws";
+import { RealtimePayload } from "../../domain/contracts/RealtimePayload.js";
 
 type IncomingClientMessage = {
   type: "SUBSCRIBE" | "UNSUBSCRIBE";
@@ -23,7 +24,7 @@ export default class WebSocketServer {
     this.wsServer.on("connection", (socket: WebSocket) => this.handleConnection(socket));
   }
 
-  public broadcast(channel: string, event: string, payload: any): void {
+  public broadcast<T = Record<string, unknown>>(channel: string, event: string, payload: RealtimePayload<T>): void {
     const clients = this.channelSubscriptions.get(channel);
     if (!clients || clients.size === 0) {
       return;

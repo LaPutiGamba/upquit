@@ -1,7 +1,10 @@
-export default class BoardNotFoundException extends Error {
+import ApplicationException from "../../../../shared/application/exceptions/ApplicationException.js";
+
+export default class BoardNotFoundException extends ApplicationException {
+  public readonly statusCode = 404;
+  public readonly errorCode = "BOARD_NOT_FOUND";
+
   constructor(identifier: string) {
     super(`Board not found: ${identifier}`);
-    this.name = this.constructor.name;
-    Error.captureStackTrace(this, this.constructor);
   }
 }

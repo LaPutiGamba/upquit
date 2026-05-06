@@ -29,7 +29,7 @@ app.use(
         Boolean
       );
 
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (allowedOrigins.includes(origin!) || (process.env.NODE_ENV === "development" && !origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"), false);
@@ -56,24 +56,28 @@ app.use("/votes", votesRouter);
 app.use("/notifications", notificationsRouter);
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent) {
+    return next(err); 
+  }
+
   logger.error(err);
 
   const errorWithMetadata =
     typeof err === "object" && err !== null
       ? (err as { statusCode?: number; message?: string; stack?: string })
       : undefined;
-
-  const statusCode = errorWithMetadata?.statusCode ?? 500;
   const isControlledError = err instanceof DomainException || err instanceof ApplicationException;
-  const message =
-    statusCode === 500 && !isControlledError
-      ? "Internal Server Error"
-      : (errorWithMetadata?.message ?? "Internal Server Error");
+  const statusCode = errorWithMetadata?.statusCode ?? 500;
+
+  const message = isControlledError ? errorWithMetadata?.message : "Internal Server Error";
 
   res.status(statusCode).json({
     error: {
       message,
-      ...(process.env.NODE_ENV === "development" && { stack: errorWithMetadata?.stack })
+      ...(process.env.NODE_ENV === "development" && {
+        stack: errorWithMetadata?.stack,
+        rawError: errorWithMetadata?.message
+      })
     }
   });
 });

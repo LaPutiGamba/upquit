@@ -81,12 +81,12 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
 
       const decodedPayload = decodeJwtPayload(response.accessToken);
       if (!decodedPayload) {
-        throw new Error(t("errors.readToken"));
+        throw new Error("Failed to decode JWT payload");
       }
 
       const userId = decodedPayload.userId || decodedPayload.sub;
       if (!userId) {
-        throw new Error(t("errors.invalidToken"));
+        throw new Error("JWT payload missing userId");
       }
 
       const user = await authService.getUserProfile(userId, response.accessToken);

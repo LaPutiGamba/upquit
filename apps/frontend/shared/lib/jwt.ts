@@ -14,7 +14,14 @@ export function decodeJwtPayload<T extends Record<string, unknown> = AuthTokenPa
     const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
     const paddedPayload = normalizedPayload.padEnd(Math.ceil(normalizedPayload.length / 4) * 4, "=");
 
-    return JSON.parse(atob(paddedPayload)) as T;
+    const decodedPayload = decodeURIComponent(
+      atob(paddedPayload)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+
+    return JSON.parse(decodedPayload) as T;
   } catch {
     return null;
   }

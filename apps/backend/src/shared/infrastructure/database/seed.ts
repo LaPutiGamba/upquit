@@ -1,4 +1,5 @@
 import "dotenv/config";
+import pino from "pino";
 import bcrypt from "bcrypt";
 import { pathToFileURL } from "node:url";
 import { db } from "./connection.js";
@@ -438,12 +439,14 @@ export async function seedDatabase() {
   return ids;
 }
 
+const logger = pino({ level: process.env.LOG_LEVEL || "info" });
+
 const run = async () => {
   try {
     await seedDatabase();
-    console.log("Database seeded successfully.");
+    logger.info("Database seeded successfully.");
   } catch (error) {
-    console.error("Database seed failed:", error);
+    logger.error({ err: error }, "Database seed failed");
     process.exitCode = 1;
   }
 };

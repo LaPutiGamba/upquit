@@ -1,10 +1,11 @@
 import RealtimePublisher from "../../domain/contracts/RealtimePublisher.js";
 import { getWebSocketServer } from "../websocket/WebSocketServerRegistry.js";
+import { RealtimePayload } from "../../domain/contracts/RealtimePayload.js";
 
 export default class WebSocketRealtimePublisher implements RealtimePublisher {
   constructor() {}
 
-  public publish(channel: string, event: string, payload: any): void {
+  public publish<T = Record<string, unknown>>(channel: string, event: string, payload: RealtimePayload<T>): void {
     const webSocketServer = getWebSocketServer();
 
     if (!webSocketServer) {

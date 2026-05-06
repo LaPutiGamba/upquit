@@ -10,6 +10,7 @@ import Category from "../../domain/entities/Category.js";
 import User from "../../../users/domain/entities/User.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import Slug from "../../domain/value-objects/Slug.js";
+import DatabaseException from "../../../../shared/infrastructure/exceptions/DatabaseException.js";
 
 export default class BoardDrizzleRepository implements BoardRepository {
   constructor(private readonly db: CurrentDatabase) {}
@@ -250,7 +251,7 @@ export default class BoardDrizzleRepository implements BoardRepository {
 
   private mapToDomainBoard(row: typeof boards.$inferSelect, owner: User | null): Board {
     if (!owner) {
-      throw new Error(`Board ${row.id} has no owner`);
+      throw new DatabaseException(`Board ${row.id} has no owner`);
     }
     return new Board(
       row.id,

@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { BoardPageContent } from "@/features/boards/components/BoardPageContent";
+import { Skeleton } from "@/shared/components/ui/skeleton"; 
 
 interface BoardPageProps {
   params: Promise<{ slug: string }>;
@@ -6,5 +8,9 @@ interface BoardPageProps {
 
 export default async function BoardPage({ params }: BoardPageProps) {
   const { slug } = await params;
-  return <BoardPageContent slug={slug} />;
+  return (
+    <Suspense fallback={<Skeleton className="h-full w-full" />}>
+      <BoardPageContent slug={slug} />
+    </Suspense>
+  );
 }

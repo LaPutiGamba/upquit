@@ -4,7 +4,9 @@ import { createServer } from "http";
 import { app } from "./app.js";
 import WebSocketServer from "./shared/infrastructure/websocket/WebSocketServer.js";
 import { registerWebSocketServer } from "./shared/infrastructure/websocket/WebSocketServerRegistry.js";
+import pino from "pino";
 
+const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 const PORT = process.env.BACKEND_PORT || 3000;
 
 const startServer = () => {
@@ -14,8 +16,19 @@ const startServer = () => {
     registerWebSocketServer(webSocketServer);
 
     httpServer.listen(PORT, () => {
-      console.log(`🚀 Backend server is running on http://localhost:${PORT}`);
+      logger.info(`🚀 Backend server is running on http://localhost:${PORT}`);
     });
+
+    const shutdown = (signal: string) => {
+      logger.info(`${signal} received. Shutting down gracefully...`);
+      httpServer.close(() => {
+        logger.info("HTTP Server closed.");
+        process.exit(0);
+      });
+    };
+
+    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
   } catch (error) {
     console.error("Error starting server:", error);
     process.exit(1);

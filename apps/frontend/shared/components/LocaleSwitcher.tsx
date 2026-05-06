@@ -11,16 +11,21 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { useTransition } from "react";
 import { Globe } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export function LocaleSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const [isPending, startTransition] = useTransition();
 
   const switchLocale = (nextLocale: "en" | "es" | "ca") => {
     startTransition(() => {
-      router.replace(pathname, { locale: nextLocale });
+      const currentSearchParams = searchParams.toString();
+      const query = currentSearchParams ? `?${currentSearchParams}` : "";
+
+      router.replace(`${pathname}${query}`, { locale: nextLocale });
     });
   };
 

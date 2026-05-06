@@ -3,7 +3,7 @@ export default class Notification {
   userId: string;
   boardId?: string | null;
   type: string;
-  payload: any;
+  payload: Record<string, unknown>;
   read: boolean;
   createdAt: string;
 
@@ -20,7 +20,7 @@ export default class Notification {
     userId: string;
     boardId?: string | null;
     type: string;
-    payload: any;
+    payload: Record<string, unknown>;
     read?: boolean;
     createdAt?: string;
   }) {

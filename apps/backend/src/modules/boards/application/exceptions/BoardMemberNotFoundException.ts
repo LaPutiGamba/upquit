@@ -1,7 +1,10 @@
-export default class BoardMemberNotFoundException extends Error {
+import ApplicationException from "../../../../shared/application/exceptions/ApplicationException.js";
+
+export default class BoardMemberNotFoundException extends ApplicationException {
+  public readonly statusCode = 404;
+  public readonly errorCode = "BOARD_MEMBER_NOT_FOUND";
+
   constructor(userId: string, boardId: string) {
-    super(`Member ${userId} was not found on board ${boardId}`);
-    this.name = this.constructor.name;
-    Error.captureStackTrace(this, this.constructor);
+    super(`User ${userId} is not a member of board ${boardId}`);
   }
 }

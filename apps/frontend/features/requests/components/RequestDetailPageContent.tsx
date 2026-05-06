@@ -139,12 +139,12 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     } catch {
       setEditableRequest(previousRequest);
       toast.error("Could not save request changes");
-      throw new Error("Could not save request changes");
     }
   };
 
   const handleDeleteRequest = async () => {
     if (!editableRequest) {
+      toast.error(t("deleteDialog.failed"));
       return;
     }
 

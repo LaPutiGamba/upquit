@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { memo } from "react";
 import { useLocale } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
@@ -27,7 +28,7 @@ function getDisplayName(comment: CommentResponse): string {
   return "Unknown user";
 }
 
-export function CommentThread({
+export const CommentThread = memo(function CommentThread({
   rootComment,
   replies,
   requestId,
@@ -148,4 +149,4 @@ export function CommentThread({
       )}
     </li>
   );
-}
+});

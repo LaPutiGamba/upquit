@@ -1,3 +1,5 @@
+import { RealtimePayload } from "./RealtimePayload.js";
+
 export default interface RealtimePublisher {
-  publish(channel: string, event: string, payload: any): void;
+  publish<T = Record<string, unknown>>(channel: string, event: string, payload: RealtimePayload<T>): void;
 }

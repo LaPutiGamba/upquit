@@ -2,10 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { db } from "../database/connection.js";
 import BoardDrizzleRepository from "../../../modules/boards/infrastructure/repositories/BoardDrizzleRepository.js";
+import EnvironmentConfigException from "../exceptions/EnvironmentConfigException.js";
 
 const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
 if (!jwtAccessSecret) {
-  throw new Error("JWT_ACCESS_SECRET environment variable is required");
+  throw new EnvironmentConfigException("JWT_ACCESS_SECRET environment variable is required");
 }
 
 const boardRepository = new BoardDrizzleRepository(db);

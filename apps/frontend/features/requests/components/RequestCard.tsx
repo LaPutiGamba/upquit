@@ -79,7 +79,6 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
     } catch {
       setEditableRequest(previousRequest);
       toast.error("Could not save request changes");
-      throw new Error("Could not save request changes");
     }
   };
 
@@ -130,7 +129,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
       </DialogTrigger>
 
       <DialogContent
-        className="flex flex-col w-[96vw] max-h-[90vh] max-w-[96vw] gap-0 overflow-hidden rounded-xl border border-border/70 bg-card p-0 sm:max-w-5xl"
+        className="flex flex-col w-[96vw] max-h-[90dvh] max-w-[96vw] gap-0 overflow-hidden rounded-xl border border-border/70 bg-card p-0 sm:max-w-5xl"
         topRightActions={
           <>
             <Button variant="ghost" size="icon-sm" onClick={handleCopyLink} aria-label="Copy request link">
