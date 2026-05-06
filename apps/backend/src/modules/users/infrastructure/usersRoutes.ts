@@ -20,6 +20,7 @@ const usersRouter = Router();
 usersRouter.post("/register", (req, res) => CreateUserPostController(req, res, createUserCommandHandler));
 usersRouter.get("/username-available", GetUsernameAvailabilityGetController);
 usersRouter.get("/username/:username", GetUserByUsernameGetController);
+usersRouter.get("/:id", GetUserByIdGetController);
 usersRouter.post("/login", AuthenticateUserPostController);
 usersRouter.post("/refresh", RefreshAccessTokenPostController);
 usersRouter.post("/logout", LogoutUserPostController);
@@ -27,7 +28,6 @@ usersRouter.post("/:id/verify-email", VerifyUserEmailPostController);
 
 // Protected
 usersRouter.get("/", JwtAuthMiddleware, TenantDbMiddleware, GetUserByEmailGetController);
-usersRouter.get("/:id", JwtAuthMiddleware, TenantDbMiddleware, GetUserByIdGetController);
 usersRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateUserPatchController);
 usersRouter.post("/:id/deactivate", JwtAuthMiddleware, TenantDbMiddleware, DeactivateUserPostController);
 

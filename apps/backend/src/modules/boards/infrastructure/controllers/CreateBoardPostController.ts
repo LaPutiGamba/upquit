@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { db } from "../../../../shared/infrastructure/database/connection.js";
 
 import BoardDrizzleRepository from "../repositories/BoardDrizzleRepository.js";
+import UserDrizzleRepository from "../../../users/infrastructure/repositories/UserDrizzleRepository.js";
 import CreateBoardCommand from "../../application/commands/CreateBoardCommand.js";
 import CreateBoardCommandHandler from "../../application/handlers/CreateBoardCommandHandler.js";
 import BoardAlreadyExistsException from "../../application/exceptions/BoardAlreadyExistsException.js";
@@ -11,7 +12,7 @@ import InvalidGiveToGetRequirementsException from "../../domain/exceptions/Inval
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 
 export default async function CreateBoardPostController(req: Request, res: Response) {
-  const commandHandler = new CreateBoardCommandHandler(new BoardDrizzleRepository(db));
+  const commandHandler = new CreateBoardCommandHandler(new BoardDrizzleRepository(db), new UserDrizzleRepository(db));
 
   try {
     if (!req.userId) {

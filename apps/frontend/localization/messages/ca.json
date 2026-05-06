@@ -423,7 +423,8 @@
       "publicBoards": "Quadres públics",
       "publicRequests": "Sol·licituds públiques",
       "noPublicBoards": "Cap quadre public encara",
-      "noPublicRequests": "Cap sol·licitud publica encara"
+      "noPublicRequests": "Cap sol·licitud publica encara",
+      "loading": "Carregant..."
     }
   }
 }

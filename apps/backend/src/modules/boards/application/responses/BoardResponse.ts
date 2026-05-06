@@ -28,7 +28,7 @@ export function mapBoardToResponse(board: Board): BoardResponse {
     description: board.description,
     logoUrl: board.logoUrl,
     primaryColor: board.primaryColor?.getValue() ?? null,
-    ownerId: board.ownerId.getValue(),
+    ownerId: board.owner?.id.getValue() ?? null,
     ownerDisplayName: board.owner?.displayName ?? null,
     ownerAvatarUrl: board.owner?.avatarUrl ?? null,
     ownerUsername: board.owner?.username ?? null,

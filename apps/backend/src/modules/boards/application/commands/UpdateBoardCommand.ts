@@ -7,7 +7,6 @@ export default class UpdateBoardCommand {
     readonly description?: string | null,
     readonly logoUrl?: string | null,
     readonly primaryColor?: string | null,
-    readonly ownerId?: string,
     readonly isPublic?: boolean | null,
     readonly allowAnonymousVotes?: boolean | null,
     readonly giveToGetEnabled?: boolean | null,

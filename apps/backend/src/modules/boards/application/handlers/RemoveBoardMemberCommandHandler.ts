@@ -14,13 +14,13 @@ export default class RemoveBoardMemberCommandHandler {
     const requesterUserId = new Uuid(command.requesterUserId);
 
     const board = await this.boardRepository.findById(boardId);
-    const requesterIsBoardOwner = board?.ownerId.getValue() === requesterUserId.getValue();
+    const requesterIsBoardOwner = board?.owner.id.getValue() === requesterUserId.getValue();
 
     if (!board) {
       throw new BoardNotFoundException(command.boardId);
     }
 
-    if (board.ownerId.getValue() === targetUserId.getValue()) {
+    if (board.owner.id.getValue() === targetUserId.getValue()) {
       throw new UnauthorizedActionException("The board owner cannot be removed from the team");
     }
 

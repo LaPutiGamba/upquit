@@ -59,13 +59,33 @@ export default class BoardDrizzleRepository implements BoardRepository {
       return [];
     }
 
-    const rows = await this.db.select().from(boards).where(inArray(boards.id, boardIds));
-    return rows.map((row) => this.mapToDomainBoard(row));
+    const rows = await this.db
+      .select({
+        board: boards,
+        owner: users
+      })
+      .from(boards)
+      .leftJoin(users, eq(boards.ownerId, users.id))
+      .where(inArray(boards.id, boardIds));
+    return rows.map((row) => {
+      const owner = row.owner ? this.mapToDomainUser(row.owner) : null;
+      return this.mapToDomainBoard(row.board, owner);
+    });
   }
 
   public async findByOwnerId(ownerId: Uuid): Promise<Board[]> {
-    const rows = await this.db.select().from(boards).where(eq(boards.ownerId, ownerId.getValue()));
-    return rows.map((row) => this.mapToDomainBoard(row));
+    const rows = await this.db
+      .select({
+        board: boards,
+        owner: users
+      })
+      .from(boards)
+      .leftJoin(users, eq(boards.ownerId, users.id))
+      .where(eq(boards.ownerId, ownerId.getValue()));
+    return rows.map((row) => {
+      const owner = row.owner ? this.mapToDomainUser(row.owner) : null;
+      return this.mapToDomainBoard(row.board, owner);
+    });
   }
 
   public async findBoardIdsByUserId(userId: Uuid): Promise<string[]> {
@@ -111,7 +131,7 @@ export default class BoardDrizzleRepository implements BoardRepository {
       description: board.description,
       logoUrl: board.logoUrl,
       primaryColor: board.primaryColor?.getValue() ?? null,
-      ownerId: board.ownerId.getValue(),
+      ownerId: board.owner.id.getValue(),
       isPublic: board.isPublic,
       allowAnonymousVotes: board.allowAnonymousVotes,
       giveToGetEnabled: board.giveToGetEnabled,
@@ -130,7 +150,7 @@ export default class BoardDrizzleRepository implements BoardRepository {
         description: board.description,
         logoUrl: board.logoUrl,
         primaryColor: board.primaryColor?.getValue() ?? null,
-        ownerId: board.ownerId.getValue(),
+        ownerId: board.owner.id.getValue(),
         isPublic: board.isPublic,
         allowAnonymousVotes: board.allowAnonymousVotes,
         giveToGetEnabled: board.giveToGetEnabled,
@@ -228,7 +248,10 @@ export default class BoardDrizzleRepository implements BoardRepository {
   // MAPPER
   // =========================================================================
 
-  private mapToDomainBoard(row: typeof boards.$inferSelect, owner: User | null = null): Board {
+  private mapToDomainBoard(row: typeof boards.$inferSelect, owner: User | null): Board {
+    if (!owner) {
+      throw new Error(`Board ${row.id} has no owner`);
+    }
     return new Board(
       row.id,
       row.slug,
@@ -236,7 +259,6 @@ export default class BoardDrizzleRepository implements BoardRepository {
       row.description,
       row.logoUrl,
       row.primaryColor,
-      row.ownerId,
       row.isPublic,
       row.allowAnonymousVotes,
       row.giveToGetEnabled,
@@ -255,10 +277,10 @@ export default class BoardDrizzleRepository implements BoardRepository {
       row.displayName,
       row.passwordHash,
       row.avatarUrl,
-      !row.emailVerified,
+      row.emailVerified ?? false,
       row.oauthProvider,
       row.oauthId,
-      !row.isActive,
+      row.isActive ?? true,
       row.createdAt
     );
   }

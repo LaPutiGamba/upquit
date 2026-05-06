@@ -422,7 +422,8 @@
       "publicBoards": "Public Boards",
       "publicRequests": "Public Requests",
       "noPublicBoards": "No public boards yet.",
-      "noPublicRequests": "No public requests yet."
+      "noPublicRequests": "No public requests yet.",
+      "loading": "Loading..."
     }
   }
 }

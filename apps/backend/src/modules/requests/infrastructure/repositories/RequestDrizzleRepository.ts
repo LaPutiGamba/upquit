@@ -299,11 +299,7 @@ export default class RequestDrizzleRepository implements RequestRepository {
   // MAPPER
   // =========================================================================
 
-  private mapToDomainRequest(
-    row: typeof requests.$inferSelect,
-    categoryIds: string[] = [],
-    author: User
-  ): Request {
+  private mapToDomainRequest(row: typeof requests.$inferSelect, categoryIds: string[] = [], author: User): Request {
     const statusValue = (row.status ?? "open") as StatusValue;
 
     return new Request(
@@ -330,10 +326,10 @@ export default class RequestDrizzleRepository implements RequestRepository {
       row.displayName,
       row.passwordHash,
       row.avatarUrl,
-      !row.emailVerified,
+      row.emailVerified ?? false,
       row.oauthProvider,
       row.oauthId,
-      !row.isActive,
+      row.isActive ?? true,
       row.createdAt
     );
   }

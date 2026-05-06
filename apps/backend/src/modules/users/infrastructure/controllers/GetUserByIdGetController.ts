@@ -11,10 +11,6 @@ export default async function GetUserByIdGetController(req: Request, res: Respon
   const queryHandler = new GetUserByIdQueryHandler(new UserDrizzleRepository(db));
 
   try {
-    if (!req.userId) {
-      return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
-    }
-
     const command = new GetUserByIdQuery(req.params.id as string);
 
     const response = await queryHandler.execute(command);

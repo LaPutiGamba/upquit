@@ -21,7 +21,7 @@ export default class DeleteBoardCommandHandler {
       throw new BoardNotFoundException(command.boardId);
     }
 
-    const isOwner = board.ownerId.getValue() === requesterUserId.getValue();
+    const isOwner = board.owner.id.getValue() === requesterUserId.getValue();
 
     if (!isOwner) {
       throw new UnauthorizedActionException("Only board owners can delete boards");

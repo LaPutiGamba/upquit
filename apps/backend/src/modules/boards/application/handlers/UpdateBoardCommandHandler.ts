@@ -23,7 +23,7 @@ export default class UpdateBoardCommandHandler {
       throw new BoardNotFoundException(command.boardId);
     }
 
-    const isOwner = board.ownerId.getValue() === requesterUserId.getValue();
+    const isOwner = board.owner.id.getValue() === requesterUserId.getValue();
 
     if (!isOwner) {
       const requesterMembership = await this.boardRepository.findMemberByBoardIdAndUserId(boardId, requesterUserId);
@@ -62,12 +62,12 @@ export default class UpdateBoardCommandHandler {
       command.description !== undefined ? command.description : board.description,
       command.logoUrl !== undefined ? command.logoUrl : board.logoUrl,
       command.primaryColor !== undefined ? command.primaryColor : (board.primaryColor?.getValue() ?? null),
-      command.ownerId ?? board.ownerId.getValue(),
       command.isPublic !== undefined ? command.isPublic : board.isPublic,
       command.allowAnonymousVotes !== undefined ? command.allowAnonymousVotes : board.allowAnonymousVotes,
       command.giveToGetEnabled !== undefined ? command.giveToGetEnabled : board.giveToGetEnabled,
       command.giveToGetVotesReq !== undefined ? command.giveToGetVotesReq : board.giveToGetVotesReq,
       command.giveToGetCommentsReq !== undefined ? command.giveToGetCommentsReq : board.giveToGetCommentsReq,
+      board.owner,
       board.createdAt
     );
 

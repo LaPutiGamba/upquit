@@ -31,7 +31,6 @@ export default async function UpdateBoardPatchController(req: Request, res: Resp
       req.body.description,
       req.body.logoUrl,
       req.body.primaryColor,
-      req.body.ownerId,
       req.body.isPublic,
       req.body.allowAnonymousVotes,
       req.body.giveToGetEnabled,

@@ -68,6 +68,12 @@ export const boardService = {
     });
   },
 
+  getPublicBoardsByUserId: async (userId: string): Promise<BoardResponse[]> => {
+    return await apiClient<BoardResponse[]>(`/boards/user/${userId}/public`, {
+      method: "GET"
+    });
+  },
+
   getBoardById: async (id: string, token?: string): Promise<BoardResponse> => {
     return await apiClient<BoardResponse>(`/boards/${id}`, {
       method: "GET",

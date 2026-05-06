@@ -5,9 +5,15 @@ import InvalidGiveToGetRequirementsException from "../../domain/exceptions/Inval
 import CreateBoardCommand from "../commands/CreateBoardCommand.js";
 import BoardAlreadyExistsException from "../exceptions/BoardAlreadyExistsException.js";
 import BoardResponse, { mapBoardToResponse } from "../responses/BoardResponse.js";
+import UserRepository from "../../../users/domain/contracts/UserRepository.js";
+import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
+import UserNotFoundException from "../../../users/application/exceptions/UserNotFoundException.js";
 
 export default class CreateBoardCommandHandler {
-  constructor(private readonly boardRepository: BoardRepository) {}
+  constructor(
+    private readonly boardRepository: BoardRepository,
+    private readonly userRepository: UserRepository
+  ) {}
 
   async execute(command: CreateBoardCommand): Promise<BoardResponse> {
     const slug = new Slug(command.slug);
@@ -25,6 +31,13 @@ export default class CreateBoardCommandHandler {
       throw new InvalidGiveToGetRequirementsException();
     }
 
+    const ownerId = new Uuid(command.ownerId);
+    const owner = await this.userRepository.findById(ownerId);
+
+    if (!owner) {
+      throw new UserNotFoundException(command.ownerId);
+    }
+
     const board = new Board(
       crypto.randomUUID(),
       command.slug,
@@ -32,12 +45,12 @@ export default class CreateBoardCommandHandler {
       command.description,
       command.logoUrl,
       command.primaryColor,
-      command.ownerId,
       command.isPublic,
       command.allowAnonymousVotes,
       command.giveToGetEnabled,
       command.giveToGetVotesReq,
       command.giveToGetCommentsReq,
+      owner,
       new Date()
     );
 

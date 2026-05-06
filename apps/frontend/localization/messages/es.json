@@ -423,7 +423,8 @@
       "publicBoards": "Tableros públicos",
       "publicRequests": "Solicitudes públicas",
       "noPublicBoards": "Sin tableros públicos aún.",
-      "noPublicRequests": "Sin solicitudes públicas aún."
+      "noPublicRequests": "Sin solicitudes públicas aún.",
+      "loading": "Cargando..."
     }
   }
 }

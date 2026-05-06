@@ -4,6 +4,7 @@ import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/T
 import CreateBoardPostController from "./controllers/CreateBoardPostController.js";
 import GetBoardBySlugGetController from "./controllers/GetBoardBySlugGetController.js";
 import GetBoardsByUserGetController from "./controllers/GetBoardsByUserGetController.js";
+import GetPublicBoardsByUserGetController from "./controllers/GetPublicBoardsByUserGetController.js";
 import GetBoardByIdGetController from "./controllers/GetBoardByIdGetController.js";
 import UpdateBoardPatchController from "./controllers/UpdateBoardPatchController.js";
 import GetBoardCategoriesGetController from "./controllers/GetBoardCategoriesGetController.js";
@@ -38,6 +39,7 @@ boardsRouter.delete(
 );
 
 // Public
+boardsRouter.get("/user/:userId/public", GetPublicBoardsByUserGetController);
 boardsRouter.get("/:id", GetBoardByIdGetController);
 boardsRouter.get("/:id/categories", GetBoardCategoriesGetController);
 boardsRouter.get("/:id/members", GetBoardMembersGetController);
