@@ -26,6 +26,7 @@ import CommentCreatedEvent from "../../modules/comments/domain/events/CommentCre
 import CommentDeletedEvent from "../../modules/comments/domain/events/CommentDeletedEvent.js";
 import UserCreatedEvent from "../../modules/users/domain/events/UserCreatedEvent.js";
 import RequestCreatedEvent from "../../modules/requests/domain/events/RequestCreatedEvent.js";
+import RequestUpdatedEvent from "../../modules/requests/domain/events/RequestUpdatedEvent.js";
 
 // ========================
 // Event Listeners
@@ -40,6 +41,7 @@ import SendVerificationEmailOnUserCreated from "../../modules/users/application/
 import CreateNotificationsOnVoteCreated from "../../modules/notifications/application/listeners/CreateNotificationsOnVoteCreated.js";
 import CreateNotificationsOnCommentCreated from "../../modules/notifications/application/listeners/CreateNotificationsOnCommentCreated.js";
 import CreateNotificationsOnRequestCreated from "../../modules/notifications/application/listeners/CreateNotificationsOnRequestCreated.js";
+import CreateNotificationsOnRequestUpdated from "../../modules/notifications/application/listeners/CreateNotificationsOnRequestUpdated.js";
 
 // ========================
 // Command Handlers
@@ -112,6 +114,13 @@ export const createNotificationsOnRequestCreatedListener = new CreateNotificatio
   userRepository,
   realtimePublisher
 );
+export const createNotificationsOnRequestUpdatedListener = new CreateNotificationsOnRequestUpdated(
+  notificationRepository,
+  boardRepository,
+  requestRepository,
+  userRepository,
+  realtimePublisher
+);
 
 // ========================
 // Subscribe Listeners to Events
@@ -132,6 +141,9 @@ eventBus.subscribe("comment.created", (event: CommentCreatedEvent) =>
 );
 eventBus.subscribe("request.created", (event: RequestCreatedEvent) =>
   createNotificationsOnRequestCreatedListener.handle(event)
+);
+eventBus.subscribe("request.updated", (event: RequestUpdatedEvent) =>
+  createNotificationsOnRequestUpdatedListener.handle(event)
 );
 eventBus.subscribe("user.created", (event: UserCreatedEvent) => sendVerificationEmailListener.handle(event));
 

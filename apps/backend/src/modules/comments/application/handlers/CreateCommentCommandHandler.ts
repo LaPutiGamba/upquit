@@ -40,8 +40,11 @@ export default class CreateCommentCommandHandler {
     );
 
     this.realtimePublisher.publish(command.requestId, "CommentAdded", {
-      requestId: command.requestId,
-      comment: response
+      data: {
+        requestId: command.requestId,
+        comment: response
+      },
+      timestamp: new Date().toISOString()
     });
 
     await this.eventBus.publish([

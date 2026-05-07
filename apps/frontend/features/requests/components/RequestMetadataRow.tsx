@@ -34,6 +34,7 @@ interface RequestMetadataRowProps {
   request: RequestMetadata;
   boardId: string;
   canEdit?: boolean;
+  canManageStatus?: boolean;
   onStatusSave?: (nextStatus: RequestStatusValue) => Promise<void> | void;
   stopPropagation?: boolean;
   size: "sm" | "md";
@@ -133,6 +134,7 @@ export function RequestMetadataRow({
   request,
   boardId,
   canEdit = false,
+  canManageStatus,
   onStatusSave,
   stopPropagation = false,
   size,
@@ -143,6 +145,7 @@ export function RequestMetadataRow({
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const canEditStatus = canManageStatus ?? canEdit;
 
   const requestDateLabel = request.createdAt ? formatLocalizedDateTime(request.createdAt, locale) : "";
 
@@ -171,7 +174,7 @@ export function RequestMetadataRow({
 
   return (
     <div className={cn(metadataRowVariants({ size }), className)}>
-      {canEdit && isEditingStatus ? (
+      {canEditStatus && isEditingStatus ? (
         <div onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}>
           <Select
             open={isSelectOpen}
@@ -227,13 +230,13 @@ export function RequestMetadataRow({
             metadataBadgeContentVariants({ size }),
             "uppercase tracking-[0.08em]",
             getRequestStatusColor(request.status),
-            canEdit && "cursor-pointer transition-opacity hover:opacity-90"
+            canEditStatus && "cursor-pointer transition-opacity hover:opacity-90"
           )}
-          role={canEdit ? "button" : undefined}
-          tabIndex={canEdit ? 0 : undefined}
-          aria-label={canEdit ? "Edit request status" : undefined}
+          role={canEditStatus ? "button" : undefined}
+          tabIndex={canEditStatus ? 0 : undefined}
+          aria-label={canEditStatus ? "Edit request status" : undefined}
           onClick={
-            canEdit
+            canEditStatus
               ? (event) => {
                   if (stopPropagation) {
                     event.stopPropagation();
@@ -244,7 +247,7 @@ export function RequestMetadataRow({
               : undefined
           }
           onKeyDown={
-            canEdit
+            canEditStatus
               ? (event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();

@@ -26,8 +26,11 @@ export default class AddBoardCategoryCommandHandler {
     const response = mapCategoryToResponse(category);
 
     this.realtimePublisher.publish(command.boardId, "CategoryAdded", {
-      boardId: command.boardId,
-      category: response
+      data: {
+        boardId: command.boardId,
+        category: response
+      },
+      timestamp: new Date().toISOString()
     });
 
     return response;

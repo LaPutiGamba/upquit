@@ -120,6 +120,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
               boardId={editableRequest.boardId}
               stopPropagation
               canEdit={canEdit}
+              canManageStatus={isBoardAdmin}
               onStatusSave={(nextStatus) => handleUpdateRequest({ status: nextStatus })}
               size="sm"
               className="mt-2 mb-1"
@@ -201,6 +202,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
                 boardId={editableRequest.boardId}
                 stopPropagation
                 canEdit={canEdit}
+                canManageStatus={isBoardAdmin}
                 onStatusSave={(nextStatus) => handleUpdateRequest({ status: nextStatus })}
                 size="sm"
                 className="mt-3"

@@ -8,11 +8,14 @@ import CreateRequestCommandHandler from "../../application/handlers/CreateReques
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import InvalidRequestStatusException from "../../domain/exceptions/InvalidRequestStatusException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
-import { eventBus } from "../../../../shared/infrastructure/dependencies.js";
+import { boardRepository, eventBus } from "../../../../shared/infrastructure/dependencies.js";
+import BoardNotFoundException from "../../../boards/application/exceptions/BoardNotFoundException.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default async function CreateRequestPostController(req: Request, res: Response) {
   const commandHandler = new CreateRequestCommandHandler(
     new RequestDrizzleRepository(db),
+    boardRepository,
     new UserDrizzleRepository(db),
     new WebSocketRealtimePublisher(),
     eventBus
@@ -48,6 +51,18 @@ export default async function CreateRequestPostController(req: Request, res: Res
     if (ex instanceof InvalidRequestStatusException) {
       return res.status(400).send({
         error: "INVALID_REQUEST_STATUS",
+        message: ex.message
+      });
+    }
+    if (ex instanceof BoardNotFoundException) {
+      return res.status(404).send({
+        error: "BOARD_NOT_FOUND",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UnauthorizedActionException) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
         message: ex.message
       });
     }

@@ -7,11 +7,14 @@ import UpdateRequestCommand from "../commands/UpdateRequestCommand.js";
 import RequestNotFoundException from "../exceptions/RequestNotFoundException.js";
 import RequestResponse, { mapRequestToResponse } from "../responses/RequestResponse.js";
 import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
+import EventBus from "../../../../shared/domain/events/EventBus.js";
+import RequestUpdatedEvent from "../../domain/events/RequestUpdatedEvent.js";
 
 export default class UpdateRequestCommandHandler {
   constructor(
     private readonly requestRepository: RequestRepository,
-    private readonly realtimePublisher: RealtimePublisher
+    private readonly realtimePublisher: RealtimePublisher,
+    private readonly eventBus: EventBus
   ) {}
 
   async execute(command: UpdateRequestCommand): Promise<RequestResponse> {
@@ -73,6 +76,19 @@ export default class UpdateRequestCommandHandler {
       await this.requestRepository.addChangelogEntries(changelogEntries);
     }
 
+    if (changelogEntries.length > 0 && !isAuthor) {
+      await this.eventBus.publish([
+        new RequestUpdatedEvent(
+          request.id.getValue(),
+          request.boardId.getValue(),
+          command.userId,
+          request.author.id.getValue(),
+          request.title,
+          changelogEntries.map((entry) => entry.field)
+        )
+      ]);
+    }
+
     const updatedRequestWithAuthor = await this.requestRepository.findById(updatedRequest.id);
     const response = mapRequestToResponse(updatedRequestWithAuthor!);
     const hasTitleChanged = request.title !== updatedRequest.title;
@@ -80,8 +96,11 @@ export default class UpdateRequestCommandHandler {
 
     if (hasTitleChanged || hasStatusChanged) {
       this.realtimePublisher.publish(updatedRequest.boardId.getValue(), "RequestUpdated", {
-        boardId: updatedRequest.boardId.getValue(),
-        request: response
+        data: {
+          boardId: updatedRequest.boardId.getValue(),
+          request: response
+        },
+        timestamp: new Date().toISOString()
       });
     }
 

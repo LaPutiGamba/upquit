@@ -25,9 +25,16 @@ export default class IncrementVoteCountOnVoteCreated {
         action: "created",
         voteCount: request.voteCount
       };
+      const timestamp = new Date().toISOString();
 
-      this.realtimePublisher.publish(`request.${userId.getValue()}.${boardId.getValue()}`, "RequestUpdated", payload);
-      this.realtimePublisher.publish(`request.${boardId.getValue()}`, "RequestUpdated", payload);
+      this.realtimePublisher.publish(`request.${userId.getValue()}.${boardId.getValue()}`, "RequestUpdated", {
+        data: payload,
+        timestamp
+      });
+      this.realtimePublisher.publish(`request.${boardId.getValue()}`, "RequestUpdated", {
+        data: payload,
+        timestamp
+      });
     }
   }
 }

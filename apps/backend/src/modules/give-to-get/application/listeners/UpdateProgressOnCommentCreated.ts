@@ -70,11 +70,10 @@ export default class UpdateProgressOnCommentCreated {
     }
 
     if (finalProgressToPublish) {
-      this.realtimePublisher.publish(
-        `progress.${userId.getValue()}.${boardId.getValue()}`,
-        "ProgressUpdated",
-        mapGiveToGetProgressToResponse(finalProgressToPublish)
-      );
+      this.realtimePublisher.publish(`progress.${userId.getValue()}.${boardId.getValue()}`, "ProgressUpdated", {
+        data: mapGiveToGetProgressToResponse(finalProgressToPublish),
+        timestamp: new Date().toISOString()
+      });
     }
   }
 }

@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { giveToGetService, GiveToGetProgressResponse } from "@/features/give-to-get/services/giveToGetService";
 import { CategorySelectorMultiple } from "@/features/requests/components/CategorySelectorMultiple";
+import { formatRequestStatusLabel } from "@/features/requests/lib/requestStatusPresentation";
 import { requestService, RequestResponse } from "../services/requestService";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
@@ -23,9 +24,18 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/shared/components/ui/select";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { toast } from "@/shared/components/ui/sonner";
 import { Plus } from "lucide-react";
+import type { RequestStatusValue } from "../services/requestService";
 
 const sectionLabelClassName = "text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground";
 
@@ -39,10 +49,18 @@ type CreateRequestFormValues = z.infer<typeof createRequestSchema>;
 interface CreateRequestFormProps {
   boardId: string;
   giveToGetEnabled?: boolean | null;
+  canManageStatus?: boolean;
   onRequestCreated?: (request: RequestResponse) => void | Promise<void>;
 }
 
-export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated }: CreateRequestFormProps) {
+const REQUEST_STATUS_OPTIONS: RequestStatusValue[] = ["open", "planned", "in_progress", "completed", "rejected"];
+
+export function CreateRequestForm({
+  boardId,
+  giveToGetEnabled,
+  canManageStatus = false,
+  onRequestCreated
+}: CreateRequestFormProps) {
   const router = useRouter();
   const [isHydrated, setIsHydrated] = useState(false);
   const [canPost, setCanPost] = useState(false);
@@ -51,6 +69,7 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [status, setStatus] = useState<RequestStatusValue>("open");
 
   const form = useForm<CreateRequestFormValues>({
     // @ts-expect-error - zodResolver type mismatch
@@ -123,11 +142,13 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
         boardId,
         title: data.title,
         description: data.description?.trim() ? data.description : null,
-        categoryIds
+        categoryIds,
+        status: canManageStatus ? status : "open"
       });
 
       form.reset({ title: "", description: "" });
       setCategoryIds([]);
+      setStatus("open");
       setIsDialogOpen(false);
       toast.success("Request created successfully");
 
@@ -181,8 +202,33 @@ export function CreateRequestForm({ boardId, giveToGetEnabled, onRequestCreated 
         />
 
         <div className="mt-2 space-y-3">
+          {canManageStatus ? (
+            <div className="space-y-2">
+              <p className={sectionLabelClassName}>Initial status</p>
+              <Select value={status} onValueChange={(value) => setStatus(value as RequestStatusValue)}>
+                <SelectTrigger className="h-10 rounded-md">
+                  <SelectValue>{formatRequestStatusLabel(status)}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {REQUEST_STATUS_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {formatRequestStatusLabel(option)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+
           <p className={sectionLabelClassName}>Categories</p>
-          <CategorySelectorMultiple boardId={boardId} value={categoryIds} onChange={setCategoryIds} />
+          <CategorySelectorMultiple
+            boardId={boardId}
+            value={categoryIds}
+            onChange={setCategoryIds}
+            disabled={isSubmitting}
+          />
         </div>
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>

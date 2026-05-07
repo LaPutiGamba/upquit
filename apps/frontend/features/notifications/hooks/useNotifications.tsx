@@ -13,7 +13,12 @@ import {
 } from "../services/notificationsApi";
 import type { NotificationItem } from "../services/notificationsApi";
 
-const STICKY_NOTIFICATION_TYPES = new Set(["request.created", "board.member.added", "request.status.changed"]);
+const STICKY_NOTIFICATION_TYPES = new Set([
+  "request.created",
+  "request.updated",
+  "board.member.added",
+  "request.status.changed"
+]);
 
 export function useNotifications(boardId?: string) {
   const { user } = useAuth();

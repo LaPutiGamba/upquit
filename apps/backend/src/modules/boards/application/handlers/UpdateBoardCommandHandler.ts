@@ -75,7 +75,10 @@ export default class UpdateBoardCommandHandler {
 
     const response = mapBoardToResponse(updatedBoard);
 
-    this.realtimePublisher.publish(updatedBoard.id.getValue(), "BoardUpdated", response);
+    this.realtimePublisher.publish(updatedBoard.id.getValue(), "BoardUpdated", {
+      data: response,
+      timestamp: new Date().toISOString()
+    });
 
     return response;
   }

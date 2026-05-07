@@ -24,7 +24,7 @@ export default class CreateNotificationsOnCommentCreated {
     if (!board) return;
 
     const members = await this.boardRepository.findMembersByBoardId(new Uuid(boardId));
-    const recipients = new Set<string>([board.owner.id.getValue(), request.authorId.getValue()]);
+    const recipients = new Set<string>([board.owner.id.getValue(), request.author.id.getValue()]);
 
     for (const member of members) {
       if (member.role === "admin") {
@@ -65,7 +65,10 @@ export default class CreateNotificationsOnCommentCreated {
       });
 
       await this.notificationRepository.create(notification);
-      this.realtimePublisher.publish(`notification.${recipientId}`, "NotificationCreated", notification);
+      this.realtimePublisher.publish(`notification.${recipientId}`, "NotificationCreated", {
+        data: notification,
+        timestamp: notification.createdAt
+      });
     }
   }
 }

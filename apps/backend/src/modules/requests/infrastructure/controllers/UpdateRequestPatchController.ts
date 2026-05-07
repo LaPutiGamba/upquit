@@ -9,6 +9,7 @@ import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUu
 import InvalidRequestStatusException from "../../domain/exceptions/InvalidRequestStatusException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
 import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
+import { eventBus } from "../../../../shared/infrastructure/dependencies.js";
 
 type UpdateRequestPatchParams = {
   id: string;
@@ -17,7 +18,8 @@ type UpdateRequestPatchParams = {
 export default async function UpdateRequestPatchController(req: Request<UpdateRequestPatchParams>, res: Response) {
   const commandHandler = new UpdateRequestCommandHandler(
     new RequestDrizzleRepository(db),
-    new WebSocketRealtimePublisher()
+    new WebSocketRealtimePublisher(),
+    eventBus
   );
 
   try {

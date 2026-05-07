@@ -32,16 +32,16 @@ export default class UpdateProgressOnVoteCreated {
       await this.progressRepository.incrementVotesGiven(userId, boardId);
       currentProgress = await this.progressRepository.findByUserAndBoard(userId, boardId);
     }
-    
+
     let finalProgressToPublish = currentProgress;
-    
+
     if (currentProgress && !currentProgress.canPost) {
       const reqVotes = board.giveToGetVotesReq ?? 0;
       const reqComments = board.giveToGetCommentsReq ?? 0;
-      
+
       const currentVotes = currentProgress.votesGiven ?? 0;
       const currentComments = currentProgress.qualifyingComments ?? 0;
-      
+
       if (currentVotes >= reqVotes && currentComments >= reqComments) {
         const unlockedProgress = new GiveToGetProgress(
           currentProgress.id.getValue(),
@@ -52,18 +52,17 @@ export default class UpdateProgressOnVoteCreated {
           true,
           new Date()
         );
-        
+
         await this.progressRepository.update(unlockedProgress);
         finalProgressToPublish = unlockedProgress;
       }
     }
 
     if (finalProgressToPublish) {
-      this.realtimePublisher.publish(
-        `progress.${userId.getValue()}.${boardId.getValue()}`,
-        "ProgressUpdated",
-        mapGiveToGetProgressToResponse(finalProgressToPublish)
-      );
+      this.realtimePublisher.publish(`progress.${userId.getValue()}.${boardId.getValue()}`, "ProgressUpdated", {
+        data: mapGiveToGetProgressToResponse(finalProgressToPublish),
+        timestamp: new Date().toISOString()
+      });
     }
   }
 }

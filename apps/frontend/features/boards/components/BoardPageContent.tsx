@@ -106,6 +106,7 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
               <CreateRequestForm
                 boardId={board.id}
                 giveToGetEnabled={board.giveToGetEnabled}
+                canManageStatus={canManageBoard}
                 onRequestCreated={addRequest}
               />
             </div>

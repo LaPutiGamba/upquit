@@ -63,7 +63,10 @@ export default class CreateNotificationsOnVoteCreated {
       });
 
       await this.notificationRepository.create(notification);
-      this.realtimePublisher.publish(`notification.${recipientId}`, "NotificationCreated", notification);
+      this.realtimePublisher.publish(`notification.${recipientId}`, "NotificationCreated", {
+        data: notification,
+        timestamp: notification.createdAt
+      });
     }
   }
 }

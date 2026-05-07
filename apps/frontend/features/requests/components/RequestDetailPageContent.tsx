@@ -98,6 +98,14 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     return editableRequest.authorId === user.id || board.ownerId === user.id;
   }, [board, editableRequest, user]);
 
+  const canManageStatus = useMemo(() => {
+    if (!user || !board) {
+      return false;
+    }
+
+    return board.ownerId === user.id || canManageBoard;
+  }, [board, canManageBoard, user]);
+
   const canDelete = useMemo(() => {
     if (!user || !board || !editableRequest) {
       return false;
@@ -241,6 +249,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
               request={editableRequest}
               boardId={board.id}
               canEdit={canEdit}
+              canManageStatus={canManageStatus}
               onStatusSave={(nextStatus) => handleUpdateRequest({ status: nextStatus })}
               size="md"
               className="mt-5"

@@ -49,8 +49,11 @@ export default class UpdateCommentCommandHandler {
     );
 
     this.realtimePublisher.publish(updatedComment.requestId.getValue(), "CommentUpdated", {
-      requestId: updatedComment.requestId.getValue(),
-      comment: response
+      data: {
+        requestId: updatedComment.requestId.getValue(),
+        comment: response
+      },
+      timestamp: new Date().toISOString()
     });
 
     return response;
