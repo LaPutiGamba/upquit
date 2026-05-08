@@ -59,10 +59,16 @@ export default class UpdateRequestCommandHandler {
 
     await this.requestRepository.update(updatedRequest);
 
+    let removedCategoryNames: { id: string; name: string }[] = [];
+    let removedCategoryIds: string[] = [];
     if (command.categoryIds !== undefined) {
       const oldCategoryIds = request.categoryIds;
       const newCategoryIds = command.categoryIds;
-      const removedCategoryIds = oldCategoryIds.filter((id) => !newCategoryIds.includes(id));
+      removedCategoryIds = oldCategoryIds.filter((id) => !newCategoryIds.includes(id));
+
+      if (removedCategoryIds.length > 0) {
+        removedCategoryNames = await this.requestRepository.getCategoryNamesByIds(removedCategoryIds);
+      }
 
       await this.requestRepository.setRequestCategories(requestId, newCategoryIds);
 
@@ -74,6 +80,22 @@ export default class UpdateRequestCommandHandler {
     const changelogEntries = this.buildChangelogEntries(request, command);
     if (changelogEntries.length > 0) {
       await this.requestRepository.addChangelogEntries(changelogEntries);
+
+      if (removedCategoryIds.length > 0) {
+        const categoryChangeEntry = changelogEntries.find((e) => e.field === "categoryIds");
+        if (categoryChangeEntry && categoryChangeEntry.id) {
+          const records = removedCategoryIds.map((catId) => {
+            const found = removedCategoryNames.find((c) => c.id === catId);
+            return {
+              requestChangelogId: categoryChangeEntry.id!,
+              categoryId: catId,
+              categoryName: found ? found.name : `Deleted category (${catId})`
+            };
+          });
+
+          await this.requestRepository.addDeletedCategoriesForChangelog(records);
+        }
+      }
     }
 
     if (changelogEntries.length > 0 && !isAuthor) {
@@ -145,6 +167,7 @@ export default class UpdateRequestCommandHandler {
       }
 
       entries.push({
+        id: crypto.randomUUID(),
         requestId: request.id.getValue(),
         userId: command.userId,
         field,

@@ -1,5 +1,11 @@
 import { and, asc, eq, sql, not, inArray } from "drizzle-orm";
-import { requestChangelogs, requests, subscriptions, requestCategories } from "../schema.js";
+import {
+  requestChangelogs,
+  requests,
+  subscriptions,
+  requestCategories,
+  requestChangelogDeletedCategories
+} from "../schema.js";
 import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
 import RequestRepository from "../../domain/contracts/RequestRepository.js";
@@ -38,7 +44,11 @@ export default class RequestDrizzleRepository implements RequestRepository {
     }
 
     const categoryIds = await this.getRequestCategoryIds(id);
-    const author = row.author ? this.mapToDomainUser(row.author) : null;
+    if (!row.author) {
+      return null;
+    }
+
+    const author = this.mapToDomainUser(row.author);
 
     return this.mapToDomainRequest(row.request, categoryIds, author);
   }
@@ -75,10 +85,16 @@ export default class RequestDrizzleRepository implements RequestRepository {
       }
     }
 
-    return rows.map((row) => {
-      const author = row.author ? this.mapToDomainUser(row.author) : null;
-      return this.mapToDomainRequest(row.request, requestCategoriesMap.get(row.request.id) ?? [], author);
-    });
+    return rows
+      .map((row) => {
+        if (!row.author) {
+          return null;
+        }
+
+        const author = this.mapToDomainUser(row.author);
+        return this.mapToDomainRequest(row.request, requestCategoriesMap.get(row.request.id) ?? [], author);
+      })
+      .filter((request): request is Request => request !== null);
   }
 
   public async isBoardOwnerOrAdmin(boardId: Uuid, userId: Uuid): Promise<boolean> {
@@ -163,6 +179,7 @@ export default class RequestDrizzleRepository implements RequestRepository {
 
     await this.db.insert(requestChangelogs).values(
       entries.map((entry) => ({
+        id: entry.id,
         requestId: entry.requestId,
         userId: entry.userId,
         field: entry.field,
@@ -183,7 +200,7 @@ export default class RequestDrizzleRepository implements RequestRepository {
       .where(eq(requestChangelogs.requestId, id.getValue()))
       .orderBy(asc(requestChangelogs.createdAt), asc(requestChangelogs.id));
 
-    return rows.map((row) => ({
+    const changelogEntries: RequestChangelogWithAuthor[] = rows.map((row) => ({
       id: row.changelog.id,
       requestId: row.changelog.requestId,
       userId: row.changelog.userId,
@@ -191,8 +208,66 @@ export default class RequestDrizzleRepository implements RequestRepository {
       field: row.changelog.field,
       oldValue: row.changelog.oldValue,
       newValue: row.changelog.newValue,
-      createdAt: row.changelog.createdAt
+      createdAt: row.changelog.createdAt,
+      deletedCategories: []
     }));
+
+    // load deleted category names for the fetched changelog entries
+    const changelogIds = changelogEntries.map((c) => c.id);
+    if (changelogIds.length === 0) {
+      return changelogEntries;
+    }
+
+    const deletedRows = await this.db
+      .select({
+        id: requestChangelogDeletedCategories.id,
+        requestChangelogId: requestChangelogDeletedCategories.requestChangelogId,
+        categoryId: requestChangelogDeletedCategories.categoryId,
+        categoryName: requestChangelogDeletedCategories.categoryName
+      })
+      .from(requestChangelogDeletedCategories)
+      .where(inArray(requestChangelogDeletedCategories.requestChangelogId, changelogIds));
+
+    const mapByChangelog = new Map<string, { categoryId: string; categoryName: string }[]>();
+    for (const dr of deletedRows) {
+      const arr = mapByChangelog.get(dr.requestChangelogId) ?? [];
+      arr.push({ categoryId: dr.categoryId, categoryName: dr.categoryName });
+      mapByChangelog.set(dr.requestChangelogId, arr);
+    }
+
+    for (const entry of changelogEntries) {
+      const arr = mapByChangelog.get(entry.id);
+      if (arr) {
+        entry.deletedCategories = arr;
+      }
+    }
+
+    return changelogEntries;
+  }
+
+  public async getCategoryNamesByIds(categoryIds: string[]): Promise<{ id: string; name: string }[]> {
+    if (categoryIds.length === 0) return [];
+
+    const rows = await this.db
+      .select({ id: categories.id, name: categories.name })
+      .from(categories)
+      .where(inArray(categories.id, categoryIds));
+
+    return rows.map((r) => ({ id: r.id, name: r.name }));
+  }
+
+  public async addDeletedCategoriesForChangelog(
+    records: { requestChangelogId: string; categoryId: string; categoryName: string }[]
+  ): Promise<void> {
+    if (records.length === 0) return;
+
+    await this.db.insert(requestChangelogDeletedCategories).values(
+      records.map((r) => ({
+        requestChangelogId: r.requestChangelogId,
+        categoryId: r.categoryId,
+        categoryName: r.categoryName
+      }))
+    );
   }
 
   public async incrementVoteCount(id: Uuid): Promise<void> {

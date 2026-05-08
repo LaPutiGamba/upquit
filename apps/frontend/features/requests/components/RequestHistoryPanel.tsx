@@ -127,10 +127,17 @@ export function RequestHistoryPanel({
       .filter(Boolean);
   };
 
-  const formatCategoryList = (value: string | null): string => {
-    const categoryNames = parseCategoryIds(value).map(
-      (categoryId) => categoryNamesById[categoryId] ?? "Deleted category"
-    );
+  const formatCategoryList = (
+    value: string | null,
+    deletedCategories?: { categoryId: string; categoryName: string }[]
+  ): string => {
+    const categoryNames = parseCategoryIds(value).map((categoryId) => {
+      const name = categoryNamesById[categoryId];
+      if (name) return name;
+      const fromDeleted = deletedCategories?.find((d) => d.categoryId === categoryId);
+      if (fromDeleted) return `${fromDeleted.categoryName} (deleted)`;
+      return `Deleted category`;
+    });
 
     if (categoryNames.length === 0) {
       return "none";
@@ -202,9 +209,13 @@ export function RequestHistoryPanel({
     const newValue = entry.newValue;
 
     const oldFormattedValue =
-      entry.field === "categoryIds" ? formatCategoryList(oldValue) : formatFieldValue(entry.field, oldValue);
+      entry.field === "categoryIds"
+        ? formatCategoryList(oldValue, entry.deletedCategories)
+        : formatFieldValue(entry.field, oldValue);
     const newFormattedValue =
-      entry.field === "categoryIds" ? formatCategoryList(newValue) : formatFieldValue(entry.field, newValue);
+      entry.field === "categoryIds"
+        ? formatCategoryList(newValue, entry.deletedCategories)
+        : formatFieldValue(entry.field, newValue);
 
     switch (entry.field) {
       case "status":

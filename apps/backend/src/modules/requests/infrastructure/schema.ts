@@ -51,6 +51,16 @@ export const requestChangelogs = pgTable("request_changelogs", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow()
 });
 
+export const requestChangelogDeletedCategories = pgTable("request_changelog_deleted_categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  requestChangelogId: uuid("request_changelog_id")
+    .notNull()
+    .references(() => requestChangelogs.id, { onDelete: "cascade" }),
+  categoryId: uuid("category_id").notNull(),
+  categoryName: varchar("category_name", { length: 200 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow()
+});
+
 export const subscriptions = pgTable(
   "subscriptions",
   {

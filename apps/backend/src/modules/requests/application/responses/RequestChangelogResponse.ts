@@ -9,6 +9,7 @@ export default interface RequestChangelogResponse {
   oldValue: string | null;
   newValue: string | null;
   createdAt: Date | null;
+  deletedCategories?: { categoryId: string; categoryName: string }[];
 }
 
 export function mapRequestChangelogToResponse(changelog: RequestChangelogWithAuthor): RequestChangelogResponse {
@@ -20,6 +21,7 @@ export function mapRequestChangelogToResponse(changelog: RequestChangelogWithAut
     field: changelog.field,
     oldValue: changelog.oldValue,
     newValue: changelog.newValue,
-    createdAt: changelog.createdAt
+    createdAt: changelog.createdAt,
+    deletedCategories: changelog.deletedCategories
   };
 }

@@ -45,6 +45,7 @@ export interface RequestChangelogResponse {
   oldValue: string | null;
   newValue: string | null;
   createdAt: string | null;
+  deletedCategories?: { categoryId: string; categoryName: string }[];
 }
 
 export type RequestStatusValue = "open" | "planned" | "in_progress" | "completed" | "rejected";

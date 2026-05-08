@@ -13,6 +13,10 @@ export default interface RequestRepository {
   delete(id: string): Promise<void>;
   addChangelogEntries(entries: RequestChangelogCreateInput[]): Promise<void>;
   findChangelogByRequestId(id: Uuid): Promise<RequestChangelogWithAuthor[]>;
+  getCategoryNamesByIds(categoryIds: string[]): Promise<{ id: string; name: string }[]>;
+  addDeletedCategoriesForChangelog(
+    records: { requestChangelogId: string; categoryId: string; categoryName: string }[]
+  ): Promise<void>;
 
   incrementVoteCount(id: Uuid): Promise<void>;
   decrementVoteCount(id: Uuid): Promise<void>;

@@ -4,6 +4,7 @@ export interface RequestChangelogCreateInput {
   field: string;
   oldValue: string | null;
   newValue: string | null;
+  id?: string;
 }
 
 export interface RequestChangelogWithAuthor {
@@ -15,4 +16,5 @@ export interface RequestChangelogWithAuthor {
   oldValue: string | null;
   newValue: string | null;
   createdAt: Date | null;
+  deletedCategories?: { categoryId: string; categoryName: string }[];
 }

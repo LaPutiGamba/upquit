@@ -50,6 +50,13 @@
       "when": 1778076971636,
       "tag": "0006_add_username_to_users",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1778251060422,
+      "tag": "0007_request_changelog_deleted_categories",
+      "breakpoints": true
     }
   ]
 }
