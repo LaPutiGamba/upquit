@@ -2,12 +2,12 @@
 
 import type React from "react";
 import { memo } from "react";
-import { useLocale } from "next-intl";
+import { useFormatter } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { CommentForm } from "./CommentForm";
 import type CommentResponse from "../services/commentService";
-import { formatLocalizedDateTime } from "@/shared/lib/date";
+import { formatDateWithFormatter } from "@/shared/lib/date";
 
 type CommentThreadProps = {
   rootComment: CommentResponse;
@@ -38,7 +38,7 @@ export const CommentThread = memo(function CommentThread({
   setReplyingTo,
   onCommentAdded
 }: CommentThreadProps) {
-  const locale = useLocale();
+  const formatter = useFormatter();
   const hasReplies = replies.length > 0;
   const isReplying = replyingTo === rootComment.id;
   const showConnectionLine = hasReplies || isReplying;
@@ -69,7 +69,7 @@ export const CommentThread = memo(function CommentThread({
             )}
             {rootComment.createdAt && (
               <span className="text-xs text-muted-foreground">
-                {formatLocalizedDateTime(rootComment.createdAt, locale, {
+                {formatDateWithFormatter(formatter, rootComment.createdAt, {
                   month: "short",
                   day: "numeric",
                   hour: "2-digit",
@@ -114,7 +114,7 @@ export const CommentThread = memo(function CommentThread({
                   )}
                   {reply.createdAt && (
                     <span className="text-xs text-muted-foreground">
-                      {formatLocalizedDateTime(reply.createdAt, locale, {
+                      {formatDateWithFormatter(formatter, reply.createdAt, {
                         month: "short",
                         day: "numeric",
                         hour: "2-digit",

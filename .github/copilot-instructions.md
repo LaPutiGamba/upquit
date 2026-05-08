@@ -88,3 +88,7 @@ apps/frontend/
 - **Server vs. Client Components:** Default to Server Components (page.tsx, layout.tsx) for maximum performance and SEO. Add the "use client" directive only at the top of feature components that require interactivity (hooks, states, event listeners).
 - **Data Fetching:** API calls must be encapsulated in the services/ or hooks/ folder of the respective feature. Utilize Next.js standard fetch for Server Components or Server Actions for mutations. Client components should not make direct fetch or axios calls without passing through a feature service or a data-fetching hook (like React Query/SWR if implemented).
 - **Styling & UI:** Use Tailwind CSS for styling. For standard elements, use shadcn/ui components located in shared/components/ui. Always combine Tailwind classes using the custom cn() utility function found in shared/lib/utils to avoid class conflicts.
+
+
+# IMPORTANT
+Cannot use type `any` in Typescript!

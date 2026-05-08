@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useWebSocket, IncomingBroadcastMessage } from "../components/WebSocketProvider";
+import { useWebSocket, type IncomingBroadcastMessage } from "../components/WebSocketProvider";
+
+export type { IncomingBroadcastMessage } from "../components/WebSocketProvider";
 
 export function useChannel<T = unknown>(
   channel: string | null,
@@ -26,5 +28,5 @@ export function useChannel<T = unknown>(
     return () => {
       unsubscribe<T>(channel, callback);
     };
-  }, [channel, onMessage, subscribe, unsubscribe]);
+  }, [channel, subscribe, unsubscribe]);
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 import Image from "next/image";
 import { UserResponse } from "@/features/authentication/services/authService";
 import { Card } from "@/shared/components/ui/card";
+import { formatMonthYearWithFormatter } from "@/shared/lib/date";
 
 interface UserProfileClientProps {
   user: UserResponse;
@@ -11,14 +12,7 @@ interface UserProfileClientProps {
 
 export default function UserProfileClient({ user }: UserProfileClientProps) {
   const t = useTranslations("users.profile");
-
-  const formatDate = (date: Date | null | undefined) => {
-    if (!date) return "";
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "long"
-    }).format(new Date(date));
-  };
+  const formatter = useFormatter();
 
   if (!user.isActive) {
     return (
@@ -61,7 +55,7 @@ export default function UserProfileClient({ user }: UserProfileClientProps) {
 
               {user.createdAt && (
                 <p className="text-sm text-slate-500 dark:text-slate-500 mt-4">
-                  {t("joinedOn")} {formatDate(user.createdAt)}
+                  {t("joinedOn")} {formatMonthYearWithFormatter(formatter, user.createdAt)}
                 </p>
               )}
             </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "../globals.css";
 import { cn } from "@/shared/lib/utils";
@@ -53,7 +54,9 @@ export default async function RootLayout({
               <TooltipProvider>
                 <ViewTransition default="none">
                   <AuthProvider>
-                    <AppShell>{children}</AppShell>
+                    <Suspense fallback={<div className="flex-1" />}>
+                      <AppShell>{children}</AppShell>
+                    </Suspense>
                   </AuthProvider>
                 </ViewTransition>
               </TooltipProvider>

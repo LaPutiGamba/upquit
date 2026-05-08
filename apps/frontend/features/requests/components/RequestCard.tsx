@@ -47,13 +47,6 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
 
   const categories = editableRequest.categories ?? [];
 
-  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      event.currentTarget.click();
-    }
-  };
-
   const handleCopyLink = async () => {
     const currentUrl = window.location.href.replace(/\/$/, "");
     const shareUrl = `${currentUrl}/request/${editableRequest.id}`;
@@ -85,12 +78,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <article
-          role="button"
-          tabIndex={0}
-          onKeyDown={handleCardKeyDown}
-          className="flex w-full flex-col rounded-lg border border-border/70 px-4 py-3 text-left transition-colors hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
-        >
+        <article className="flex w-full flex-col rounded-lg border border-border/70 px-4 py-3 text-left transition-colors hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2">
           <div className="min-w-0">
             <div className="min-w-0">
               <h3 className="min-w-0 truncate text-lg font-semibold tracking-tight">{editableRequest.title}</h3>
@@ -130,6 +118,9 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
       </DialogTrigger>
 
       <DialogContent
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+        }}
         className="flex flex-col w-[96vw] max-h-[90dvh] max-w-[96vw] gap-0 overflow-hidden rounded-xl border border-border/70 bg-card p-0 sm:max-w-5xl"
         topRightActions={
           <>

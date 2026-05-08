@@ -3,7 +3,7 @@
 import { cva } from "class-variance-authority";
 import { useState } from "react";
 import { CalendarDays } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 
 import type { RequestStatusValue } from "@/features/requests/services/requestService";
 import {
@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/shared/components/ui/select";
-import { formatLocalizedDateTime } from "@/shared/lib/date";
+import { formatDateWithFormatter } from "@/shared/lib/date";
 import { cn } from "@/shared/lib/utils";
 
 type RequestMetadata = {
@@ -141,13 +141,13 @@ export function RequestMetadataRow({
   className
 }: RequestMetadataRowProps) {
   const t = useTranslations("RequestCard");
-  const locale = useLocale();
+  const formatter = useFormatter();
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const canEditStatus = canManageStatus ?? canEdit;
 
-  const requestDateLabel = request.createdAt ? formatLocalizedDateTime(request.createdAt, locale) : "";
+  const requestDateLabel = request.createdAt ? formatDateWithFormatter(formatter, request.createdAt) : "";
 
   const handleStatusSave = async (nextStatus: string) => {
     if (!onStatusSave) {

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "@/localization/i18n/routing";
+import { useFormatter } from "next-intl";
 import { Bell, ArrowLeft } from "lucide-react";
 import { Link } from "@/localization/i18n/routing";
 import { useAuth } from "@/shared/components/AuthProvider";
@@ -10,9 +11,11 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
+import { DATE_TIME_FORMAT_OPTIONS } from "@/shared/lib/date";
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const formatter = useFormatter();
   const { boards } = useAuth();
   const { notifications, markAll, markAsRead } = useNotifications(undefined);
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
@@ -126,7 +129,7 @@ export default function NotificationsPage() {
                         </span>
                       </p>
                     )}
-                    <p>{new Date(notification.createdAt).toLocaleString()}</p>
+                    <p>{formatter.dateTime(new Date(notification.createdAt), DATE_TIME_FORMAT_OPTIONS)}</p>
                   </div>
                 </>
               );

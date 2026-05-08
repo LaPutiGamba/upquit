@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { useChannel } from "@/shared/hooks/useChannel";
+import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
 import { commentService, type default as CommentResponse } from "../services/commentService";
 
 type UseCommentsResult = {
@@ -80,29 +80,34 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
     };
   }, [addComment, fetchComments, syncChannelName]);
 
-  useChannel<CommentRealtimePayload>(requestId, (message) => {
-    const payload = message.payload;
+  const handleCommentsChannelMessage = useCallback(
+    (message: IncomingBroadcastMessage<CommentRealtimePayload>) => {
+      const payload = message.payload;
 
-    if (message.event === "CommentAdded") {
-      if ("comment" in payload) {
-        addComment(payload.comment);
+      if (message.event === "CommentAdded") {
+        if ("comment" in payload) {
+          addComment(payload.comment);
+        }
+        return;
       }
-      return;
-    }
 
-    if (message.event === "CommentDeleted") {
-      if ("commentId" in payload) {
-        setComments((prev) => prev.filter((item) => item.id !== payload.commentId));
+      if (message.event === "CommentDeleted") {
+        if ("commentId" in payload) {
+          setComments((prev) => prev.filter((item) => item.id !== payload.commentId));
+        }
+        return;
       }
-      return;
-    }
 
-    if (message.event === "CommentUpdated") {
-      if ("comment" in payload) {
-        setComments((prev) => prev.map((item) => (item.id === payload.comment.id ? payload.comment : item)));
+      if (message.event === "CommentUpdated") {
+        if ("comment" in payload) {
+          setComments((prev) => prev.map((item) => (item.id === payload.comment.id ? payload.comment : item)));
+        }
       }
-    }
-  });
+    },
+    [addComment]
+  );
+
+  useChannel<CommentRealtimePayload>(requestId, handleCommentsChannelMessage);
 
   return {
     comments,

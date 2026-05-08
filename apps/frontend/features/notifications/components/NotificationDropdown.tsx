@@ -1,10 +1,10 @@
 "use client";
 
+import { useFormatter } from "next-intl";
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/shared/components/ui/dropdown-menu";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
-import { formatDistanceToNow } from "date-fns";
 import { Link } from "@/localization/i18n/routing";
 import { CheckCheck } from "lucide-react";
 import type { NotificationItem } from "../services/notificationsApi";
@@ -18,6 +18,7 @@ export default function NotificationDropdown({
   onMarkRead?: (id: string) => void;
   onMarkAll?: () => void;
 }) {
+  const formatter = useFormatter();
   return (
     <div className="w-full">
       <div className="px-3 py-2">
@@ -58,9 +59,6 @@ export default function NotificationDropdown({
                   }`}
                   onClick={() => onMarkRead?.(n.id)}
                 >
-                  <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/40 text-muted-foreground">
-                    <span className="h-2 w-2 rounded-full bg-current" />
-                  </div>
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <div className="text-sm font-medium">{n.payload?.title ?? n.type}</div>
@@ -70,41 +68,24 @@ export default function NotificationDropdown({
                         </Badge>
                       )}
                     </div>
-                    {actor ? (
-                      actor.profileUrl ? (
-                        <Link
-                          href={actor.profileUrl}
-                          className="flex items-center gap-2 text-xs text-muted-foreground hover:underline"
-                        >
-                          <Avatar className="size-5">
+                    <div className="text-xs leading-relaxed text-muted-foreground flex items-center gap-1.5">
+                      {actor && (
+                        <>
+                          <Avatar className="size-4">
                             {actor.avatarUrl ? (
                               <AvatarImage src={actor.avatarUrl} alt={actor.displayName ?? actor.username ?? "User"} />
                             ) : null}
-                            <AvatarFallback className="text-[10px] font-semibold uppercase">
+                            <AvatarFallback className="text-[9px] font-semibold uppercase">
                               {(actor.displayName ?? actor.username ?? "U").charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          <span>{actorLabel}</span>
-                        </Link>
-                      ) : (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Avatar className="size-5">
-                            {actor.avatarUrl ? (
-                              <AvatarImage src={actor.avatarUrl} alt={actor.displayName ?? actor.username ?? "User"} />
-                            ) : null}
-                            <AvatarFallback className="text-[10px] font-semibold uppercase">
-                              {(actor.displayName ?? actor.username ?? "U").charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span>{actorLabel}</span>
-                        </div>
-                      )
-                    ) : null}
-                    <div className="text-xs leading-relaxed text-muted-foreground">{n.payload?.body}</div>
+                          <span className="font-medium">{actorLabel}</span>
+                        </>
+                      )}
+                      {n.payload?.body}
+                    </div>
                     <div className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(n.createdAt), {
-                        addSuffix: true
-                      })}
+                      {formatter.relativeTime(new Date(n.createdAt), new Date())}
                     </div>
                   </div>
                 </Link>
@@ -116,9 +97,6 @@ export default function NotificationDropdown({
                   n.read ? "opacity-60" : "hover:bg-accent/50"
                 }`}
               >
-                <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/40 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full bg-current" />
-                </div>
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="text-sm font-medium">{n.payload?.title ?? n.type}</div>
@@ -128,11 +106,24 @@ export default function NotificationDropdown({
                       </Badge>
                     )}
                   </div>
-                  <div className="text-xs leading-relaxed text-muted-foreground">{n.payload?.body}</div>
+                  <div className="text-xs leading-relaxed text-muted-foreground flex items-center gap-1.5">
+                    {actor && (
+                      <>
+                        <Avatar className="size-4">
+                          {actor.avatarUrl ? (
+                            <AvatarImage src={actor.avatarUrl} alt={actor.displayName ?? actor.username ?? "User"} />
+                          ) : null}
+                          <AvatarFallback className="text-[9px] font-semibold uppercase">
+                            {(actor.displayName ?? actor.username ?? "U").charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{actorLabel}</span>
+                      </>
+                    )}
+                    {n.payload?.body}
+                  </div>
                   <div className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(n.createdAt), {
-                      addSuffix: true
-                    })}
+                    {formatter.relativeTime(new Date(n.createdAt), new Date())}
                   </div>
                 </div>
               </div>

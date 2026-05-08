@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 
 import { BoardHeader } from "@/features/boards/components/BoardHeader";
 import { useBoardPage } from "@/features/boards/hooks/useBoardPage";
@@ -14,6 +14,7 @@ import { useAuth } from "@/shared/components/AuthProvider";
 import { Badge } from "@/shared/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/shared/components/ui/empty";
 import { MessageSquareDashed } from "lucide-react";
+import { formatDateWithFormatter } from "@/shared/lib/date";
 
 interface BoardPageContentProps {
   slug: string;
@@ -21,6 +22,7 @@ interface BoardPageContentProps {
 
 export function BoardPageContent({ slug }: BoardPageContentProps) {
   const t = useTranslations("BoardPage");
+  const formatter = useFormatter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { board, requests, latestRequestDate, loading, notFound, addRequest } = useBoardPage(slug);
@@ -99,7 +101,9 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
                 <h2 className="text-xl font-semibold tracking-tight md:text-2xl">{t("featureRequestsTitle")}</h2>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="secondary">{requests.length} total</Badge>
-                  {latestRequestDate ? <Badge variant="outline">Newest: {latestRequestDate}</Badge> : null}
+                  {latestRequestDate ? (
+                    <Badge variant="outline">Newest: {formatDateWithFormatter(formatter, latestRequestDate)}</Badge>
+                  ) : null}
                 </div>
               </div>
 

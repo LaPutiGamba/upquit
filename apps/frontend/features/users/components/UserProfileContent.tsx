@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/localization/i18n/routing";
 import { UserResponse } from "@/features/authentication/services/authService";
@@ -16,6 +16,7 @@ import {
   EmptyTitle
 } from "@/shared/components/ui/empty";
 import { PresentationIcon, ChevronRightIcon } from "lucide-react";
+import { formatMonthYearWithFormatter } from "@/shared/lib/date";
 
 interface UserProfileContentProps {
   user: UserResponse;
@@ -23,17 +24,9 @@ interface UserProfileContentProps {
 
 export default function UserProfileContent({ user }: UserProfileContentProps) {
   const t = useTranslations("users.profile");
+  const formatter = useFormatter();
   const [publicBoards, setPublicBoards] = useState<BoardResponse[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const formatDate = (date: Date | string | null | undefined) => {
-    if (!date) return "";
-    const dateObj = typeof date === "string" ? new Date(date) : date;
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "long"
-    }).format(dateObj);
-  };
 
   useEffect(() => {
     const fetchPublicBoards = async () => {
@@ -100,7 +93,7 @@ export default function UserProfileContent({ user }: UserProfileContentProps) {
 
             {user.createdAt && (
               <p className="text-sm text-muted-foreground mt-4">
-                {t("joinedOn")} {formatDate(user.createdAt)}
+                {t("joinedOn")} {formatMonthYearWithFormatter(formatter, user.createdAt)}
               </p>
             )}
           </div>

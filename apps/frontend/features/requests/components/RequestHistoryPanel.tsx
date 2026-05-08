@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, type ReactNode } from "react";
+import { useFormatter } from "next-intl";
 import { MoveRight } from "lucide-react";
 import { Spinner } from "@/shared/components/ui/spinner";
 import type { RequestChangelogResponse } from "@/features/requests/services/requestService";
-import { formatLocalizedDateTimeWithClock } from "@/shared/lib/date";
+import { formatDateTimeWithFormatter } from "@/shared/lib/date";
 import {
   formatRequestStatusLabel,
   getRequestStatusColor,
@@ -27,6 +28,7 @@ export function RequestHistoryPanel({
   changelogError,
   categoryNamesById
 }: RequestHistoryPanelProps) {
+  const formatter = useFormatter();
   const sortedChangelogEntries = useMemo(() => {
     return [...changelogEntries].sort((a, b) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -60,7 +62,7 @@ export function RequestHistoryPanel({
       return "just now";
     }
 
-    return formatLocalizedDateTimeWithClock(timestamp);
+    return formatDateTimeWithFormatter(formatter, timestamp);
   };
 
   const formatDisplayName = (displayName: string | null) => {

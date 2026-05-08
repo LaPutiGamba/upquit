@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
 
 import { boardService, BoardResponse } from "@/features/boards/services/boardService";
 import { requestService, RequestResponse } from "@/features/requests/services/requestService";
 import { UnauthorizedError } from "@/shared/lib/apiClient";
-import { formatLocalizedDateTime } from "@/shared/lib/date";
-import { useChannel } from "@/shared/hooks/useChannel";
+import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
 import { useAuth } from "@/shared/components/AuthProvider";
 
 interface UseBoardPageResult {
@@ -37,7 +35,6 @@ type RequestRealtimeMessagePayload =
 export function useBoardPage(slug: string): UseBoardPageResult {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const locale = useLocale();
   const { isAuthLoading } = useAuth();
   const isRequestsTab = searchParams.get("tab") === "requests";
 
@@ -46,7 +43,7 @@ export function useBoardPage(slug: string): UseBoardPageResult {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  const addRequest = (request: RequestResponse) => {
+  const addRequest = useCallback((request: RequestResponse) => {
     setRequests((prev) => {
       const exists = prev.some((r) => r.id === request.id);
       if (exists) {
@@ -55,7 +52,7 @@ export function useBoardPage(slug: string): UseBoardPageResult {
 
       return [request, ...prev];
     });
-  };
+  }, []);
 
   const requestsSortedByDate = useMemo(() => {
     return [...requests].sort((a, b) => {
@@ -68,13 +65,11 @@ export function useBoardPage(slug: string): UseBoardPageResult {
 
   const latestRequestDate = useMemo(() => {
     const latest = requestsSortedByDate[0];
+    if (!latest?.createdAt) return null;
 
-    if (!latest?.createdAt) {
-      return null;
-    }
-
-    return formatLocalizedDateTime(latest.createdAt, locale);
-  }, [locale, requestsSortedByDate]);
+    const date = latest.createdAt;
+    return typeof date === "string" ? date : date.toISOString();
+  }, [requestsSortedByDate]);
 
   useEffect(() => {
     if (isAuthLoading) {
@@ -132,35 +127,40 @@ export function useBoardPage(slug: string): UseBoardPageResult {
     };
   }, [isAuthLoading, isRequestsTab, router, slug]);
 
-  useChannel<RequestRealtimeMessagePayload>(board ? `request.${board.id}` : null, (message) => {
-    const payload = message.payload;
+  const handleBoardChannelMessage = useCallback(
+    (message: IncomingBroadcastMessage<RequestRealtimeMessagePayload>) => {
+      const payload = message.payload;
 
-    if (message.event === "RequestCreated" && "request" in payload) {
-      addRequest(payload.request);
-      return;
-    }
-
-    if (message.event === "RequestUpdated") {
-      if ("request" in payload) {
-        const nextRequest = payload.request;
-        setRequests((prev) => prev.map((item) => (item.id === nextRequest.id ? nextRequest : item)));
+      if (message.event === "RequestCreated" && "request" in payload) {
+        addRequest(payload.request);
         return;
       }
 
-      if ("requestId" in payload) {
-        setRequests((prev) =>
-          prev.map((item) =>
-            item.id === payload.requestId
-              ? {
-                  ...item,
-                  voteCount: payload.voteCount ?? 0
-                }
-              : item
-          )
-        );
+      if (message.event === "RequestUpdated") {
+        if ("request" in payload) {
+          const nextRequest = payload.request;
+          setRequests((prev) => prev.map((item) => (item.id === nextRequest.id ? nextRequest : item)));
+          return;
+        }
+
+        if ("requestId" in payload) {
+          setRequests((prev) =>
+            prev.map((item) =>
+              item.id === payload.requestId
+                ? {
+                    ...item,
+                    voteCount: payload.voteCount ?? 0
+                  }
+                : item
+            )
+          );
+        }
       }
-    }
-  });
+    },
+    [addRequest]
+  );
+
+  useChannel<RequestRealtimeMessagePayload>(board ? `request.${board.id}` : null, handleBoardChannelMessage);
 
   return { board, requests: requestsSortedByDate, latestRequestDate, loading, notFound, addRequest };
 }
