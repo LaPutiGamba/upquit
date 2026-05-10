@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 RUN apk update && apk upgrade && rm -rf /var/cache/apk/*
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -13,8 +13,8 @@ ARG NEXT_PUBLIC_BACKEND_URL
 ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
 
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter frontend run build
-RUN pnpm deploy --filter frontend --prod --legacy /app/deploy
+RUN pnpm --filter upquit-frontend run build
+RUN pnpm deploy --filter upquit-frontend --prod --legacy /app/deploy
 # Ensure that the compiled Next.js folder is moved to the deployment folder
 RUN cp -r apps/frontend/.next /app/deploy/.next || true
 
