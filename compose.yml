@@ -3,64 +3,66 @@ name: upquit
 services:
   postgres:
     image: postgres:16-alpine
-    restart: always
+    container_name: upquit-postgres
+    restart: unless-stopped
     env_file:
       - .env
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-upquit_admin} -d $${POSTGRES_DB:-upquit}"]
       interval: 5s
       timeout: 5s
       retries: 5
-
-  migrator:
-    build:
-      context: .
-      dockerfile: apps/backend/Dockerfile
-      target: builder
-    env_file:
-      - .env
-    command: sh -c "pnpm --filter upquit-backend run db:migrate && pnpm --filter upquit-backend run db:seed"
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   backend:
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
-    restart: always
+    container_name: upquit-backend
+    restart: unless-stopped
     env_file:
       - .env
     environment:
-      NODE_ENV: production 
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      NODE_ENV: production
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     depends_on:
       postgres:
         condition: service_healthy
-      migrator:
-        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:${BACKEND_PORT:-8080}/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
       args:
-        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
-    restart: always
+        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8080}
+    container_name: upquit-frontend
+    restart: unless-stopped
     env_file:
       - .env
     environment:
       NODE_ENV: production
-      INTERNAL_BACKEND_URL: http://backend:8080
+      INTERNAL_BACKEND_URL: http://backend:${BACKEND_PORT:-8080}
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  pgdata:
+  postgres_data:
+    name: upquit-postgres-data
