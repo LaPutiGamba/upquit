@@ -17,6 +17,7 @@ import {
 } from "@/shared/components/ui/combobox";
 import { cn } from "@/shared/lib/utils";
 import { getAccessToken } from "@/shared/lib/apiClient";
+import { toast } from "@/shared/components/ui/sonner";
 
 interface CategorySelectorMultipleProps {
   boardId: string;
@@ -51,6 +52,13 @@ export function CategorySelectorMultiple({
   const [searchString, setSearchString] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const anchorRef = useComboboxAnchor();
+  const [container, setContainer] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (anchorRef.current) {
+      setContainer(anchorRef.current);
+    }
+  }, [anchorRef]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -60,6 +68,7 @@ export function CategorySelectorMultiple({
       setCategories(fetchedCategories);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
+      toast.error("Failed to load categories");
       setCategories([]);
     } finally {
       setIsLoadingCategories(false);
@@ -90,6 +99,7 @@ export function CategorySelectorMultiple({
       setIsOpen(false);
     } catch (error) {
       console.error("Failed to create category:", error);
+      toast.error("Failed to create category");
     } finally {
       setIsCreatingCategory(false);
     }
@@ -118,14 +128,6 @@ export function CategorySelectorMultiple({
     void handleCreateCategory();
   };
 
-  const handleSelectCategory = (categoryId: string) => {
-    if (!value.includes(categoryId)) {
-      onChange([...value, categoryId]);
-    }
-    setSearchString("");
-    setIsOpen(false);
-  };
-
   const handleRemoveCategory = async (categoryId: string) => {
     await onChange(value.filter((id) => id !== categoryId));
     await fetchCategories();
@@ -147,7 +149,13 @@ export function CategorySelectorMultiple({
   const canCreateCategory = Boolean(searchString.trim()) && !hasExactMatch;
 
   return (
-    <Combobox multiple value={value} onValueChange={handleComboboxValueChange}>
+    <Combobox
+        multiple
+        value={value}
+        onValueChange={handleComboboxValueChange}
+        open={isOpen}
+        onOpenChange={(open) => setIsOpen(open)}
+      >
       <div ref={anchorRef} className="w-full" data-expanded={isOpen}>
         <ComboboxChips
           className={cn(disabled && "opacity-50")}
@@ -189,7 +197,7 @@ export function CategorySelectorMultiple({
       </div>
 
       {isOpen && (
-        <ComboboxContent anchor={anchorRef}>
+        <ComboboxContent anchor={anchorRef} container={container}>
           <ComboboxList>
             {isLoadingCategories ? (
               <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
@@ -207,7 +215,6 @@ export function CategorySelectorMultiple({
                     <ComboboxItem
                       key={category.id}
                       value={category.id}
-                      onClick={() => handleSelectCategory(category.id)}
                     >
                       <div
                         className="size-2 rounded-full"
