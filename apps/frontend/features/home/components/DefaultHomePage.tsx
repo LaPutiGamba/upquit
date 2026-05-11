@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { LocaleSwitcher } from "@/shared/components/LocaleSwitcher";
+import { Suspense } from "react";
 
 const homeDisplay = Sora({
   subsets: ["latin"],
@@ -80,7 +81,9 @@ export function DefaultHomePage() {
               <Button asChild variant="ghost" size="sm" className="rounded-full px-4">
                 <Link href="/login">{t("header.login")}</Link>
               </Button>
-              <LocaleSwitcher />
+              <Suspense fallback={null}>
+                <LocaleSwitcher />
+              </Suspense>
               <ThemeToggle />
             </div>
           </header>

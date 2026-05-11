@@ -10,7 +10,7 @@ import { useNotifications } from "../hooks/useNotifications";
 import { usePathname } from "@/localization/i18n/routing";
 import { useAuth } from "@/shared/components/AuthProvider";
 
-export function NotificationBell() {
+export default function NotificationBell() {
   const pathname = usePathname();
   const { boards } = useAuth();
   const currentBoardSlug = pathname.startsWith("/board/") ? pathname.replace("/board/", "").split("/")[0] : null;
@@ -30,7 +30,7 @@ export function NotificationBell() {
           ) : null}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[520px] p-0">
+      <DropdownMenuContent align="end" className="w-130 p-0">
         <NotificationDropdown
           notifications={notifications}
           onMarkRead={async (id) => {
@@ -44,5 +44,3 @@ export function NotificationBell() {
     </DropdownMenu>
   );
 }
-
-export default NotificationBell;

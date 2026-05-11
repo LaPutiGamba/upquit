@@ -13,7 +13,7 @@ type CreateBoardModalProps = {
 };
 
 export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) {
-  const router = useRouter();
+  const { push } = useRouter();
   const tBoards = useTranslations("BoardsEntryGate");
   const { refreshBoards } = useAuth();
 
@@ -32,7 +32,7 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
               await refreshBoards();
             } catch {}
 
-            router.push(`/board/${createdBoardSlug}`);
+            push(`/board/${createdBoardSlug}`);
           }}
         />
       </DialogContent>

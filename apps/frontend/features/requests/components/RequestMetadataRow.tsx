@@ -175,7 +175,7 @@ export function RequestMetadataRow({
   return (
     <div className={cn(metadataRowVariants({ size }), className)}>
       {canEditStatus && isEditingStatus ? (
-        <div onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}>
+        <div role="presentation" onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}>
           <Select
             open={isSelectOpen}
             onOpenChange={(open) => {
@@ -279,7 +279,11 @@ export function RequestMetadataRow({
         </span>
       ) : null}
 
-      <div className="shrink-0" onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}>
+      <div
+        role="presentation"
+        className="shrink-0"
+        onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}
+      >
         <UpvoteButton
           requestId={request.id}
           boardId={boardId}

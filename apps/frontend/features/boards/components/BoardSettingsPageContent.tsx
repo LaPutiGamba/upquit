@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { Link, useRouter } from "@/localization/i18n/routing";
+import { Link } from "@/localization/i18n/routing";
 import { boardService } from "@/features/boards/services/boardService";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { Button } from "@/shared/components/ui/button";
@@ -93,23 +93,22 @@ type BoardSettingsFormValues = {
 
 export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps) {
   const t = useTranslations("BoardSettingsPage");
-  const router = useRouter();
   const { user, refreshBoards } = useAuth();
   const loadingRef = useRef(true);
   const notFoundRef = useRef(false);
   const forbiddenRef = useRef(false);
   const [boardId, setBoardId] = useState<string | null>(null);
   const [ownerId, setOwnerId] = useState<string | null>(null);
-  
+
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const isOwner = Boolean(user?.id && ownerId && user.id === ownerId);
-  
+
   const setForbiddenRef = (value: boolean) => {
     forbiddenRef.current = value;
   };
-  
+
   const boardSettingsSchema = useMemo(() => createBoardSettingsSchema(t), [t]);
 
   const boardSettingsResolver: Resolver<BoardSettingsFormValues> = async (values) => {
@@ -260,7 +259,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
       await refreshBoards();
 
       toast.success(t("saved"));
-      router.replace(`/board/${updatedBoard.slug}`);
+      window.location.replace(`/board/${updatedBoard.slug}`);
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -283,7 +282,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
       await boardService.deleteBoard(boardId);
       await refreshBoards();
       toast.success(t("dangerZone.success"));
-      router.replace("/");
+      window.location.replace("/");
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);

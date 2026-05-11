@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormatter } from "next-intl";
+import { useMemo } from "react";
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/shared/components/ui/dropdown-menu";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
@@ -9,8 +10,10 @@ import { Link } from "@/localization/i18n/routing";
 import { CheckCheck } from "lucide-react";
 import type { NotificationItem } from "../services/notificationsApi";
 
+const EMPTY_NOTIFICATIONS: NotificationItem[] = [];
+
 export default function NotificationDropdown({
-  notifications = [],
+  notifications = EMPTY_NOTIFICATIONS,
   onMarkRead,
   onMarkAll
 }: {
@@ -19,6 +22,7 @@ export default function NotificationDropdown({
   onMarkAll?: () => void;
 }) {
   const formatter = useFormatter();
+  const NOW = useMemo(() => new Date(), []);
   return (
     <div className="w-full">
       <div className="px-3 py-2">
@@ -85,7 +89,7 @@ export default function NotificationDropdown({
                       {n.payload?.body}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {formatter.relativeTime(new Date(n.createdAt), new Date())}
+                      {formatter.relativeTime(new Date(n.createdAt), NOW)}
                     </div>
                   </div>
                 </Link>
@@ -123,7 +127,7 @@ export default function NotificationDropdown({
                     {n.payload?.body}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {formatter.relativeTime(new Date(n.createdAt), new Date())}
+                    {formatter.relativeTime(new Date(n.createdAt), NOW)}
                   </div>
                 </div>
               </div>

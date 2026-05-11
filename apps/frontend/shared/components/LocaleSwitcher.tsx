@@ -11,21 +11,19 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { useTransition } from "react";
 import { Globe } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 
 export function LocaleSwitcher() {
-  const router = useRouter();
+  const { replace } = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const locale = useLocale();
   const [isPending, startTransition] = useTransition();
 
   const switchLocale = (nextLocale: "en" | "es" | "ca") => {
     startTransition(() => {
-      const currentSearchParams = searchParams.toString();
+      const currentSearchParams = window.location.search.replace(/^\?/, "");
       const query = currentSearchParams ? `?${currentSearchParams}` : "";
 
-      router.replace(`${pathname}${query}`, { locale: nextLocale });
+      replace(`${pathname}${query}`, { locale: nextLocale });
     });
   };
 
@@ -33,7 +31,7 @@ export function LocaleSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon" disabled={isPending}>
-          <Globe className="h-[1.2rem] w-[1.2rem]" />
+          <Globe className="size-[1.2rem]" />
           <span className="sr-only">Toggle language</span>
         </Button>
       </DropdownMenuTrigger>

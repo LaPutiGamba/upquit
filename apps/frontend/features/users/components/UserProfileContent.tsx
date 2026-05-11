@@ -76,11 +76,11 @@ export default function UserProfileContent({ user }: UserProfileContentProps) {
                 alt={user.displayName}
                 width={120}
                 height={120}
-                className="rounded-full w-32 h-32 object-cover"
+                className="rounded-full size-32 object-cover"
                 priority
               />
             ) : (
-              <div className="w-32 h-32 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+              <div className="size-32 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center">
                 <span className="text-4xl font-bold text-white">{user.displayName.charAt(0).toUpperCase()}</span>
               </div>
             )}

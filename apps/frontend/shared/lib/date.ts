@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type DateTimeFormatOptions = any;
+import type { DateTimeFormatOptions } from "next-intl";
 
 export const DATE_FORMAT_OPTIONS: DateTimeFormatOptions = {
   day: "2-digit",
@@ -20,6 +19,21 @@ export const MONTH_YEAR_FORMAT_OPTIONS: DateTimeFormatOptions = {
   month: "long"
 };
 
+// Cache Intl.DateTimeFormat instances by locale+options to avoid
+// allocating a new formatter on every call (performance).
+const FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
+
+function getDateTimeFormatter(locale: string | undefined, options: DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale ?? "default"}::${JSON.stringify(options)}`;
+  let formatter = FORMATTER_CACHE.get(key);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, options);
+    FORMATTER_CACHE.set(key, formatter);
+  }
+
+  return formatter;
+}
+
 /**
  * Format date for display. This version should ONLY be used in Server Components
  * or to format data that will be passed to Client Components.
@@ -36,7 +50,7 @@ export function formatLocalizedDateTime(
   locale: string | undefined,
   options: DateTimeFormatOptions = DATE_FORMAT_OPTIONS
 ): string {
-  return new Intl.DateTimeFormat(locale, options).format(new Date(date));
+  return getDateTimeFormatter(locale, options).format(new Date(date));
 }
 
 /**

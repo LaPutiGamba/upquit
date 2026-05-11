@@ -22,149 +22,116 @@ interface RequestHistoryPanelProps {
   categoryNamesById: Record<string, string>;
 }
 
-export function RequestHistoryPanel({
-  changelogEntries,
-  changelogLoading,
-  changelogError,
-  categoryNamesById
-}: RequestHistoryPanelProps) {
-  const formatter = useFormatter();
-  const sortedChangelogEntries = useMemo(() => {
-    return changelogEntries.toSorted((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+function formatDisplayName(displayName: string | null) {
+  return displayName || "Unknown user";
+}
 
-      return dateB - dateA;
-    });
-  }, [changelogEntries]);
+function getInitials(displayName: string | null) {
+  const normalized = formatDisplayName(displayName);
+  const chunks = normalized.split(" ").flatMap((chunk) => {
+    const trimmed = chunk.trim();
+    return trimmed ? [trimmed] : [];
+  });
 
-  const formatFieldValue = (field: RequestChangelogResponse["field"], value: string | null) => {
-    if (value === null) {
-      return "empty";
-    }
+  if (chunks.length === 0) {
+    return "U";
+  }
 
-    if (field === "status") {
-      return value
-        .split("_")
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" ");
-    }
+  if (chunks.length === 1) {
+    return chunks[0].slice(0, 2).toUpperCase();
+  }
 
-    if (field === "isPinned" || field === "isHidden") {
-      return value === "true" ? "Yes" : "No";
-    }
+  return `${chunks[0][0] ?? ""}${chunks[1][0] ?? ""}`.toUpperCase();
+}
 
-    return value;
-  };
+function formatFieldValue(field: RequestChangelogResponse["field"], value: string | null) {
+  if (value === null) {
+    return "empty";
+  }
 
-  const formatRelativeTime = (timestamp: string | null) => {
-    if (!timestamp) {
-      return "just now";
-    }
-
-    return formatDateTimeWithFormatter(formatter, timestamp);
-  };
-
-  const formatDisplayName = (displayName: string | null) => {
-    if (!displayName) {
-      return "Unknown user";
-    }
-
-    return displayName;
-  };
-
-  const getInitials = (displayName: string | null) => {
-    const normalized = formatDisplayName(displayName);
-    const chunks = normalized
-      .split(" ")
-      .map((chunk) => chunk.trim())
-      .filter(Boolean);
-
-    if (chunks.length === 0) {
-      return "U";
-    }
-
-    if (chunks.length === 1) {
-      return chunks[0].slice(0, 2).toUpperCase();
-    }
-
-    return `${chunks[0][0] ?? ""}${chunks[1][0] ?? ""}`.toUpperCase();
-  };
-
-  const getStatusColor = (status: string) => {
-    return getRequestStatusColor(status);
-  };
-
-  const getStatusIcon = (status: string) => {
-    return getRequestStatusIcon(status, "size-3");
-  };
-
-  const formatStatusLabel = (status: string | null) => {
-    return formatRequestStatusLabel(status);
-  };
-
-  const renderStatusBadge = (status: string | null) => {
-    if (!status) {
-      return <span className="text-xs font-medium text-muted-foreground">None</span>;
-    }
-
-    return (
-      <Badge variant="outline" className={cn("gap-1.5 px-2 py-0.5 text-[11px] font-semibold", getStatusColor(status))}>
-        {getStatusIcon(status)}
-        <span>{formatStatusLabel(status)}</span>
-      </Badge>
-    );
-  };
-
-  const parseCategoryIds = (value: string | null): string[] => {
-    if (!value) {
-      return [];
-    }
-
+  if (field === "status") {
     return value
-      .split(",")
-      .map((categoryId) => categoryId.trim())
-      .filter(Boolean);
-  };
+      .split("_")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+  }
 
-  const formatCategoryList = (
-    value: string | null,
-    deletedCategories?: { categoryId: string; categoryName: string }[]
-  ): string => {
-    const categoryNames = parseCategoryIds(value).map((categoryId) => {
-      const name = categoryNamesById[categoryId];
-      if (name) return name;
-      const fromDeleted = deletedCategories?.find((d) => d.categoryId === categoryId);
-      if (fromDeleted) return `${fromDeleted.categoryName} (deleted)`;
-      return `Deleted category`;
-    });
+  if (field === "isPinned" || field === "isHidden") {
+    return value === "true" ? "Yes" : "No";
+  }
 
-    if (categoryNames.length === 0) {
-      return "none";
-    }
+  return value;
+}
 
-    return categoryNames.join(", ");
-  };
+function formatFieldLabel(field: RequestChangelogResponse["field"]) {
+  switch (field) {
+    case "categoryIds":
+      return "Categories";
+    case "isPinned":
+      return "Pinned";
+    case "isHidden":
+      return "Hidden";
+    case "voteCount":
+      return "Votes";
+    case "adminNote":
+      return "Admin note";
+    case "status":
+      return "Status";
+    default:
+      return field.charAt(0).toUpperCase() + field.slice(1);
+  }
+}
 
-  const formatFieldLabel = (field: RequestChangelogResponse["field"]) => {
-    switch (field) {
-      case "categoryIds":
-        return "Categories";
-      case "isPinned":
-        return "Pinned";
-      case "isHidden":
-        return "Hidden";
-      case "voteCount":
-        return "Votes";
-      case "adminNote":
-        return "Admin note";
-      case "status":
-        return "Status";
-      default:
-        return field.charAt(0).toUpperCase() + field.slice(1);
-    }
-  };
+function parseCategoryIds(value: string | null) {
+  if (!value) {
+    return [];
+  }
 
+  return value
+    .split(",")
+    .map((categoryId) => categoryId.trim())
+    .filter(Boolean);
+}
+
+function formatCategoryList(
+  value: string | null,
+  categoryNamesById: Record<string, string>,
+  deletedCategories?: { categoryId: string; categoryName: string }[]
+) {
+  const categoryNames = parseCategoryIds(value).map((categoryId) => {
+    const name = categoryNamesById[categoryId];
+    if (name) return name;
+    const fromDeleted = deletedCategories?.find((deletedCategory) => deletedCategory.categoryId === categoryId);
+    if (fromDeleted) return `${fromDeleted.categoryName} (deleted)`;
+    return "Deleted category";
+  });
+
+  if (categoryNames.length === 0) {
+    return "none";
+  }
+
+  return categoryNames.join(", ");
+}
+
+function getStatusColor(status: string) {
+  return getRequestStatusColor(status);
+}
+
+function getStatusIcon(status: string) {
+  return getRequestStatusIcon(status, "size-3");
+}
+
+function formatStatusLabel(status: string | null) {
+  return formatRequestStatusLabel(status);
+}
+
+function RequestHistoryEntryAction({
+  entry,
+  categoryNamesById
+}: {
+  entry: RequestChangelogResponse;
+  categoryNamesById: Record<string, string>;
+}) {
   const renderFieldChange = ({
     label,
     oldValue,
@@ -204,33 +171,72 @@ export function RequestHistoryPanel({
     );
   };
 
-  const renderAction = (entry: RequestChangelogResponse): ReactNode => {
-    const oldValue = entry.oldValue;
-    const newValue = entry.newValue;
+  const oldValue = entry.oldValue;
+  const newValue = entry.newValue;
 
-    const oldFormattedValue =
-      entry.field === "categoryIds"
-        ? formatCategoryList(oldValue, entry.deletedCategories)
-        : formatFieldValue(entry.field, oldValue);
-    const newFormattedValue =
-      entry.field === "categoryIds"
-        ? formatCategoryList(newValue, entry.deletedCategories)
-        : formatFieldValue(entry.field, newValue);
+  const oldFormattedValue =
+    entry.field === "categoryIds"
+      ? formatCategoryList(oldValue, categoryNamesById, entry.deletedCategories)
+      : formatFieldValue(entry.field, oldValue);
+  const newFormattedValue =
+    entry.field === "categoryIds"
+      ? formatCategoryList(newValue, categoryNamesById, entry.deletedCategories)
+      : formatFieldValue(entry.field, newValue);
 
-    switch (entry.field) {
-      case "status":
-        return renderFieldChange({
-          label: formatFieldLabel(entry.field),
-          oldNode: renderStatusBadge(oldValue),
-          newNode: renderStatusBadge(newValue)
-        });
-      default:
-        return renderFieldChange({
-          label: formatFieldLabel(entry.field),
-          oldValue: oldFormattedValue,
-          newValue: newFormattedValue
-        });
+  switch (entry.field) {
+    case "status":
+      return renderFieldChange({
+        label: formatFieldLabel(entry.field),
+        oldNode: (
+          <Badge
+            variant="outline"
+            className={cn("gap-1.5 px-2 py-0.5 text-[11px] font-semibold", getStatusColor(oldValue ?? ""))}
+          >
+            {oldValue ? getStatusIcon(oldValue) : null}
+            <span>{formatStatusLabel(oldValue)}</span>
+          </Badge>
+        ),
+        newNode: (
+          <Badge
+            variant="outline"
+            className={cn("gap-1.5 px-2 py-0.5 text-[11px] font-semibold", getStatusColor(newValue ?? ""))}
+          >
+            {newValue ? getStatusIcon(newValue) : null}
+            <span>{formatStatusLabel(newValue)}</span>
+          </Badge>
+        )
+      });
+    default:
+      return renderFieldChange({
+        label: formatFieldLabel(entry.field),
+        oldValue: oldFormattedValue,
+        newValue: newFormattedValue
+      });
+  }
+}
+
+export function RequestHistoryPanel({
+  changelogEntries,
+  changelogLoading,
+  changelogError,
+  categoryNamesById
+}: RequestHistoryPanelProps) {
+  const formatter = useFormatter();
+  const sortedChangelogEntries = useMemo(() => {
+    return changelogEntries.toSorted((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
+      return dateB - dateA;
+    });
+  }, [changelogEntries]);
+
+  const formatRelativeTime = (timestamp: string | null) => {
+    if (!timestamp) {
+      return "just now";
     }
+
+    return formatDateTimeWithFormatter(formatter, timestamp);
   };
 
   if (changelogLoading) {
@@ -274,7 +280,9 @@ export function RequestHistoryPanel({
                   <span>{formatRelativeTime(entry.createdAt)}</span>
                 </p>
 
-                <div>{renderAction(entry)}</div>
+                <div>
+                  <RequestHistoryEntryAction entry={entry} categoryNamesById={categoryNamesById} />
+                </div>
               </div>
             </div>
           </li>

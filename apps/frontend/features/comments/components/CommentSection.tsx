@@ -58,7 +58,7 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
       <div className={cn("min-h-0 flex-1 overflow-y-auto px-2 pt-6", isDialog ? "pb-4" : "pb-6")}>
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <p className="text-sm text-muted-foreground">Loading comments...</p>
+            <p className="text-sm text-muted-foreground">Loading comments…</p>
           </div>
         ) : comments.length === 0 ? (
           <div className="flex justify-center py-12">

@@ -194,7 +194,7 @@ export function CategorySelectorMultiple({
             {isLoadingCategories ? (
               <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
                 <Loader2Icon className="size-4 animate-spin mr-2" />
-                Loading categories...
+                Loading categories…
               </div>
             ) : (
               <>
@@ -239,7 +239,7 @@ export function CategorySelectorMultiple({
                       {isCreatingCategory ? (
                         <>
                           <Loader2Icon className="size-4 animate-spin" />
-                          <span>Creating...</span>
+                          <span>Creating…</span>
                         </>
                       ) : (
                         <>

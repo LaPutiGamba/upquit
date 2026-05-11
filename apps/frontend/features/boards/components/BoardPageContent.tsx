@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useTranslations, useFormatter } from "next-intl";
 
 import { BoardHeader } from "@/features/boards/components/BoardHeader";
@@ -18,41 +17,38 @@ import { formatDateWithFormatter } from "@/shared/lib/date";
 
 interface BoardPageContentProps {
   slug: string;
+  isRequestsTab: boolean;
 }
 
-export function BoardPageContent({ slug }: BoardPageContentProps) {
+export function BoardPageContent({ slug, isRequestsTab }: BoardPageContentProps) {
   const t = useTranslations("BoardPage");
   const formatter = useFormatter();
-  const { get } = useSearchParams();
   const { user } = useAuth();
-  const { board, requests, latestRequestDate, loading, notFound, addRequest } = useBoardPage(slug);
-  const isRequestsTab = get("tab") === "requests";
+  const { board, requests, latestRequestDate, loading, notFound, addRequest } = useBoardPage(slug, isRequestsTab);
   const [canManageBoard, setCanManageBoard] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     const resolvePermissions = async () => {
-      if (!board || !user) {
-        setCanManageBoard(false);
-        return;
+      let nextCanManageBoard = false;
+
+      if (board && user) {
+        if (board.ownerId === user.id) {
+          nextCanManageBoard = true;
+        } else {
+          try {
+            const members = await boardService.getBoardMembers(board.id);
+
+            nextCanManageBoard = members.some((member) => member.userId === user.id && member.role === "admin");
+          } catch {
+            nextCanManageBoard = false;
+          }
+        }
       }
 
-      if (board.ownerId === user.id) {
-        setCanManageBoard(true);
-        return;
-      }
-
-      try {
-        const members = await boardService.getBoardMembers(board.id);
-
-        if (!cancelled) {
-          setCanManageBoard(members.some((member) => member.userId === user.id && member.role === "admin"));
-        }
-      } catch {
-        if (!cancelled) {
-          setCanManageBoard(false);
-        }
+      if (!cancelled) {
+        setCanManageBoard(nextCanManageBoard);
       }
     };
 

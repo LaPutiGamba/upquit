@@ -11,10 +11,10 @@ export default function VerifyEmailPage() {
     <main className="flex min-h-svh flex-col items-center justify-center bg-background p-6 md:p-10">
       <Card className="w-full max-w-md border-none shadow-none bg-transparent sm:bg-card sm:border sm:shadow-sm">
         <CardHeader className="flex flex-col items-center gap-4 text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Mail className="h-6 w-6" />
+          <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Mail className="size-6" />
           </span>
-          <CardTitle className="text-2xl font-bold tracking-tight">Check your email</CardTitle>
+          <CardTitle className="text-2xl font-semibold tracking-tight">Check your email</CardTitle>
           <CardDescription className="text-balance text-base">
             We&apos;ve sent a verification link to your email address. Please verify your account to start using UpQuit.
           </CardDescription>

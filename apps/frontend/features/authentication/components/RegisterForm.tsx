@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,7 +55,7 @@ function getErrorMessage(error: unknown, fallbackMessage: string): string {
 
 export default function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
   const t = useTranslations("RegisterForm");
-  const router = useRouter();
+  const { push } = useRouter();
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
   const form = useForm<RegisterFormValues>({
@@ -77,7 +78,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
         const destination = await resolveAuthenticatedRedirectPath();
 
         if (!cancelled) {
-          router.replace(destination);
+          window.location.replace(destination);
         }
       } catch {}
     };
@@ -87,7 +88,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, []);
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {
@@ -100,7 +101,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
       await authService.register(submitData);
 
       toast.success(t("success.created"));
-      router.push("/login");
+      push("/login");
     } catch (error) {
       toast.error(getErrorMessage(error, t("errors.generic")));
     }
@@ -137,7 +138,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
             <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
               <FieldGroup>
                 <div className="flex flex-col items-center gap-2 text-center">
-                  <h1 className="text-2xl font-bold">{t("title")}</h1>
+                  <h1 className="text-2xl font-semibold">{t("title")}</h1>
                   <p className="text-sm text-balance text-muted-foreground">{t("subtitle")}</p>
                 </div>
 
@@ -293,10 +294,12 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
           </Form>
 
           <div className="relative hidden bg-muted md:block">
-            <img
+            <Image
               src="/placeholder.svg"
               alt="Image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
         </CardContent>
@@ -304,13 +307,13 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
 
       <FieldDescription className="px-6 text-center">
         {t("terms.prefix")}{" "}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
           {t("terms.termsOfService")}
-        </a>{" "}
+        </Link>{" "}
         {t("terms.and")}{" "}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
           {t("terms.privacyPolicy")}
-        </a>
+        </Link>
         .
       </FieldDescription>
     </div>

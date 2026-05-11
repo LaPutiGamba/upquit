@@ -1,5 +1,4 @@
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 import { authService } from "@/features/authentication/services/authService";
@@ -13,10 +12,11 @@ export const metadata = {
   description: "Verify your email address to activate your account"
 };
 
-function VerifyPageContent() {
-  const { get } = useSearchParams();
-  const userId = get("id");
+interface VerifyPageContentProps {
+  userId: string | null;
+}
 
+function VerifyPageContent({ userId }: VerifyPageContentProps) {
   const [status, setStatus] = useState<"loading" | "success" | "error">(userId ? "loading" : "error");
   const StatusIcon = status === "success" ? CheckCircle2 : status === "error" ? XCircle : Loader2;
 
@@ -77,10 +77,19 @@ function VerifyPageContent() {
   );
 }
 
-export default function VerifyPage() {
+interface VerifyPageProps {
+  searchParams: Promise<{ id?: string | string[] }>;
+}
+
+export default async function VerifyPage({ searchParams }: VerifyPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const userId = Array.isArray(resolvedSearchParams.id)
+    ? resolvedSearchParams.id[0]
+    : (resolvedSearchParams.id ?? null);
+
   return (
     <Suspense fallback={<Skeleton className="h-64 w-full max-w-md" />}>
-      <VerifyPageContent />
+      <VerifyPageContent userId={userId} />
     </Suspense>
   );
 }

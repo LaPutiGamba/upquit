@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { boardService, BoardResponse } from "@/features/boards/services/boardService";
 import { requestService, RequestResponse } from "@/features/requests/services/requestService";
@@ -32,17 +32,14 @@ type RequestRealtimeMessagePayload =
       voteCount: number | null;
     };
 
-export function useBoardPage(slug: string): UseBoardPageResult {
+export function useBoardPage(slug: string, isRequestsTab: boolean): UseBoardPageResult {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { isAuthLoading } = useAuth();
-  const isRequestsTab = searchParams.get("tab") === "requests";
 
   const [board, setBoard] = useState<BoardResponse | null>(null);
   const [requests, setRequests] = useState<RequestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-
   const addRequest = useCallback((request: RequestResponse) => {
     setRequests((prev) => {
       const exists = prev.some((r) => r.id === request.id);
@@ -55,7 +52,7 @@ export function useBoardPage(slug: string): UseBoardPageResult {
   }, []);
 
   const requestsSortedByDate = useMemo(() => {
-    return [...requests].sort((a, b) => {
+    return requests.toSorted((a, b) => {
       const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
 
@@ -108,7 +105,7 @@ export function useBoardPage(slug: string): UseBoardPageResult {
         }
 
         if (error instanceof UnauthorizedError) {
-          router.replace("/login");
+          window.location.replace("/login");
           return;
         }
 

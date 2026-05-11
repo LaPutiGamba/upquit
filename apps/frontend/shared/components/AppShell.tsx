@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LayoutGrid, Sparkles, Users2 } from "lucide-react";
 
@@ -46,8 +45,7 @@ function isShelllessPath(pathname: string): boolean {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const { replace, refresh } = useRouter();
   const t = useTranslations("AppShell");
   const { user, boards } = useAuth();
 
@@ -59,11 +57,12 @@ export function AppShell({ children }: AppShellProps) {
   const currentBoardSlug = pathname.startsWith("/board/") ? pathname.replace("/board/", "").split("/")[0] : null;
   const activeBoard = boards.find((board) => board.slug === currentBoardSlug) ?? null;
   const boardNavigationSlug = activeBoard?.slug ?? currentBoardSlug;
-  const isRequestsTab = searchParams.get("tab") === "requests";
   const isMembersTab = pathname.endsWith("/members");
   const isUserBoardsDashboard = pathname === "/boards";
   const shouldShowBoardNavigation = !isUserBoardsDashboard;
   const [canManageActiveBoard, setCanManageActiveBoard] = useState(false);
+  const isRequestsTab =
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "requests";
 
   const boardDashboardHref = boardNavigationSlug ? `/board/${boardNavigationSlug}` : "/boards";
   const boardRequestsHref = boardNavigationSlug ? `/board/${boardNavigationSlug}?tab=requests` : "/boards";
@@ -140,8 +139,8 @@ export function AppShell({ children }: AppShellProps) {
   const handleLogout = async () => {
     try {
       await authService.logout();
-      router.replace("/login");
-      router.refresh();
+      replace("/login");
+      refresh();
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);

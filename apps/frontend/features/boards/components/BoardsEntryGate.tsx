@@ -68,7 +68,7 @@ export function BoardsEntryGate() {
     };
   }, [router]);
 
-  const sortedBoards = useMemo(() => [...boards].sort((a, b) => a.name.localeCompare(b.name)), [boards]);
+  const sortedBoards = useMemo(() => boards.toSorted((a, b) => a.name.localeCompare(b.name)), [boards]);
   const personalBoards = useMemo(
     () => sortedBoards.filter((board) => board.ownerId === user?.id),
     [sortedBoards, user?.id]

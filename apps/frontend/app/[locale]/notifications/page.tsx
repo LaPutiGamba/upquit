@@ -19,7 +19,7 @@ export const metadata = {
 };
 
 export default function NotificationsPage() {
-  const router = useRouter();
+  const { back } = useRouter();
   const formatter = useFormatter();
   const { boards } = useAuth();
   const { notifications, markAll, markAsRead } = useNotifications(undefined);
@@ -46,11 +46,11 @@ export default function NotificationsPage() {
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-6 md:px-6">
       {/* Header with Back Button */}
       <div className="flex items-center gap-3 mb-2">
-        <Button variant="outline" size="icon" onClick={() => router.back()} className="h-9 w-9" title="Go back">
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="outline" size="icon" onClick={() => back()} className="size-9" title="Go back">
+          <ArrowLeft className="size-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-2xl font-semibold">
             <Bell className="size-6" />
             Notifications
           </h1>
@@ -101,7 +101,7 @@ export default function NotificationsPage() {
         <CardContent className="space-y-2 py-4">
           {filteredNotifications.length === 0 ? (
             <div className="py-8 text-center">
-              <Bell className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
+              <Bell className="mx-auto mb-2 size-8 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">
                 {selectedBoardId ? "No notifications for this board." : "No notifications yet."}
               </p>

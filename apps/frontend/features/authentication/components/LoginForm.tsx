@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,7 +45,7 @@ function getErrorMessage(error: unknown, fallbackMessage: string, invalidCredent
 
 export default function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const t = useTranslations("LoginForm");
-  const router = useRouter();
+  const { push } = useRouter();
 
   const form = useForm<LoginFormValues>({
     // @ts-expect-error - zodResolver is not correctly typed for some reason
@@ -63,7 +64,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
         const destination = await resolveAuthenticatedRedirectPath();
 
         if (!cancelled) {
-          router.replace(destination);
+          window.location.replace(destination);
         }
       } catch {}
     };
@@ -73,7 +74,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, []);
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
@@ -92,10 +93,10 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
       const user = await authService.getUserProfile(userId, response.accessToken);
 
       if (!user.emailVerified) {
-        router.push("/verify-email");
+        push("/verify-email");
       } else {
         const destination = await resolveAuthenticatedRedirectPath();
-        router.push(destination);
+        push(destination);
       }
     } catch (error) {
       toast.error(getErrorMessage(error, t("errors.generic"), t("errors.invalidCredentialsOrRegister")));
@@ -110,7 +111,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
             <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
               <FieldGroup>
                 <div className="flex flex-col items-center gap-2 text-center">
-                  <h1 className="text-2xl font-bold">{t("title")}</h1>
+                  <h1 className="text-2xl font-semibold">{t("title")}</h1>
                   <p className="text-balance text-muted-foreground">{t("subtitle")}</p>
                 </div>
 
@@ -144,7 +145,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
                       <Field>
                         <div className="flex items-center">
                           <FieldLabel htmlFor="password">{t("fields.password.label")}</FieldLabel>
-                          <Link href="#" className="ml-auto text-sm underline-offset-4 hover:underline">
+                          <Link href="/forgot-password" className="ml-auto text-sm underline-offset-4 hover:underline">
                             {t("forgotPassword")}
                           </Link>
                         </div>
@@ -196,23 +197,25 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
           </Form>
 
           <div className="relative hidden bg-muted md:block">
-            <img
+            <Image
               src="/placeholder.svg"
               alt="Image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
         {t("terms.prefix")}{" "}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
           {t("terms.termsOfService")}
-        </a>{" "}
+        </Link>{" "}
         {t("terms.and")}{" "}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
           {t("terms.privacyPolicy")}
-        </a>
+        </Link>
         .
       </FieldDescription>
     </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -21,15 +20,13 @@ function getErrorMessage(error: unknown, fallbackMessage: string): string {
 
 export function LogoutButton({ children, ...props }: LogoutButtonProps) {
   const t = useTranslations("LogoutButton");
-  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
       await authService.logout();
-      router.replace("/login");
-      router.refresh();
+      window.location.replace("/login");
     } catch (error) {
       toast.error(getErrorMessage(error, t("errors.generic")));
     } finally {

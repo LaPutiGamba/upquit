@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { MoreHorizontal, Trash2 } from "lucide-react";
-import { useRouter } from "@/localization/i18n/routing";
 
 import { boardService } from "@/features/boards/services/boardService";
 import { useRequestDetailPage } from "@/features/requests/hooks/useRequestDetailPage";
@@ -46,7 +45,6 @@ interface RequestDetailPageContentProps {
 
 export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentProps) {
   const t = useTranslations("RequestDetailPage");
-  const router = useRouter();
   const { user } = useAuth();
   const { board, request, loading, notFound } = useRequestDetailPage(slug, id);
   const [editableRequest, setEditableRequest] = useState<RequestResponse | null>(null);
@@ -161,7 +159,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     try {
       await requestService.deleteRequest(editableRequest.id);
       toast.success(t("deleteDialog.success"));
-      router.replace(`/board/${slug}`);
+      window.location.replace(`/board/${slug}`);
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
