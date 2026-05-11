@@ -30,7 +30,7 @@ export function RequestHistoryPanel({
 }: RequestHistoryPanelProps) {
   const formatter = useFormatter();
   const sortedChangelogEntries = useMemo(() => {
-    return [...changelogEntries].sort((a, b) => {
+    return changelogEntries.toSorted((a, b) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
 

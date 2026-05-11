@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { Textarea } from "@/shared/components/ui/textarea";
@@ -26,7 +26,7 @@ export function CommentForm({
   onCancel
 }: CommentFormProps) {
   const [content, setContent] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const syncChannelName = `comments:${requestId}`;
 
@@ -57,30 +57,28 @@ export function CommentForm({
   }, [parentId]);
 
   const submitComment = async () => {
-    if (!content.trim() || isLoading) {
+    if (!content.trim() || isPending) {
       toast.error("Please enter a comment");
       return;
     }
 
-    setIsLoading(true);
+    startTransition(async () => {
+      try {
+        const createdComment = await commentService.createComment(requestId, boardId, content.trim(), parentId);
 
-    try {
-      const createdComment = await commentService.createComment(requestId, boardId, content.trim(), parentId);
+        setContent("");
+        notifyOtherTabs(createdComment);
+        toast.success(parentId ? "Reply posted successfully" : "Comment posted successfully");
+        onCommentAdded(createdComment);
 
-      setContent("");
-      notifyOtherTabs(createdComment);
-      toast.success(parentId ? "Reply posted successfully" : "Comment posted successfully");
-      onCommentAdded(createdComment);
-
-      if (onCancel) {
-        onCancel();
+        if (onCancel) {
+          onCancel();
+        }
+      } catch (error) {
+        console.error("Error posting comment:", error);
+        toast.error("Failed to post comment");
       }
-    } catch (error) {
-      console.error("Error posting comment:", error);
-      toast.error("Failed to post comment");
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -109,7 +107,7 @@ export function CommentForm({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={isLoading}
+          disabled={isPending}
           className={cn(
             "resize-none overscroll-none transition-colors w-full",
             "bg-background/70 focus:bg-background",
@@ -120,7 +118,7 @@ export function CommentForm({
         />
         <Button
           type="submit"
-          disabled={isLoading || !content.trim()}
+          disabled={isPending || !content.trim()}
           size="icon-sm"
           className={cn("absolute right-1.5 top-1.5 transition-all shadow-none", !content.trim() && "opacity-50")}
         >
@@ -136,7 +134,7 @@ export function CommentForm({
             variant="ghost"
             size="sm"
             onClick={onCancel}
-            disabled={isLoading}
+            disabled={isPending}
             className="text-xs text-muted-foreground hover:text-foreground"
           >
             Cancel

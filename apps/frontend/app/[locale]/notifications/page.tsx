@@ -13,6 +13,11 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { DATE_TIME_FORMAT_OPTIONS } from "@/shared/lib/date";
 
+export const metadata = {
+  title: "Notifications",
+  description: "View and manage your notifications"
+};
+
 export default function NotificationsPage() {
   const router = useRouter();
   const formatter = useFormatter();

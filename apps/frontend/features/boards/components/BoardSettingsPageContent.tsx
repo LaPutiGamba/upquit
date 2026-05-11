@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { type Resolver, type SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { Link, useRouter } from "@/localization/i18n/routing";
@@ -94,17 +95,21 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
   const t = useTranslations("BoardSettingsPage");
   const router = useRouter();
   const { user, refreshBoards } = useAuth();
-
+  const loadingRef = useRef(true);
+  const notFoundRef = useRef(false);
+  const forbiddenRef = useRef(false);
   const [boardId, setBoardId] = useState<string | null>(null);
   const [ownerId, setOwnerId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  const [forbidden, setForbidden] = useState(false);
+  
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const isOwner = Boolean(user?.id && ownerId && user.id === ownerId);
-
+  
+  const setForbiddenRef = (value: boolean) => {
+    forbiddenRef.current = value;
+  };
+  
   const boardSettingsSchema = useMemo(() => createBoardSettingsSchema(t), [t]);
 
   const boardSettingsResolver: Resolver<BoardSettingsFormValues> = async (values) => {
@@ -162,9 +167,9 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
     let cancelled = false;
 
     const loadBoard = async () => {
-      setLoading(true);
-      setNotFound(false);
-      setForbidden(false);
+      loadingRef.current = true;
+      notFoundRef.current = false;
+      setForbiddenRef(false);
 
       try {
         const board = await boardService.getBoardBySlug(slug);
@@ -182,7 +187,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
         );
 
         if (!canManage) {
-          setForbidden(true);
+          setForbiddenRef(true);
           return;
         }
 
@@ -207,14 +212,14 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
         }
 
         if (error instanceof UnauthorizedError) {
-          router.replace("/login");
+          redirect("/login");
           return;
         }
 
-        setNotFound(true);
+        notFoundRef.current = true;
       } finally {
         if (!cancelled) {
-          setLoading(false);
+          loadingRef.current = false;
         }
       }
     };
@@ -224,7 +229,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
     return () => {
       cancelled = true;
     };
-  }, [form, router, slug, user?.id]);
+  }, [form, slug, user?.id]);
 
   const onSubmit: SubmitHandler<BoardSettingsFormValues> = async (values) => {
     if (!boardId) {
@@ -291,11 +296,11 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
     }
   };
 
-  if (loading) {
+  if (loadingRef.current) {
     return null;
   }
 
-  if (notFound) {
+  if (notFoundRef.current) {
     return (
       <main className="min-h-svh bg-background">
         <div className="mx-auto flex min-h-svh w-full max-w-6xl items-center justify-center p-6 md:p-10">
@@ -307,7 +312,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
     );
   }
 
-  if (forbidden) {
+  if (forbiddenRef.current) {
     return (
       <main className="min-h-svh bg-background">
         <div className="mx-auto flex min-h-svh w-full max-w-6xl items-center justify-center p-6 md:p-10">

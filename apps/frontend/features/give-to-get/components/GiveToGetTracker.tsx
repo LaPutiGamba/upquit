@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { giveToGetService, GiveToGetProgressResponse } from "../services/giveToGetService";
 import { BoardResponse } from "@/features/boards/services/boardService";
 import { Progress } from "@/shared/components/ui/progress";
@@ -14,13 +14,43 @@ interface GiveToGetTrackerProps {
   board: BoardResponse;
 }
 
+type GiveToGetState = {
+  progress: GiveToGetProgressResponse | null;
+  loading: boolean;
+  userId: string | null;
+  isAuthenticated: boolean;
+};
+
+type GiveToGetAction =
+  | { type: "SET_USER"; payload: { userId: string | null; isAuthenticated: boolean } }
+  | { type: "SET_PROGRESS"; payload: GiveToGetProgressResponse | null }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "DONE" };
+
+function giveToGetReducer(state: GiveToGetState, action: GiveToGetAction): GiveToGetState {
+  switch (action.type) {
+    case "SET_USER":
+      return { ...state, userId: action.payload.userId, isAuthenticated: action.payload.isAuthenticated };
+    case "SET_PROGRESS":
+      return { ...state, progress: action.payload };
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+    case "DONE":
+      return { ...state, loading: false };
+    default:
+      return state;
+  }
+}
+
 export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
   const t = useTranslations("GiveToGet");
 
-  const [progress, setProgress] = useState<GiveToGetProgressResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [state, dispatch] = useReducer(giveToGetReducer, {
+    progress: null,
+    loading: true,
+    userId: null,
+    isAuthenticated: false
+  });
 
   useEffect(() => {
     const token = getAccessToken();
@@ -29,36 +59,35 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
       const nextUserId = payload?.userId || payload?.sub;
 
       if (nextUserId) {
-        setUserId(nextUserId);
-        setIsAuthenticated(true);
+        dispatch({ type: "SET_USER", payload: { userId: nextUserId, isAuthenticated: true } });
       } else {
         console.error("Failed to parse token");
-        setLoading(false);
+        dispatch({ type: "DONE" });
       }
     } else {
-      setLoading(false);
+      dispatch({ type: "DONE" });
     }
   }, []);
 
   useEffect(() => {
     if (!board.giveToGetEnabled) {
-      setLoading(false);
+      dispatch({ type: "DONE" });
       return;
     }
 
     const fetchProgress = async () => {
       try {
         const data = await giveToGetService.getProgress(board.id);
-        setProgress(data);
-        setIsAuthenticated(true);
+        dispatch({ type: "SET_PROGRESS", payload: data });
+        dispatch({ type: "SET_USER", payload: { userId: state.userId, isAuthenticated: true } });
 
-        if (!userId) {
+        if (!state.userId) {
           const token = getAccessToken();
           const payload = token ? decodeJwtPayload(token) : null;
           const nextUserId = payload?.userId || payload?.sub;
 
           if (nextUserId) {
-            setUserId(nextUserId);
+            dispatch({ type: "SET_USER", payload: { userId: nextUserId, isAuthenticated: true } });
           }
         }
       } catch (error) {
@@ -69,36 +98,36 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
         if (isNotFoundError) {
           try {
             const newData = await giveToGetService.createProgress(board.id);
-            setProgress(newData);
+            dispatch({ type: "SET_PROGRESS", payload: newData });
           } catch (createError) {
             console.error("Failed to auto-create give-to-get progress", createError);
           }
         } else if (isUnauthorized) {
-          setProgress(null);
+          dispatch({ type: "SET_PROGRESS", payload: null });
         } else {
           console.error("Error fetching give-to-get progress", error);
         }
       } finally {
-        setLoading(false);
+        dispatch({ type: "DONE" });
       }
     };
 
     fetchProgress();
-  }, [board.id, board.giveToGetEnabled, userId]);
+  }, [board.id, board.giveToGetEnabled, state.userId]);
 
-  const channelName = userId ? `progress.${userId}.${board.id}` : null;
+  const channelName = state.userId ? `progress.${state.userId}.${board.id}` : null;
 
   useChannel<GiveToGetProgressResponse>(channelName, (message) => {
     if (message.event === "ProgressUpdated") {
-      setProgress(message.payload);
+      dispatch({ type: "SET_PROGRESS", payload: message.payload });
     }
   });
 
   if (!board.giveToGetEnabled) return null;
 
-  if (loading) return <div className="h-16 animate-pulse rounded-md bg-muted/60 w-full mb-4"></div>;
+  if (state.loading) return <div className="h-16 animate-pulse rounded-md bg-muted/60 w-full mb-4"></div>;
 
-  if (!isAuthenticated) {
+  if (!state.isAuthenticated) {
     return (
       <Card className="mb-4 border-border/60 bg-background shadow-none">
         <CardContent className="px-4 py-3">
@@ -109,12 +138,12 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
     );
   }
 
-  if (!progress) return null;
+  if (!state.progress) return null;
 
   const votesReq = board.giveToGetVotesReq || 0;
   const commentsReq = board.giveToGetCommentsReq || 0;
-  const votesGiven = progress.votesGiven || 0;
-  const commentsGiven = progress.qualifyingComments || 0;
+  const votesGiven = state.progress.votesGiven || 0;
+  const commentsGiven = state.progress.qualifyingComments || 0;
 
   const votesPercent = votesReq > 0 ? Math.min((votesGiven / votesReq) * 100, 100) : 100;
   const commentsPercent = commentsReq > 0 ? Math.min((commentsGiven / commentsReq) * 100, 100) : 100;
@@ -139,7 +168,7 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-lg leading-none shrink-0">{t("title")}</CardTitle>
           <p className="text-sm text-muted-foreground text-right">
-            {progress.canPost ? t("unlocked") : t("locked", { votes: votesLeft, comments: commentsLeft })}
+            {state.progress.canPost ? t("unlocked") : t("locked", { votes: votesLeft, comments: commentsLeft })}
           </p>
         </div>
         <div className="mt-2 flex items-center gap-3">

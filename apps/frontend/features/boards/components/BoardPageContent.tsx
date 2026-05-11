@@ -23,10 +23,10 @@ interface BoardPageContentProps {
 export function BoardPageContent({ slug }: BoardPageContentProps) {
   const t = useTranslations("BoardPage");
   const formatter = useFormatter();
-  const searchParams = useSearchParams();
+  const { get } = useSearchParams();
   const { user } = useAuth();
   const { board, requests, latestRequestDate, loading, notFound, addRequest } = useBoardPage(slug);
-  const isRequestsTab = searchParams.get("tab") === "requests";
+  const isRequestsTab = get("tab") === "requests";
   const [canManageBoard, setCanManageBoard] = useState(false);
 
   useEffect(() => {

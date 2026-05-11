@@ -1,8 +1,8 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/localization/i18n/routing";
+import { redirect } from "next/navigation";
 import { UserPlus2, Trash2, Shield, Crown } from "lucide-react";
 
 import {
@@ -30,12 +30,12 @@ interface BoardMembersPageContentProps {
 
 export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) {
   const t = useTranslations("BoardMembersPage");
-  const router = useRouter();
   const { user } = useAuth();
+
+  const loadingRef = useRef(true);
 
   const [board, setBoard] = useState<BoardResponse | null>(null);
   const [members, setMembers] = useState<BoardMember[]>([]);
-  const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [pendingMemberId, setPendingMemberId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +46,7 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
   const isLimitedAdmin = canManageBoard && !isBoardOwner;
 
   const sortedMembers = useMemo(() => {
-    return [...members].sort((leftMember, rightMember) => {
+    return members.toSorted((leftMember, rightMember) => {
       if (leftMember.userId === board?.ownerId) return -1;
       if (rightMember.userId === board?.ownerId) return 1;
 
@@ -67,7 +67,7 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
     let cancelled = false;
 
     const loadBoardMembers = async () => {
-      setLoading(true);
+      loadingRef.current = true;
       setNotFound(false);
 
       try {
@@ -96,14 +96,14 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
         }
 
         if (error instanceof UnauthorizedError) {
-          router.replace("/login");
+          redirect("/login");
           return;
         }
 
         setNotFound(true);
       } finally {
         if (!cancelled) {
-          setLoading(false);
+          loadingRef.current = false;
         }
       }
     };
@@ -113,7 +113,7 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
     return () => {
       cancelled = true;
     };
-  }, [router, slug, user?.id]);
+  }, [slug, user?.id]);
 
   const handleAddMember = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -198,7 +198,7 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
     }
   };
 
-  if (loading) {
+  if (loadingRef.current) {
     return null;
   }
 

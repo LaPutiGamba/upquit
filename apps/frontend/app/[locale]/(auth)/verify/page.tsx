@@ -1,17 +1,21 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 import { authService } from "@/features/authentication/services/authService";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import Link from "next/link";
 
-export default function VerifyPage() {
-  const searchParams = useSearchParams();
-  const userId = searchParams.get("id");
+export const metadata = {
+  title: "Verify Email",
+  description: "Verify your email address to activate your account"
+};
+
+function VerifyPageContent() {
+  const { get } = useSearchParams();
+  const userId = get("id");
 
   const [status, setStatus] = useState<"loading" | "success" | "error">(userId ? "loading" : "error");
   const StatusIcon = status === "success" ? CheckCircle2 : status === "error" ? XCircle : Loader2;
@@ -70,5 +74,13 @@ export default function VerifyPage() {
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<Skeleton className="h-64 w-full max-w-md" />}>
+      <VerifyPageContent />
+    </Suspense>
   );
 }
