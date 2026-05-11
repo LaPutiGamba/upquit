@@ -1,25 +1,25 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { BoardPageContent } from "@/features/boards/components/BoardPageContent";
+import { BoardRequestsPageContent } from "@/features/boards/components/BoardRequestsPageContent";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
-interface BoardPageProps {
+interface BoardRequestsPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   return {
-    title: `Board — ${slug}`,
-    description: `View and interact with the ${slug} board on UpQuit.`
+    title: `Requests — ${slug}`,
+    description: `Feature requests for the ${slug} board on UpQuit.`
   };
 }
 
-export default async function BoardPage({ params }: BoardPageProps) {
+export default async function BoardRequestsPage({ params }: BoardRequestsPageProps) {
   const { slug } = await params;
   return (
     <Suspense fallback={<Skeleton className="h-full w-full" />}>
-      <BoardPageContent slug={slug} />
+      <BoardRequestsPageContent slug={slug} />
     </Suspense>
   );
 }

@@ -1,30 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations, useFormatter } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { BoardHeader } from "@/features/boards/components/BoardHeader";
 import { useBoardPage } from "@/features/boards/hooks/useBoardPage";
 import { boardService } from "@/features/boards/services/boardService";
 import { GiveToGetTracker } from "@/features/give-to-get/components/GiveToGetTracker";
-import { RequestCard } from "@/features/requests/components/RequestCard";
-import { CreateRequestForm } from "@/features/requests/components/CreateRequestForm";
 import { useAuth } from "@/shared/components/AuthProvider";
-import { Badge } from "@/shared/components/ui/badge";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/shared/components/ui/empty";
-import { MessageSquareDashed } from "lucide-react";
-import { formatDateWithFormatter } from "@/shared/lib/date";
 
 interface BoardPageContentProps {
   slug: string;
-  isRequestsTab: boolean;
 }
 
-export function BoardPageContent({ slug, isRequestsTab }: BoardPageContentProps) {
+export function BoardPageContent({ slug }: BoardPageContentProps) {
   const t = useTranslations("BoardPage");
-  const formatter = useFormatter();
   const { user } = useAuth();
-  const { board, requests, latestRequestDate, loading, notFound, addRequest } = useBoardPage(slug, isRequestsTab);
+  const { board, loading, notFound } = useBoardPage(slug, false);
   const [canManageBoard, setCanManageBoard] = useState(false);
 
   useEffect(() => {
@@ -78,64 +70,13 @@ export function BoardPageContent({ slug, isRequestsTab }: BoardPageContentProps)
   return (
     <main className="min-h-svh bg-background">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6 pb-10 md:p-8 md:pb-12">
-        {!isRequestsTab ? (
-          <>
-            <section>
-              <BoardHeader board={board} canManage={canManageBoard} manageLabel={t("actions.editSettings")} />
-            </section>
+        <section>
+          <BoardHeader board={board} canManage={canManageBoard} manageLabel={t("actions.editSettings")} />
+        </section>
 
-            <div>
-              <GiveToGetTracker board={board} />
-            </div>
-          </>
-        ) : null}
-
-        {isRequestsTab ? (
-          <section className="flex flex-col gap-5">
-            <div className="mb-5 flex flex-col gap-4 border-b border-border/70 pb-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="flex flex-col gap-2">
-                <h2 className="text-xl font-semibold tracking-tight md:text-2xl">{t("featureRequestsTitle")}</h2>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary">{requests.length} total</Badge>
-                  {latestRequestDate ? (
-                    <Badge variant="outline">Newest: {formatDateWithFormatter(formatter, latestRequestDate)}</Badge>
-                  ) : null}
-                </div>
-              </div>
-
-              <CreateRequestForm
-                boardId={board.id}
-                giveToGetEnabled={board.giveToGetEnabled}
-                canManageStatus={canManageBoard}
-                onRequestCreated={addRequest}
-              />
-            </div>
-
-            {requests.length === 0 ? (
-              <Empty className="rounded-xl border border-dashed py-12">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <MessageSquareDashed className="size-5" aria-hidden="true" />
-                  </EmptyMedia>
-                  <EmptyTitle>{t("featureRequestsTitle")}</EmptyTitle>
-                  <EmptyDescription>{t("emptyRequests")}</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
-              <div className="grid gap-3 md:gap-4">
-                {requests.map((request) => (
-                  <RequestCard
-                    key={request.id}
-                    request={request}
-                    boardSlug={slug}
-                    currentUserId={user?.id ?? null}
-                    isBoardAdmin={canManageBoard}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        ) : null}
+        <div>
+          <GiveToGetTracker board={board} />
+        </div>
       </div>
     </main>
   );

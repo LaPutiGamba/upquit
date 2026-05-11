@@ -58,14 +58,13 @@ export function AppShell({ children }: AppShellProps) {
   const activeBoard = boards.find((board) => board.slug === currentBoardSlug) ?? null;
   const boardNavigationSlug = activeBoard?.slug ?? currentBoardSlug;
   const isMembersTab = pathname.endsWith("/members");
+  const isRequestsTab = pathname.endsWith("/requests");
   const isUserBoardsDashboard = pathname === "/boards";
   const shouldShowBoardNavigation = !isUserBoardsDashboard;
   const [canManageActiveBoard, setCanManageActiveBoard] = useState(false);
-  const isRequestsTab =
-    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "requests";
 
   const boardDashboardHref = boardNavigationSlug ? `/board/${boardNavigationSlug}` : "/boards";
-  const boardRequestsHref = boardNavigationSlug ? `/board/${boardNavigationSlug}?tab=requests` : "/boards";
+  const boardRequestsHref = boardNavigationSlug ? `/board/${boardNavigationSlug}/requests` : "/boards";
   const boardMembersHref = boardNavigationSlug ? `/board/${boardNavigationSlug}/members` : "/boards";
 
   useEffect(() => {
