@@ -8,6 +8,7 @@
   "BoardsEntryGate": {
     "title": "Your boards",
     "subtitle": "Manage your personal boards and the boards you have joined.",
+    "discoverBoards": "Discover boards",
     "createBoard": "Create board",
     "dialogTitle": "Create a new board",
     "dialogDescription": "Answer these quick questions to set up your workspace",
@@ -20,6 +21,40 @@
     "joinedDescription": "Boards where you are a member.",
     "joinedEmpty": "You have not joined any boards yet.",
     "noDescription": "No description yet"
+  },
+  "BoardsDiscoverPage": {
+    "title": "Discover public boards",
+    "subtitle": "Find public product communities and join the ones you want to follow.",
+    "publicBadge": "Public",
+    "loading": "Loading boards...",
+    "empty": "No public boards match your filters.",
+    "viewBoard": "View",
+    "join": "Join",
+    "joining": "Joining...",
+    "joined": "Joined",
+    "noDescription": "No description yet",
+    "unknownOwner": "Unknown owner",
+    "ownerBy": "By {owner}",
+    "communityLabel": "Open community",
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Search by board name or description",
+      "sortLabel": "Sort by",
+      "sortRecent": "Most recent",
+      "sortName": "Name (A-Z)",
+      "sortMembers": "Most members"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "success": {
+      "joined": "Joined {boardName}."
+    },
+    "errors": {
+      "searchFailed": "Could not load public boards.",
+      "joinFailed": "Could not join this board."
+    }
   },
   "CreateBoardForm": {
     "validation": {
@@ -423,7 +458,12 @@
       "publicRequests": "Public Requests",
       "noPublicBoards": "No public boards yet.",
       "noPublicRequests": "No public requests yet.",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "joinBoard": "Join",
+      "joining": "Joining...",
+      "joined": "Joined",
+      "joinedBoard": "Joined {boardName}.",
+      "joinBoardFailed": "Could not join this board."
     }
   }
 }

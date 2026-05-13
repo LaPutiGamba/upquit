@@ -8,6 +8,7 @@
   "BoardsEntryGate": {
     "title": "Tus tableros",
     "subtitle": "Gestiona tus tableros personales y los tableros a los que te has unido.",
+    "discoverBoards": "Descubrir tableros",
     "importBoard": "Importar tablero",
     "createBoard": "Crear tablero",
     "dialogTitle": "Crear un nuevo tablero",
@@ -21,6 +22,40 @@
     "joinedDescription": "Tableros en los que participas como miembro.",
     "joinedEmpty": "Todavía no te has unido a ningún tablero.",
     "noDescription": "Sin descripción todavía"
+  },
+  "BoardsDiscoverPage": {
+    "title": "Descubre tableros públicos",
+    "subtitle": "Encuentra comunidades públicas de producto y únete a las que quieras seguir.",
+    "publicBadge": "Público",
+    "loading": "Cargando tableros...",
+    "empty": "No hay tableros públicos que coincidan con tus filtros.",
+    "viewBoard": "Ver",
+    "join": "Unirse",
+    "joining": "Uniéndose...",
+    "joined": "Unido",
+    "noDescription": "Sin descripción todavía",
+    "unknownOwner": "Propietario desconocido",
+    "ownerBy": "Por {owner}",
+    "communityLabel": "Comunidad abierta",
+    "filters": {
+      "searchLabel": "Buscar",
+      "searchPlaceholder": "Buscar por nombre o descripción",
+      "sortLabel": "Ordenar por",
+      "sortRecent": "Más recientes",
+      "sortName": "Nombre (A-Z)",
+      "sortMembers": "Más miembros"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
+    "success": {
+      "joined": "Te has unido a {boardName}."
+    },
+    "errors": {
+      "searchFailed": "No se pudieron cargar los tableros públicos.",
+      "joinFailed": "No se pudo unir a este tablero."
+    }
   },
   "CreateBoardForm": {
     "validation": {
@@ -424,7 +459,12 @@
       "publicRequests": "Solicitudes públicas",
       "noPublicBoards": "Sin tableros públicos aún.",
       "noPublicRequests": "Sin solicitudes públicas aún.",
-      "loading": "Cargando..."
+      "loading": "Cargando...",
+      "joinBoard": "Unirse",
+      "joining": "Uniéndose...",
+      "joined": "Unido",
+      "joinedBoard": "Te has unido a {boardName}.",
+      "joinBoardFailed": "No se pudo unir a este tablero."
     }
   }
 }

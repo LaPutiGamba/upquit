@@ -4,6 +4,8 @@ import Category from "../entities/Category.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import Slug from "../value-objects/Slug.js";
 
+export type PublicBoardSortBy = "recent" | "name" | "members";
+
 export interface BoardMemberRecord {
   userId: string;
   boardId: string;
@@ -21,6 +23,7 @@ export default interface BoardRepository {
   findBySlug(slug: Slug): Promise<Board | null>;
   findByUserId(userId: Uuid): Promise<Board[]>;
   findByOwnerId(ownerId: Uuid): Promise<Board[]>;
+  searchPublicBoards(searchTerm: string, sortBy: PublicBoardSortBy, limit: number, offset: number): Promise<Board[]>;
   findBoardIdsByUserId(userId: Uuid): Promise<string[]>;
   save(board: Board): Promise<void>;
   update(board: Board): Promise<void>;

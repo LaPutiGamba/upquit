@@ -6,6 +6,8 @@ import Image from "next/image";
 import { Link } from "@/localization/i18n/routing";
 import { UserResponse } from "@/features/authentication/services/authService";
 import { boardService, BoardResponse } from "@/features/boards/services/boardService";
+import { useAuth } from "@/shared/components/AuthProvider";
+import { Button } from "@/shared/components/ui/button";
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "@/shared/components/ui/item";
 import {
   Empty,
@@ -17,6 +19,7 @@ import {
 } from "@/shared/components/ui/empty";
 import { PresentationIcon, ChevronRightIcon } from "lucide-react";
 import { formatMonthYearWithFormatter } from "@/shared/lib/date";
+import { toast } from "@/shared/components/ui/sonner";
 
 interface UserProfileContentProps {
   user: UserResponse;
@@ -25,8 +28,10 @@ interface UserProfileContentProps {
 export default function UserProfileContent({ user }: UserProfileContentProps) {
   const t = useTranslations("users.profile");
   const formatter = useFormatter();
+  const { user: currentUser, boards: currentUserBoards, refreshBoards } = useAuth();
   const [publicBoards, setPublicBoards] = useState<BoardResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [joiningBoardId, setJoiningBoardId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPublicBoards = async () => {
@@ -42,6 +47,22 @@ export default function UserProfileContent({ user }: UserProfileContentProps) {
 
     fetchPublicBoards();
   }, [user.id]);
+
+  const joinedBoardIds = new Set(currentUserBoards.map((board) => board.id));
+
+  const handleJoinBoard = async (board: BoardResponse) => {
+    setJoiningBoardId(board.id);
+
+    try {
+      await boardService.joinBoard(board.id);
+      await refreshBoards();
+      toast.success(t("joinedBoard", { boardName: board.name }));
+    } catch {
+      toast.error(t("joinBoardFailed"));
+    } finally {
+      setJoiningBoardId(null);
+    }
+  };
 
   if (!user.isActive) {
     return (
@@ -124,17 +145,40 @@ export default function UserProfileContent({ user }: UserProfileContentProps) {
               {publicBoards.map((board) => (
                 <Item
                   key={board.id}
-                  asChild
                   variant="outline"
-                  className="group rounded-lg border-border/70 bg-background px-4 py-3 transition-colors hover:bg-muted/40"
+                  className="group rounded-lg border-border/70 bg-background px-4 py-3"
                 >
-                  <Link href={`/board/${board.slug}`}>
+                  <div className="flex items-center justify-between gap-3">
                     <ItemContent>
-                      <ItemTitle>{board.name}</ItemTitle>
+                      <ItemTitle>
+                        <Link href={`/board/${board.slug}`} className="hover:underline">
+                          {board.name}
+                        </Link>
+                      </ItemTitle>
                       {board.description && <ItemDescription>{board.description}</ItemDescription>}
                     </ItemContent>
-                    <ChevronRightIcon className="size-4 text-muted-foreground shrink-0" />
-                  </Link>
+
+                    <div className="flex items-center gap-2">
+                      {currentUser && currentUser.id !== user.id && board.ownerId !== currentUser.id && (
+                        <Button
+                          size="sm"
+                          disabled={joinedBoardIds.has(board.id) || joiningBoardId === board.id}
+                          onClick={() => {
+                            void handleJoinBoard(board);
+                          }}
+                        >
+                          {joinedBoardIds.has(board.id)
+                            ? t("joined")
+                            : joiningBoardId === board.id
+                              ? t("joining")
+                              : t("joinBoard")}
+                        </Button>
+                      )}
+                      <Link href={`/board/${board.slug}`} className="text-muted-foreground hover:text-foreground">
+                        <ChevronRightIcon className="size-4 shrink-0" />
+                      </Link>
+                    </div>
+                  </div>
                 </Item>
               ))}
             </ItemGroup>

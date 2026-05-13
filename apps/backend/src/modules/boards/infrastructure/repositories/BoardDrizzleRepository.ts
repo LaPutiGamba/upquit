@@ -1,9 +1,12 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { boards, boardMembers, categories } from "../schema.js";
 import { users } from "../../../users/infrastructure/schema.js";
 import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
-import BoardRepository, { type BoardMemberRecord } from "../../domain/contracts/BoardRepository.js";
+import BoardRepository, {
+  type BoardMemberRecord,
+  type PublicBoardSortBy
+} from "../../domain/contracts/BoardRepository.js";
 import Board from "../../domain/entities/Board.js";
 import BoardMember from "../../domain/entities/BoardMember.js";
 import Category from "../../domain/entities/Category.js";
@@ -84,6 +87,89 @@ export default class BoardDrizzleRepository implements BoardRepository {
       .leftJoin(users, eq(boards.ownerId, users.id))
       .where(eq(boards.ownerId, ownerId.getValue()));
     return rows.map((row) => {
+      const owner = row.owner ? this.mapToDomainUser(row.owner) : null;
+      return this.mapToDomainBoard(row.board, owner);
+    });
+  }
+
+  public async searchPublicBoards(
+    searchTerm: string,
+    sortBy: PublicBoardSortBy,
+    limit: number,
+    offset: number
+  ): Promise<Board[]> {
+    const normalizedSearch = searchTerm.trim();
+    const whereCondition =
+      normalizedSearch.length > 0
+        ? and(
+            eq(boards.isPublic, true),
+            eq(users.isActive, true),
+            or(ilike(boards.name, `%${normalizedSearch}%`), ilike(boards.description, `%${normalizedSearch}%`))
+          )
+        : and(eq(boards.isPublic, true), eq(users.isActive, true));
+
+    if (sortBy !== "members") {
+      const rows = await this.db
+        .select({
+          board: boards,
+          owner: users
+        })
+        .from(boards)
+        .leftJoin(users, eq(boards.ownerId, users.id))
+        .where(whereCondition)
+        .orderBy(sortBy === "name" ? asc(boards.name) : desc(boards.createdAt), desc(boards.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      return rows.map((row) => {
+        const owner = row.owner ? this.mapToDomainUser(row.owner) : null;
+        return this.mapToDomainBoard(row.board, owner);
+      });
+    }
+
+    const rows = await this.db
+      .select({
+        board: boards,
+        owner: users
+      })
+      .from(boards)
+      .leftJoin(users, eq(boards.ownerId, users.id))
+      .where(whereCondition);
+
+    if (rows.length === 0) {
+      return [];
+    }
+
+    const memberCountRows = await this.db
+      .select({
+        boardId: boardMembers.boardId,
+        memberCount: sql<number>`count(*)::int`
+      })
+      .from(boardMembers)
+      .where(
+        inArray(
+          boardMembers.boardId,
+          rows.map((row) => row.board.id)
+        )
+      )
+      .groupBy(boardMembers.boardId);
+
+    const memberCountByBoardId = new Map(memberCountRows.map((row) => [row.boardId, row.memberCount]));
+
+    const sortedRows = rows.toSorted((left, right) => {
+      const leftCount = memberCountByBoardId.get(left.board.id) ?? 0;
+      const rightCount = memberCountByBoardId.get(right.board.id) ?? 0;
+
+      if (rightCount !== leftCount) {
+        return rightCount - leftCount;
+      }
+
+      const leftCreatedAt = left.board.createdAt ? left.board.createdAt.getTime() : 0;
+      const rightCreatedAt = right.board.createdAt ? right.board.createdAt.getTime() : 0;
+      return rightCreatedAt - leftCreatedAt;
+    });
+
+    return sortedRows.slice(offset, offset + limit).map((row) => {
       const owner = row.owner ? this.mapToDomainUser(row.owner) : null;
       return this.mapToDomainBoard(row.board, owner);
     });

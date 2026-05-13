@@ -92,14 +92,19 @@ export function BoardsEntryGate() {
           </div>
 
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            {sortedBoards.length !== 0 && (
-              <DialogTrigger asChild>
-                <Button className="hover:cursor-pointer">
-                  <Plus data-icon="inline-start" />
-                  {t("createBoard")}
-                </Button>
-              </DialogTrigger>
-            )}
+            <div className="flex items-center gap-2">
+              <Button asChild variant="outline" className="hover:cursor-pointer">
+                <Link href="/boards/discover">{t("discoverBoards")}</Link>
+              </Button>
+              {sortedBoards.length !== 0 && (
+                <DialogTrigger asChild>
+                  <Button className="hover:cursor-pointer">
+                    <Plus data-icon="inline-start" />
+                    {t("createBoard")}
+                  </Button>
+                </DialogTrigger>
+              )}
+            </div>
             <DialogContent className="max-w-xl">
               <DialogHeader>
                 <DialogTitle>{t("dialogTitle")}</DialogTitle>

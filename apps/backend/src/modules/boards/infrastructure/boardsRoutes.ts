@@ -14,14 +14,18 @@ import AddBoardMemberPostController from "./controllers/AddBoardMemberPostContro
 import RemoveBoardMemberDeleteController from "./controllers/RemoveBoardMemberDeleteController.js";
 import UpdateBoardMemberRolePatchController from "./controllers/UpdateBoardMemberRolePatchController.js";
 import DeleteBoardDeleteController from "./controllers/DeleteBoardDeleteController.js";
+import SearchPublicBoardsGetController from "./controllers/SearchPublicBoardsGetController.js";
+import JoinPublicBoardPostController from "./controllers/JoinPublicBoardPostController.js";
 
 const boardsRouter = Router();
 
 // Protected
 boardsRouter.get("/mine", JwtAuthMiddleware, TenantDbMiddleware, GetBoardsByUserGetController);
+boardsRouter.get("/discover", JwtAuthMiddleware, SearchPublicBoardsGetController);
 boardsRouter.get("/slug/:slug", JwtAuthMiddleware, GetBoardBySlugGetController);
 boardsRouter.post("/", JwtAuthMiddleware, TenantDbMiddleware, CreateBoardPostController);
 boardsRouter.patch("/:id", JwtAuthMiddleware, TenantDbMiddleware, UpdateBoardPatchController);
+boardsRouter.post("/:id/join", JwtAuthMiddleware, JoinPublicBoardPostController);
 boardsRouter.post("/:id/categories", JwtAuthMiddleware, TenantDbMiddleware, AddBoardCategoryPostController);
 boardsRouter.post("/:id/members", JwtAuthMiddleware, TenantDbMiddleware, AddBoardMemberPostController);
 boardsRouter.delete("/:id", JwtAuthMiddleware, TenantDbMiddleware, DeleteBoardDeleteController);

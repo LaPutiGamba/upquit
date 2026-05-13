@@ -8,6 +8,7 @@
   "BoardsEntryGate": {
     "title": "Els teus taulers",
     "subtitle": "Gestiona els teus taulers personals i els taulers als quals t'has unit.",
+    "discoverBoards": "Descobrir taulers",
     "importBoard": "Importar tauler",
     "createBoard": "Crear tauler",
     "dialogTitle": "Crea un tauler nou",
@@ -21,6 +22,40 @@
     "joinedDescription": "Taulers en els quals participes com a membre.",
     "joinedEmpty": "Encara no t'has unit a cap tauler.",
     "noDescription": "Encara sense descripció"
+  },
+  "BoardsDiscoverPage": {
+    "title": "Descobreix taulers públics",
+    "subtitle": "Troba comunitats públiques de producte i uneix-te a les que vulguis seguir.",
+    "publicBadge": "Públic",
+    "loading": "Carregant taulers...",
+    "empty": "No hi ha taulers públics que coincideixin amb els filtres.",
+    "viewBoard": "Veure",
+    "join": "Unir-se",
+    "joining": "Unint-se...",
+    "joined": "Unit",
+    "noDescription": "Encara sense descripció",
+    "unknownOwner": "Propietari desconegut",
+    "ownerBy": "Per {owner}",
+    "communityLabel": "Comunitat oberta",
+    "filters": {
+      "searchLabel": "Buscar",
+      "searchPlaceholder": "Busca per nom o descripció",
+      "sortLabel": "Ordenar per",
+      "sortRecent": "Més recents",
+      "sortName": "Nom (A-Z)",
+      "sortMembers": "Més membres"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Següent"
+    },
+    "success": {
+      "joined": "T'has unit a {boardName}."
+    },
+    "errors": {
+      "searchFailed": "No s'han pogut carregar els taulers públics.",
+      "joinFailed": "No s'ha pogut unir a aquest tauler."
+    }
   },
   "CreateBoardForm": {
     "validation": {
@@ -424,7 +459,12 @@
       "publicRequests": "Sol·licituds públiques",
       "noPublicBoards": "Cap quadre public encara",
       "noPublicRequests": "Cap sol·licitud publica encara",
-      "loading": "Carregant..."
+      "loading": "Carregant...",
+      "joinBoard": "Unir-se",
+      "joining": "Unint-se...",
+      "joined": "Unit",
+      "joinedBoard": "T'has unit a {boardName}.",
+      "joinBoardFailed": "No s'ha pogut unir a aquest tauler."
     }
   }
 }

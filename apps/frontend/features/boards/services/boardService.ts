@@ -60,6 +60,8 @@ export interface CategoryResponse {
   createdAt: string | null;
 }
 
+export type PublicBoardSortBy = "recent" | "name" | "members";
+
 export const boardService = {
   getMyBoards: async (token?: string): Promise<BoardResponse[]> => {
     return await apiClient<BoardResponse[]>("/boards/mine", {
@@ -71,6 +73,33 @@ export const boardService = {
   getPublicBoardsByUserId: async (userId: string): Promise<BoardResponse[]> => {
     return await apiClient<BoardResponse[]>(`/boards/user/${userId}/public`, {
       method: "GET"
+    });
+  },
+
+  searchPublicBoards: async (
+    params: { search?: string; sortBy?: PublicBoardSortBy; limit?: number; offset?: number },
+    token?: string
+  ): Promise<BoardResponse[]> => {
+    const query = new URLSearchParams();
+
+    if (params.search) {
+      query.set("search", params.search);
+    }
+    if (params.sortBy) {
+      query.set("sortBy", params.sortBy);
+    }
+    if (params.limit !== undefined) {
+      query.set("limit", String(params.limit));
+    }
+    if (params.offset !== undefined) {
+      query.set("offset", String(params.offset));
+    }
+
+    const suffix = query.toString();
+
+    return await apiClient<BoardResponse[]>(suffix ? `/boards/discover?${suffix}` : "/boards/discover", {
+      method: "GET",
+      token
     });
   },
 
@@ -122,6 +151,13 @@ export const boardService = {
     await apiClient(`/boards/${boardId}/members`, {
       method: "POST",
       body: JSON.stringify({ email, role: "member" }),
+      token
+    });
+  },
+
+  joinBoard: async (boardId: string, token?: string): Promise<void> => {
+    await apiClient(`/boards/${boardId}/join`, {
+      method: "POST",
       token
     });
   },
