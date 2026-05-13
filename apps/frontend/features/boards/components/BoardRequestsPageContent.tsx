@@ -11,7 +11,7 @@ import { useAuth } from "@/shared/components/AuthProvider";
 import { Badge } from "@/shared/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/shared/components/ui/empty";
 import { MessageSquareDashed } from "lucide-react";
-import { formatDateWithFormatter } from "@/shared/lib/date";
+import { formatRequestDateWithFormatter } from "@/shared/lib/date";
 
 interface BoardRequestsPageContentProps {
   slug: string;
@@ -82,7 +82,9 @@ export function BoardRequestsPageContent({ slug }: BoardRequestsPageContentProps
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{requests.length} total</Badge>
                 {latestRequestDate ? (
-                  <Badge variant="outline">Newest: {formatDateWithFormatter(formatter, latestRequestDate)}</Badge>
+                  <Badge variant="outline">
+                    Newest: {formatRequestDateWithFormatter(formatter, latestRequestDate)}
+                  </Badge>
                 ) : null}
               </div>
             </div>

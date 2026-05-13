@@ -44,13 +44,8 @@ export function NavMain({
                   ? pathname === `/board/${selectedBoardSlug}` && !isRequestsTab && !isMembersTab
                   : pathname === "/boards"
                 : item.id === "requests"
-                  ? selectedBoardSlug
-                    ? pathname === `/board/${selectedBoardSlug}` && isRequestsTab
-                    : false
-                  : selectedBoardSlug
-                    ? pathname === `/board/${selectedBoardSlug}/members` ||
-                      (pathname === `/board/${selectedBoardSlug}` && isMembersTab)
-                    : false;
+                  ? isRequestsTab
+                  : isMembersTab;
 
             return (
               <SidebarMenuItem key={`${item.id}-${item.label}`}>

@@ -113,18 +113,14 @@ export default class UpdateRequestCommandHandler {
 
     const updatedRequestWithAuthor = await this.requestRepository.findById(updatedRequest.id);
     const response = mapRequestToResponse(updatedRequestWithAuthor!);
-    const hasTitleChanged = request.title !== updatedRequest.title;
-    const hasStatusChanged = request.status.getValue() !== updatedRequest.status.getValue();
 
-    if (hasTitleChanged || hasStatusChanged) {
-      this.realtimePublisher.publish(updatedRequest.boardId.getValue(), "RequestUpdated", {
-        data: {
-          boardId: updatedRequest.boardId.getValue(),
-          request: response
-        },
-        timestamp: new Date().toISOString()
-      });
-    }
+    this.realtimePublisher.publish(updatedRequest.boardId.getValue(), "RequestUpdated", {
+      data: {
+        boardId: updatedRequest.boardId.getValue(),
+        request: response
+      },
+      timestamp: new Date().toISOString()
+    });
 
     return response;
   }

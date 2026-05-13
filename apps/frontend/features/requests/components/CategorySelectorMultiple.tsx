@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type ChangeEvent } from "react";
 import { Loader2Icon } from "lucide-react";
 
 import { boardService, CategoryResponse } from "@/features/boards/services/boardService";
+import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
 import {
   Combobox,
   ComboboxChip,
@@ -78,6 +79,28 @@ export function CategorySelectorMultiple({
   useEffect(() => {
     void fetchCategories();
   }, [fetchCategories]);
+
+  type CategoryAddedPayload = {
+    boardId: string;
+    category: CategoryResponse;
+  };
+
+  const handleCategoryAdded = useCallback(
+    (message: IncomingBroadcastMessage<CategoryAddedPayload>) => {
+      if (message.event === "CategoryAdded") {
+        const newCategory = message.payload.category;
+        setCategories((prev) => {
+          if (prev.some((cat) => cat.id === newCategory.id)) {
+            return prev;
+          }
+          return [...prev, newCategory];
+        });
+      }
+    },
+    []
+  );
+
+  useChannel<CategoryAddedPayload>(boardId, handleCategoryAdded);
 
   const hasExactMatch = categories.some((cat) => cat.name.toLowerCase() === searchString.toLowerCase());
 

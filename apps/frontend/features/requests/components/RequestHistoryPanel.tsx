@@ -5,7 +5,7 @@ import { useFormatter } from "next-intl";
 import { MoveRight } from "lucide-react";
 import { Spinner } from "@/shared/components/ui/spinner";
 import type { RequestChangelogResponse } from "@/features/requests/services/requestService";
-import { formatDateTimeWithFormatter } from "@/shared/lib/date";
+import { formatRequestHistoryWithFormatter } from "@/shared/lib/date";
 import {
   formatRequestStatusLabel,
   getRequestStatusColor,
@@ -236,7 +236,7 @@ export function RequestHistoryPanel({
       return "just now";
     }
 
-    return formatDateTimeWithFormatter(formatter, timestamp);
+    return formatRequestHistoryWithFormatter(formatter, timestamp);
   };
 
   if (changelogLoading) {

@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type Resolver, type SubmitHandler, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { Link } from "@/localization/i18n/routing";
-import { boardService } from "@/features/boards/services/boardService";
+import { boardService, type BoardResponse } from "@/features/boards/services/boardService";
 import { useAuth } from "@/shared/components/AuthProvider";
+import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { ColorPicker } from "@/shared/components/ui/color-picker";
@@ -229,6 +230,29 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
       cancelled = true;
     };
   }, [form, slug, user?.id]);
+
+  const handleBoardUpdated = useCallback(
+    (message: IncomingBroadcastMessage<BoardResponse>) => {
+      if (message.event === "BoardUpdated" && message.payload) {
+        const updatedBoard = message.payload;
+        form.reset({
+          name: updatedBoard.name,
+          slug: updatedBoard.slug,
+          description: updatedBoard.description ?? "",
+          logoUrl: updatedBoard.logoUrl ?? "",
+          primaryColor: updatedBoard.primaryColor ?? "",
+          isPublic: updatedBoard.isPublic ?? false,
+          allowAnonymousVotes: updatedBoard.allowAnonymousVotes ?? false,
+          giveToGetEnabled: updatedBoard.giveToGetEnabled ?? false,
+          giveToGetVotesReq: updatedBoard.giveToGetVotesReq ?? 2,
+          giveToGetCommentsReq: updatedBoard.giveToGetCommentsReq ?? 2
+        });
+      }
+    },
+    [form]
+  );
+
+  useChannel<BoardResponse>(boardId, handleBoardUpdated);
 
   const onSubmit: SubmitHandler<BoardSettingsFormValues> = async (values) => {
     if (!boardId) {

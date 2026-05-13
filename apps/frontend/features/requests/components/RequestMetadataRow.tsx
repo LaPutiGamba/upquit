@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/shared/components/ui/select";
-import { formatDateWithFormatter } from "@/shared/lib/date";
+import { formatRequestDateWithFormatter } from "@/shared/lib/date";
 import { cn } from "@/shared/lib/utils";
 
 type RequestMetadata = {
@@ -147,7 +147,7 @@ export function RequestMetadataRow({
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const canEditStatus = canManageStatus ?? canEdit;
 
-  const requestDateLabel = request.createdAt ? formatDateWithFormatter(formatter, request.createdAt) : "";
+  const requestDateLabel = request.createdAt ? formatRequestDateWithFormatter(formatter, request.createdAt) : "";
 
   const handleStatusSave = async (nextStatus: string) => {
     if (!onStatusSave) {

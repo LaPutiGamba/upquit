@@ -7,7 +7,7 @@ import { useFormatter } from "next-intl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { CommentForm } from "./CommentForm";
 import type CommentResponse from "../services/commentService";
-import { formatDateWithFormatter } from "@/shared/lib/date";
+import { formatDateTimeLocaleAwareWithFormatter } from "@/shared/lib/date";
 
 type CommentThreadProps = {
   rootComment: CommentResponse;
@@ -69,7 +69,7 @@ export const CommentThread = memo(function CommentThread({
             )}
             {rootComment.createdAt && (
               <span className="text-xs text-muted-foreground">
-                {formatDateWithFormatter(formatter, rootComment.createdAt, {
+                {formatDateTimeLocaleAwareWithFormatter(formatter, rootComment.createdAt, {
                   month: "short",
                   day: "numeric",
                   hour: "2-digit",
@@ -114,7 +114,7 @@ export const CommentThread = memo(function CommentThread({
                   )}
                   {reply.createdAt && (
                     <span className="text-xs text-muted-foreground">
-                      {formatDateWithFormatter(formatter, reply.createdAt, {
+                      {formatDateTimeLocaleAwareWithFormatter(formatter, reply.createdAt, {
                         month: "short",
                         day: "numeric",
                         hour: "2-digit",
