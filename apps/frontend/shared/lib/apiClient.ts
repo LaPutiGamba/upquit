@@ -129,7 +129,13 @@ function extractErrorMessage(status: number, data: Record<string, unknown> | nul
 
 export async function apiClient<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const url = `${BACKEND_URL}${normalizedEndpoint}`;
+  const serverBackendUrl = process.env.INTERNAL_BACKEND_URL || BACKEND_URL;
+  const url =
+    typeof window !== "undefined"
+      ? BACKEND_URL.includes(":3000")
+        ? `/api${normalizedEndpoint}`
+        : `${BACKEND_URL}${normalizedEndpoint}`
+      : `${serverBackendUrl}${normalizedEndpoint}`;
 
   const { token, tenantId, ...fetchOptions } = options;
 

@@ -27,14 +27,14 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      NODE_ENV: production
-    ports:
-      - "${BACKEND_PORT:-8080}:8080"
+      NODE_ENV: development
+    expose:
+      - "8080"
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:${BACKEND_PORT:-8080}/ || exit 1"]
+      test: ["CMD-SHELL", "nc -z localhost 8080 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -44,21 +44,40 @@ services:
       context: .
       dockerfile: apps/frontend/Dockerfile
       args:
-        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8080}
+        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL:-http://localhost:3000}
     container_name: upquit-frontend
     restart: unless-stopped
     env_file:
       - .env
     environment:
       NODE_ENV: production
-      INTERNAL_BACKEND_URL: http://backend:${BACKEND_PORT:-8080}
-    ports:
-      - "3000:3000"
+      INTERNAL_BACKEND_URL: http://backend:8080
+    expose:
+      - "3000"
     depends_on:
       backend:
         condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: upquit-nginx
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:80/en || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

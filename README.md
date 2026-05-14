@@ -38,6 +38,8 @@ No other dependencies required.
 
 Note: During setup the scripts will ask whether this is a local development machine. If you answer "no", they'll attempt to auto-detect your machine's LAN IP and set `FRONTEND_URL` and `NEXT_PUBLIC_BACKEND_URL` in `.env` so other devices on the same network can access the frontend and backend by IP (for example: `http://192.168.1.100:3000`).
 
+For standalone frontend development outside Docker, keep `apps/frontend/.env` pointing `NEXT_PUBLIC_BACKEND_URL` at `http://localhost:8080` so the browser can reach the backend directly. Docker Compose should keep the root `.env` on `http://localhost:3000` so the browser goes through nginx.
+
 > [!IMPORTANT]
 > In local development when accessing with an external IP (for example: `http://192.168.1.100:3000`) change in the `compose.yml` backend service the `NODE_ENV` variable from `production` to `development`.
 
@@ -132,8 +134,7 @@ pnpm dev
 
 ```bash
 cd apps/frontend
-cp .env.example .env.local
-# Edit .env.local with your backend URL
+# Edit .env with your backend URL. For browser-side dev, keep NEXT_PUBLIC_BACKEND_URL=http://localhost:8080.
 pnpm install
 pnpm dev
 ```

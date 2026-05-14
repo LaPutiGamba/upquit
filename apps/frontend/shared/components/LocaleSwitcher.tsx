@@ -20,6 +20,7 @@ export function LocaleSwitcher() {
 
   const switchLocale = (nextLocale: "en" | "es" | "ca") => {
     startTransition(() => {
+      localStorage.setItem("upquit-locale", nextLocale);
       const currentSearchParams = window.location.search.replace(/^\?/, "");
       const query = currentSearchParams ? `?${currentSearchParams}` : "";
 

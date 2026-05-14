@@ -67,10 +67,10 @@ if ($IS_LOCAL -notmatch '^[Yy]') {
     if (-not $MACHINE_IP) { $MACHINE_IP = $AUTO_IP }
 
     if ($MACHINE_IP) {
-        Write-Host "Setting FRONTEND_URL and NEXT_PUBLIC_BACKEND_URL to use $MACHINE_IP"
+        Write-Host "Setting FRONTEND_URL and NEXT_PUBLIC_BACKEND_URL to use $MACHINE_IP:3000"
         $content = Get-Content $ENV_FILE -Raw
         $content = $content -replace '(?m)^FRONTEND_URL=.*', "FRONTEND_URL=http://$MACHINE_IP:3000"
-        $content = $content -replace '(?m)^NEXT_PUBLIC_BACKEND_URL=.*', "NEXT_PUBLIC_BACKEND_URL=http://$MACHINE_IP:8080"
+        $content = $content -replace '(?m)^NEXT_PUBLIC_BACKEND_URL=.*', "NEXT_PUBLIC_BACKEND_URL=http://$MACHINE_IP:3000"
         $content | Set-Content $ENV_FILE
     } else {
         Write-Host "No machine IP provided or detected; keeping defaults (localhost)."

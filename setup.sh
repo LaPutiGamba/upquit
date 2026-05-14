@@ -66,9 +66,9 @@ if [[ ! "$IS_LOCAL" =~ ^[Yy] ]]; then
   fi
 
   if [ -n "$MACHINE_IP" ]; then
-    echo "Setting FRONTEND_URL and NEXT_PUBLIC_BACKEND_URL to use $MACHINE_IP"
+    echo "Setting FRONTEND_URL and NEXT_PUBLIC_BACKEND_URL to use $MACHINE_IP:3000"
     sed -i "s|^FRONTEND_URL=.*|FRONTEND_URL=http://$MACHINE_IP:3000|" "$ENV_FILE"
-    sed -i "s|^NEXT_PUBLIC_BACKEND_URL=.*|NEXT_PUBLIC_BACKEND_URL=http://$MACHINE_IP:8080|" "$ENV_FILE"
+    sed -i "s|^NEXT_PUBLIC_BACKEND_URL=.*|NEXT_PUBLIC_BACKEND_URL=http://$MACHINE_IP:3000|" "$ENV_FILE"
   else
     echo "No machine IP provided or detected; keeping defaults (localhost)."
   fi
