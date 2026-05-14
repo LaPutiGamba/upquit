@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { LayoutGrid, Sparkles, Users2 } from "lucide-react";
 
@@ -35,6 +35,8 @@ interface AppShellProps {
 const AUTH_PATHS = ["/login", "/register", "/verify", "/verify-email"];
 const SHELLLESS_PATHS = ["/", "/notifications"];
 
+const emptySubscribe = () => () => {};
+
 function isAuthPath(pathname: string): boolean {
   return AUTH_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
@@ -51,6 +53,11 @@ export function AppShell({ children }: AppShellProps) {
 
   const [isCreateBoardOpen, setIsCreateBoardOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const isHydrated = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const shouldHideShell = isAuthPath(pathname) || isShelllessPath(pathname);
 
@@ -129,8 +136,8 @@ export function AppShell({ children }: AppShellProps) {
     return baseItems;
   }, [boardDashboardHref, boardMembersHref, boardRequestsHref, canManageActiveBoard, t]);
 
-  const userDisplayName = user?.displayName || t("user.name");
-  const userRole = user?.email || t("user.role");
+  const userDisplayName = isHydrated ? user?.displayName || t("user.name") : t("user.name");
+  const userRole = isHydrated ? user?.email || t("user.role") : t("user.role");
   const userInitials = getInitials(userDisplayName);
 
   const handleOpenSettings = () => setIsSettingsOpen(true);
@@ -190,7 +197,7 @@ export function AppShell({ children }: AppShellProps) {
             displayName={userDisplayName}
             email={userRole}
             initials={userInitials}
-            avatarUrl={user?.avatarUrl ?? null}
+            avatarUrl={isHydrated ? (user?.avatarUrl ?? null) : null}
             dashboardLabel={t("actions.dashboard")}
             dashboardHref="/boards"
             showDashboardAction={!isUserBoardsDashboard}

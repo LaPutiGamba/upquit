@@ -85,20 +85,24 @@ export function CategorySelectorMultiple({
     category: CategoryResponse;
   };
 
-  const handleCategoryAdded = useCallback(
-    (message: IncomingBroadcastMessage<CategoryAddedPayload>) => {
-      if (message.event === "CategoryAdded") {
-        const newCategory = message.payload.category;
-        setCategories((prev) => {
-          if (prev.some((cat) => cat.id === newCategory.id)) {
-            return prev;
-          }
-          return [...prev, newCategory];
-        });
+  const handleCategoryAdded = useCallback((message: IncomingBroadcastMessage<CategoryAddedPayload>) => {
+    if (message.event !== "CategoryAdded") return;
+
+    const payloadObj = message.payload as unknown;
+
+    const newCategory =
+      (payloadObj as { category?: CategoryResponse }).category ??
+      (payloadObj as { data?: { category?: CategoryResponse } }).data?.category;
+
+    if (!newCategory) return;
+
+    setCategories((prev) => {
+      if (prev.some((cat) => cat.id === newCategory.id)) {
+        return prev;
       }
-    },
-    []
-  );
+      return [...prev, newCategory];
+    });
+  }, []);
 
   useChannel<CategoryAddedPayload>(boardId, handleCategoryAdded);
 
@@ -173,12 +177,12 @@ export function CategorySelectorMultiple({
 
   return (
     <Combobox
-        multiple
-        value={value}
-        onValueChange={handleComboboxValueChange}
-        open={isOpen}
-        onOpenChange={(open) => setIsOpen(open)}
-      >
+      multiple
+      value={value}
+      onValueChange={handleComboboxValueChange}
+      open={isOpen}
+      onOpenChange={(open) => setIsOpen(open)}
+    >
       <div ref={anchorRef} className="w-full" data-expanded={isOpen}>
         <ComboboxChips
           className={cn(disabled && "opacity-50")}
@@ -235,10 +239,7 @@ export function CategorySelectorMultiple({
                   const backgroundColor = category.hexColor ?? generateColorFromString(category.name);
 
                   return (
-                    <ComboboxItem
-                      key={category.id}
-                      value={category.id}
-                    >
+                    <ComboboxItem key={category.id} value={category.id}>
                       <div
                         className="size-2 rounded-full"
                         style={{ backgroundColor }}

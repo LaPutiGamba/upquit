@@ -166,7 +166,16 @@ export function BoardDiscoverPageContent() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <p className="text-sm text-muted-foreground">
-                      {t("ownerBy", { owner: board.ownerDisplayName || board.ownerUsername || t("unknownOwner") })}
+                      {board.ownerUsername ? (
+                        <>
+                          {t("ownerBy", { owner: "" })}
+                          <Link href={`/users/${board.ownerUsername}`} className="hover:underline">
+                            {board.ownerDisplayName || board.ownerUsername}
+                          </Link>
+                        </>
+                      ) : (
+                        t("ownerBy", { owner: t("unknownOwner") })
+                      )}
                     </p>
                     <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
                       <Users className="size-3.5" />
