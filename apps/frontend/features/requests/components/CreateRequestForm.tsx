@@ -13,6 +13,7 @@ import { requestService, RequestResponse } from "../services/requestService";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { getAccessToken } from "@/shared/lib/apiClient";
+import { unwrapBroadcastPayload } from "@/shared/lib/realtime";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -45,6 +46,8 @@ const createRequestSchema = z.object({
 });
 
 type CreateRequestFormValues = z.infer<typeof createRequestSchema>;
+
+type GiveToGetBroadcastPayload = GiveToGetProgressResponse | { data: GiveToGetProgressResponse; timestamp: string };
 
 interface CreateRequestFormProps {
   boardId: string;
@@ -127,9 +130,10 @@ export function CreateRequestForm({
 
   const channelName = giveToGetEnabled && userId ? `progress.${userId}.${boardId}` : null;
 
-  useChannel<GiveToGetProgressResponse>(channelName, (message) => {
+  useChannel<GiveToGetBroadcastPayload>(channelName, (message) => {
     if (message.event === "ProgressUpdated") {
-      setCanPost(Boolean(message.payload.canPost));
+      const progress = unwrapBroadcastPayload(message.payload);
+      setCanPost(Boolean(progress.canPost));
       setIsProgressLoading(false);
     }
   });

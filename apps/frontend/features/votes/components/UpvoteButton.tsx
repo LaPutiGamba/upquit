@@ -7,6 +7,7 @@ import { cn } from "@/shared/lib/utils";
 import { toast } from "@/shared/components/ui/sonner";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { getAccessToken } from "@/shared/lib/apiClient";
+import { unwrapBroadcastPayload } from "@/shared/lib/realtime";
 import { Heart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useChannel } from "@/shared/hooks/useChannel";
@@ -17,6 +18,17 @@ interface UpvoteButtonProps {
   initialVoteCount: number;
   className?: string;
 }
+
+type RequestUpdatedPayload = {
+  requestId: string;
+  boardId: string;
+  voteId: string;
+  userId: string;
+  action: "created" | "deleted";
+  voteCount: number | null;
+};
+
+type RequestUpdatedBroadcastPayload = RequestUpdatedPayload | { data: RequestUpdatedPayload; timestamp: string };
 
 export function UpvoteButton({ requestId, boardId, initialVoteCount, className }: UpvoteButtonProps) {
   const t = useTranslations("UpvoteButton");
@@ -33,23 +45,22 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount, className }
 
   const channelName = boardId ? `request.${boardId}` : null;
 
-  useChannel<{
-    requestId: string;
-    boardId: string;
-    voteId: string;
-    userId: string;
-    action: "created" | "deleted";
-    voteCount: number | null;
-  }>(channelName, (message) => {
-    if (message.event !== "RequestUpdated" || message.payload.requestId !== requestId) {
+  useChannel<RequestUpdatedBroadcastPayload>(channelName, (message) => {
+    if (message.event !== "RequestUpdated") {
       return;
     }
 
-    setVoteCount(message.payload.voteCount ?? 0);
+    const payload = unwrapBroadcastPayload(message.payload);
 
-    if (message.payload.userId === currentUserId) {
-      setHasVoted(message.payload.action === "created");
-      setVoteId(message.payload.action === "created" ? message.payload.voteId : null);
+    if (payload.requestId !== requestId) {
+      return;
+    }
+
+    setVoteCount(payload.voteCount ?? 0);
+
+    if (payload.userId === currentUserId) {
+      setHasVoted(payload.action === "created");
+      setVoteId(payload.action === "created" ? payload.voteId : null);
     }
   });
 

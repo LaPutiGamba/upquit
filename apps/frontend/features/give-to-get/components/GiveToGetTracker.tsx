@@ -8,6 +8,7 @@ import { Card, CardContent, CardTitle } from "@/shared/components/ui/card";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { getAccessToken } from "@/shared/lib/apiClient";
+import { unwrapBroadcastPayload } from "@/shared/lib/realtime";
 import { useTranslations } from "next-intl";
 
 interface GiveToGetTrackerProps {
@@ -26,6 +27,8 @@ type GiveToGetAction =
   | { type: "SET_PROGRESS"; payload: GiveToGetProgressResponse | null }
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "DONE" };
+
+type GiveToGetBroadcastPayload = GiveToGetProgressResponse | { data: GiveToGetProgressResponse; timestamp: string };
 
 function giveToGetReducer(state: GiveToGetState, action: GiveToGetAction): GiveToGetState {
   switch (action.type) {
@@ -117,9 +120,9 @@ export function GiveToGetTracker({ board }: GiveToGetTrackerProps) {
 
   const channelName = state.userId ? `progress.${state.userId}.${board.id}` : null;
 
-  useChannel<GiveToGetProgressResponse>(channelName, (message) => {
+  useChannel<GiveToGetBroadcastPayload>(channelName, (message) => {
     if (message.event === "ProgressUpdated") {
-      dispatch({ type: "SET_PROGRESS", payload: message.payload });
+      dispatch({ type: "SET_PROGRESS", payload: unwrapBroadcastPayload(message.payload) });
     }
   });
 

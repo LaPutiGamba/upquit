@@ -8,6 +8,7 @@ import { requestService, RequestResponse } from "@/features/requests/services/re
 import { UnauthorizedError } from "@/shared/lib/apiClient";
 import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
 import { useAuth } from "@/shared/components/AuthProvider";
+import { unwrapBroadcastPayload } from "@/shared/lib/realtime";
 
 interface UseBoardPageResult {
   board: BoardResponse | null;
@@ -126,7 +127,7 @@ export function useBoardPage(slug: string, isRequestsTab: boolean): UseBoardPage
 
   const handleBoardChannelMessage = useCallback(
     (message: IncomingBroadcastMessage<RequestRealtimeMessagePayload>) => {
-      const payload = message.payload;
+      const payload = unwrapBroadcastPayload(message.payload);
 
       if (message.event === "RequestCreated" && "request" in payload) {
         addRequest(payload.request);
