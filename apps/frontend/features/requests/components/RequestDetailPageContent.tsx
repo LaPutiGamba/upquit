@@ -234,7 +234,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
             >
               {editableRequest.description ?? ""}
             </RequestDescription>
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 space-y-3">
               <p className={sectionLabelClassName}>Categories</p>
               <CategorySelectorMultiple
                 boardId={board.id}
@@ -250,7 +250,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
               canManageStatus={canManageStatus}
               onStatusSave={(nextStatus) => handleUpdateRequest({ status: nextStatus })}
               size="md"
-              className="mt-5"
+              className="mt-3"
             />
           </RequestHeader>
 

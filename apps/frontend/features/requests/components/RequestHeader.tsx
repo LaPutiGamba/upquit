@@ -8,19 +8,20 @@ import {
   useState,
   type ComponentPropsWithoutRef,
   type ElementType,
-  type KeyboardEvent,
   type ReactNode
 } from "react";
 
 import { Link } from "@/localization/i18n/routing";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import { Input } from "@/shared/components/ui/input";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/shared/lib/utils";
 
-const requestHeaderVariants = cva("", {
+const requestTitleVariants = cva("font-semibold tracking-tight text-foreground", {
   variants: {
     variant: {
-      dialog: "rounded-none border-0 bg-transparent px-0 py-0",
-      page: "rounded-xl border border-border/70 bg-linear-to-b from-background via-background to-muted/20 px-5 py-5 sm:px-7 sm:py-6"
+      dialog: "text-3xl md:text-3xl",
+      page: "text-3xl sm:text-4xl md:text-4xl"
     }
   },
   defaultVariants: {
@@ -28,11 +29,11 @@ const requestHeaderVariants = cva("", {
   }
 });
 
-const requestTitleVariants = cva("text-balance font-semibold tracking-tight text-foreground", {
+const requestHeaderVariants = cva("", {
   variants: {
     variant: {
-      dialog: "text-3xl",
-      page: "text-3xl sm:text-4xl"
+      dialog: "rounded-none border-0 bg-transparent px-0 py-0",
+      page: "rounded-xl border border-border/70 bg-linear-to-b from-background via-background to-muted/20 px-5 py-5 sm:px-7 sm:py-6"
     }
   },
   defaultVariants: {
@@ -66,28 +67,30 @@ export function RequestHeader({
   const isAuthorLinkable = Boolean(authorUsername && authorIsActive !== false);
 
   return (
-    <div className={cn(requestHeaderVariants({ variant }), className)} data-can-edit={canEdit}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          {authorLabel ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Avatar className="size-6">
-                {authorAvatarUrl ? <AvatarImage src={authorAvatarUrl} alt={authorLabel} /> : null}
-                <AvatarFallback className="text-[10px] font-semibold uppercase">{authorLabel.charAt(0)}</AvatarFallback>
-              </Avatar>
-              {isAuthorLinkable ? (
-                <Link href={`/users/${authorUsername}`} className="font-medium text-foreground hover:underline">
-                  {authorLabel}
-                </Link>
-              ) : (
-                <span className="font-medium text-foreground">{authorLabel}</span>
-              )}
-            </div>
-          ) : null}
-          {children}
-        </div>
+    <div className={cn(requestHeaderVariants({ variant }), "flex flex-col gap-4", className)} data-can-edit={canEdit}>
+      <div className={cn("flex min-h-8 items-center justify-between gap-4", variant === "dialog" && "pr-35 sm:pr-38")}>
+        {authorLabel ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Avatar className="size-6">
+              {authorAvatarUrl ? <AvatarImage src={authorAvatarUrl} alt={authorLabel} /> : null}
+              <AvatarFallback className="text-[10px] font-semibold uppercase">{authorLabel.charAt(0)}</AvatarFallback>
+            </Avatar>
+            {isAuthorLinkable ? (
+              <Link href={`/users/${authorUsername}`} className="font-medium text-foreground hover:underline">
+                {authorLabel}
+              </Link>
+            ) : (
+              <span className="font-medium text-foreground">{authorLabel}</span>
+            )}
+          </div>
+        ) : (
+          <div />
+        )}
+
         {actions ? <div className="shrink-0">{actions}</div> : null}
       </div>
+
+      <div className="flex min-w-0 flex-col gap-2">{children}</div>
     </div>
   );
 }
@@ -109,34 +112,20 @@ export function RequestTitle({
   className
 }: RequestTitleProps) {
   const initialText = useMemo(() => {
-    if (typeof children === "string") {
-      return children;
-    }
-
+    if (typeof children === "string") return children;
     return String(children ?? "");
   }, [children]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [value, setValue] = useState(initialText);
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (!isEditing) {
-      setValue(initialText);
-    }
+    if (!isEditing) setValue(initialText);
   }, [initialText, isEditing]);
-
-  useEffect(() => {
-    if (isEditing) {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    }
-  }, [isEditing]);
 
   const commitTitle = async () => {
     const nextTitle = value.trim();
-
     setIsEditing(false);
 
     if (!nextTitle || nextTitle === initialText || !onSave) {
@@ -154,58 +143,41 @@ export function RequestTitle({
     }
   };
 
-  if (isEditing) {
+  if (canEdit) {
     return (
-      <input
-        ref={inputRef}
-        type="text"
+      <Input
         value={value}
         onChange={(event) => setValue(event.target.value)}
+        onFocus={() => setIsEditing(true)}
         onBlur={() => void commitTitle()}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             event.preventDefault();
-            void commitTitle();
+            event.currentTarget.blur();
           }
-
           if (event.key === "Escape") {
             event.preventDefault();
             setValue(initialText);
             setIsEditing(false);
+            event.currentTarget.blur();
           }
         }}
+        isEditing={isEditing}
+        disabled={isSaving}
+        aria-label="Edit request title"
         className={cn(
           requestTitleVariants({ variant }),
-          "h-auto w-full rounded-md border border-input bg-background/80 px-2 py-1.5 outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+          "h-auto w-[calc(100%+1rem)] -mx-2 px-2 py-1 transition-colors",
+          !isEditing &&
+            "cursor-pointer border-transparent bg-transparent dark:bg-transparent shadow-none hover:bg-muted/50 dark:hover:bg-muted/40",
           className
         )}
-        disabled={isSaving}
       />
     );
   }
 
   return (
-    <Tag
-      className={cn(
-        requestTitleVariants({ variant }),
-        canEdit && "-mx-2 cursor-text rounded-md px-2 py-1 transition-colors hover:bg-muted/45",
-        className
-      )}
-      onClick={canEdit ? () => setIsEditing(true) : undefined}
-      role={canEdit ? "button" : undefined}
-      tabIndex={canEdit ? 0 : undefined}
-      onKeyDown={
-        canEdit
-          ? (event: KeyboardEvent<HTMLElement>) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                setIsEditing(true);
-              }
-            }
-          : undefined
-      }
-      aria-label={canEdit ? "Edit request title" : undefined}
-    >
+    <Tag className={cn(requestTitleVariants({ variant }), "w-[calc(100%+1rem)] -mx-2 px-2 py-1", className)}>
       {children}
     </Tag>
   );
@@ -229,14 +201,8 @@ export function RequestDescription({
   ...props
 }: RequestDescriptionProps) {
   const initialText = useMemo(() => {
-    if (typeof children === "string") {
-      return children;
-    }
-
-    if (children === null || children === undefined) {
-      return "";
-    }
-
+    if (typeof children === "string") return children;
+    if (children === null || children === undefined) return "";
     return String(children);
   }, [children]);
 
@@ -245,6 +211,11 @@ export function RequestDescription({
   const [value, setValue] = useState(initialText);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const adjustHeight = (el: HTMLTextAreaElement) => {
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+
   useEffect(() => {
     if (!isEditing) {
       setValue(initialText);
@@ -252,16 +223,12 @@ export function RequestDescription({
   }, [initialText, isEditing]);
 
   useEffect(() => {
-    if (!isEditing || !textareaRef.current) {
-      return;
+    if (textareaRef.current) {
+      setTimeout(() => {
+        if (textareaRef.current) adjustHeight(textareaRef.current);
+      }, 0);
     }
-
-    const textarea = textareaRef.current;
-    textarea.focus();
-    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [isEditing]);
+  }, [initialText, isEditing]);
 
   const commitDescription = async () => {
     const trimmed = value.trim();
@@ -286,50 +253,47 @@ export function RequestDescription({
   };
 
   return (
-    <div className={cn("mt-6", className)} {...props}>
+    <div className={cn("mt-3", className)} {...props}>
       <p className="mb-1 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">{label}</p>
-      {isEditing ? (
-        <textarea
+
+      {canEdit ? (
+        <Textarea
           ref={textareaRef}
+          rows={1}
           value={value}
           onChange={(event) => {
             setValue(event.target.value);
-
-            const element = event.currentTarget;
-            element.style.height = "auto";
-            element.style.height = `${element.scrollHeight}px`;
+            adjustHeight(event.target);
           }}
+          onFocus={() => setIsEditing(true)}
           onBlur={() => void commitDescription()}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              setValue(initialText);
+              setIsEditing(false);
+              event.currentTarget.blur();
+            }
+          }}
+          isEditing={isEditing}
+          disabled={isSaving}
+          placeholder="Add a description..."
+          style={{ minHeight: 0 }}
           className={cn(
-            "w-full resize-none overflow-hidden rounded-md border border-input bg-background/80 px-2 py-2 whitespace-pre-wrap wrap-anywhere text-sm leading-7 text-foreground/90 outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-base",
+            "block w-[calc(100%+1rem)] -mx-2 !min-h-0 resize-none overflow-hidden whitespace-pre-wrap wrap-anywhere px-2 py-1 text-sm leading-7 transition-colors sm:text-base md:text-base",
+            !isEditing &&
+              "cursor-pointer border-transparent bg-transparent dark:bg-transparent shadow-none hover:bg-muted/50 dark:hover:bg-muted/40",
             contentClassName
           )}
-          disabled={isSaving}
         />
       ) : (
         <p
           className={cn(
-            "whitespace-pre-wrap wrap-anywhere text-sm leading-7 text-foreground/85 sm:text-base",
-            canEdit && "-mx-2 min-h-7 cursor-text rounded-md px-2 py-1 transition-colors hover:bg-muted/45",
-            !initialText.trim() && canEdit && "text-muted-foreground",
+            "w-[calc(100%+1rem)] -mx-2 whitespace-pre-wrap wrap-anywhere px-2 py-1 text-sm leading-7 text-foreground/85 sm:text-base md:text-base",
             contentClassName
           )}
-          onClick={canEdit ? () => setIsEditing(true) : undefined}
-          role={canEdit ? "button" : undefined}
-          tabIndex={canEdit ? 0 : undefined}
-          onKeyDown={
-            canEdit
-              ? (event: KeyboardEvent<HTMLElement>) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    setIsEditing(true);
-                  }
-                }
-              : undefined
-          }
-          aria-label={canEdit ? "Edit request description" : undefined}
         >
-          {initialText.trim() ? initialText : canEdit ? "Add a description..." : ""}
+          {initialText}
         </p>
       )}
     </div>
