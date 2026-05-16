@@ -21,6 +21,17 @@ export default class UserDrizzleRepository implements UserRepository {
     return this.mapToDomainUser(row);
   }
 
+  public async findByOAuthId(provider: string, oauthId: string): Promise<User | null> {
+    const [row] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.oauthProvider, provider), eq(users.oauthId, oauthId), eq(users.isActive, true)))
+      .limit(1);
+
+    if (!row) return null;
+    return this.mapToDomainUser(row);
+  }
+
   public async findByUsername(username: string): Promise<User | null> {
     const [row] = await this.db
       .select()
@@ -115,7 +126,6 @@ export default class UserDrizzleRepository implements UserRepository {
   // =========================================================================
   // MAPPER
   // =========================================================================
-
   private mapToDomainUser(row: typeof users.$inferSelect): User {
     return new User(
       row.id,

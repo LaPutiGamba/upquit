@@ -13,6 +13,8 @@ import RefreshAccessTokenPostController from "./controllers/RefreshAccessTokenPo
 import LogoutUserPostController from "./controllers/LogoutUserPostController.js";
 import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
 import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/TenantDbMiddleware.js";
+import passport from "passport";
+import GoogleOAuthCallbackController from "./controllers/GoogleOAuthCallbackController.js";
 
 const usersRouter = Router();
 
@@ -25,6 +27,23 @@ usersRouter.post("/login", AuthenticateUserPostController);
 usersRouter.post("/refresh", RefreshAccessTokenPostController);
 usersRouter.post("/logout", LogoutUserPostController);
 usersRouter.post("/:id/verify-email", VerifyUserEmailPostController);
+
+// Google OAuth
+usersRouter.get("/auth/google", (req, res, next) => {
+  const locale = typeof req.query.locale === "string" ? req.query.locale : undefined;
+  const authOptions: any = { scope: ["profile", "email"], session: false };
+  if (locale) authOptions.state = locale;
+  authOptions.accessType = "offline";
+  authOptions.prompt = "consent";
+
+  return passport.authenticate("google", authOptions)(req, res, next);
+});
+
+usersRouter.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login", session: false }),
+  GoogleOAuthCallbackController
+);
 
 // Protected
 usersRouter.get("/", JwtAuthMiddleware, TenantDbMiddleware, GetUserByEmailGetController);

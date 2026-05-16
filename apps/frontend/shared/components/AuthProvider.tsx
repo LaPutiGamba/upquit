@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, use, useEffect, useMemo, useState } from "react";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { boardService, type BoardResponse } from "@/features/boards/services/boardService";
 import { authService, type UserResponse } from "@/features/authentication/services/authService";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
@@ -121,7 +122,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [boards, isAuthLoading, refreshAuthState, refreshBoards, user]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+  if (!googleClientId) {
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  }
+
+  return (
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    </GoogleOAuthProvider>
+  );
 }
 
 export function useAuth(): AuthContextValue {

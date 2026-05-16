@@ -7,6 +7,8 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { pinoHttp } from "pino-http";
 import pino from "pino";
+import passport from "passport";
+import "./shared/infrastructure/auth/passportConfig.js";
 import usersRouter from "./modules/users/infrastructure/usersRoutes.js";
 import boardsRouter from "./modules/boards/infrastructure/boardsRoutes.js";
 import commentsRouter from "./modules/comments/infrastructure/commentsRoutes.js";
@@ -41,6 +43,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(passport.initialize());
 app.use(pinoHttp({ logger }));
 
 app.get("/health", (req: Request, res: Response) => {
@@ -57,7 +60,7 @@ app.use("/notifications", notificationsRouter);
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
-    return next(err); 
+    return next(err);
   }
 
   logger.error(err);

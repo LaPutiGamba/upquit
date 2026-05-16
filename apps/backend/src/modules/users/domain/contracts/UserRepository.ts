@@ -4,6 +4,7 @@ import Email from "../value-objects/Email.js";
 
 export default interface UserRepository {
   findById(id: Uuid): Promise<User | null>;
+  findByOAuthId(provider: string, oauthId: string): Promise<User | null>;
   findByIdIncludingInactive(id: Uuid): Promise<User | null>;
   findByEmail(email: Email): Promise<User | null>;
   findByEmailIncludingInactive(email: Email): Promise<User | null>;

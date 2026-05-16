@@ -112,3 +112,19 @@ export const authService = {
     setAccessToken(null);
   }
 };
+
+export const handleGoogleOAuthCallback = async (searchParams: Record<string, string | string[] | undefined>) => {
+  const token = Array.isArray(searchParams.token) ? searchParams.token[0] : searchParams.token;
+  const error = Array.isArray(searchParams.error) ? searchParams.error[0] : searchParams.error;
+
+  if (error) {
+    throw new Error(`Google OAuth error: ${error}`);
+  }
+
+  if (!token) {
+    throw new Error("No access token provided");
+  }
+
+  setAccessToken(token);
+  return { accessToken: token };
+};
