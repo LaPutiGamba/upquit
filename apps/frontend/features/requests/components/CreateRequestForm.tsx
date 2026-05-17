@@ -75,7 +75,6 @@ export function CreateRequestForm({
   const [status, setStatus] = useState<RequestStatusValue>("open");
 
   const form = useForm<CreateRequestFormValues>({
-    // @ts-expect-error - zodResolver type mismatch
     resolver: zodResolver(createRequestSchema),
     defaultValues: {
       title: "",
