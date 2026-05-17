@@ -65,9 +65,8 @@ export function CreateRequestForm({
   onRequestCreated
 }: CreateRequestFormProps) {
   const router = useRouter();
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [canPost, setCanPost] = useState(false);
-  const [isProgressLoading, setIsProgressLoading] = useState(true);
+  const [canPost, setCanPost] = useState(() => !giveToGetEnabled);
+  const [isProgressLoading, setIsProgressLoading] = useState(() => Boolean(giveToGetEnabled));
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -83,11 +82,7 @@ export function CreateRequestForm({
   });
 
   useEffect(() => {
-    setIsHydrated(true);
-
     if (!giveToGetEnabled) {
-      setCanPost(true);
-      setIsProgressLoading(false);
       return;
     }
 
@@ -241,7 +236,7 @@ export function CreateRequestForm({
     </Form>
   );
 
-  if (giveToGetEnabled && (!isHydrated || isProgressLoading || !canPost)) {
+  if (giveToGetEnabled && (isProgressLoading || !canPost)) {
     return (
       <div className="flex items-center gap-3">
         <Button aria-disabled="true" tabIndex={-1} variant="outline" className="pointer-events-none opacity-60">

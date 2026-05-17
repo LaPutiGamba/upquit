@@ -90,7 +90,7 @@ export default async function GoogleOAuthCallbackController(req: Request<GoogleO
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "none",
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000
       });
@@ -131,7 +131,7 @@ export default async function GoogleOAuthCallbackController(req: Request<GoogleO
         res.cookie("refreshToken", refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
+          sameSite: "none",
           path: "/",
           maxAge: 7 * 24 * 60 * 60 * 1000
         });
