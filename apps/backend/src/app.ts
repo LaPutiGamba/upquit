@@ -23,6 +23,10 @@ const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 
 export const app = express();
 
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 app.use(helmet());
 app.use(
   cors({
@@ -45,10 +49,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use(pinoHttp({ logger }));
-
-app.get("/health", (req: Request, res: Response) => {
-  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
-});
 
 app.use("/users", usersRouter);
 app.use("/boards", boardsRouter);
