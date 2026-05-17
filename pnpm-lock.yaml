@@ -7,20 +7,10 @@ settings:
 importers:
 
   .:
-    dependencies:
-      passport:
-        specifier: ^0.7.0
-        version: 0.7.0
-      passport-google-oauth20:
-        specifier: ^2.0.0
-        version: 2.0.0
     devDependencies:
       '@types/node':
         specifier: ^25.5.0
         version: 25.5.0
-      '@types/passport-google-oauth20':
-        specifier: ^2.0.17
-        version: 2.0.17
       eslint:
         specifier: ^9.39.4
         version: 9.39.4(jiti@2.6.1)
