@@ -32,7 +32,7 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
-const AUTH_PATHS = ["/login", "/register", "/verify", "/verify-email"];
+const AUTH_PATHS = ["/login", "/register", "/verify", "/verify-email", "/forgot-password", "/reset-password"];
 const SHELLLESS_PATHS = ["/", "/notifications", "/terms", "/privacy"];
 
 const emptySubscribe = () => () => {};

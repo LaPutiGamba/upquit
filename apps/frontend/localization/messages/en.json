@@ -484,6 +484,61 @@
       "text": "Create a workspace, invite collaborators, and start shaping your roadmap in one place."
     }
   },
+  "ForgotPasswordForm": {
+    "validation": {
+      "email": "Please enter a valid email address."
+    },
+    "errors": {
+      "generic": "Unable to send reset email. Please try again."
+    },
+    "success": {
+      "emailSent": "Password reset email sent successfully.",
+      "title": "Check your email",
+      "description": "If an account exists with that email, we've sent a password reset link. The link expires in 15 minutes."
+    },
+    "title": "Forgot your password?",
+    "subtitle": "Enter your email address and we'll send you a link to reset your password",
+    "fields": {
+      "email": {
+        "label": "Email",
+        "placeholder": "m@example.com"
+      }
+    },
+    "actions": {
+      "sending": "Sending...",
+      "sendReset": "Send Reset Link",
+      "backToLogin": "Back to Login"
+    }
+  },
+  "ResetPasswordForm": {
+    "validation": {
+      "password": "Password must be at least 8 characters.",
+      "confirmPassword": "Passwords don't match"
+    },
+    "errors": {
+      "generic": "Unable to reset password. Please try again."
+    },
+    "success": {
+      "passwordReset": "Password reset successfully. You can now login with your new password."
+    },
+    "title": "Reset your password",
+    "subtitle": "Enter your new password below",
+    "fields": {
+      "password": {
+        "label": "New Password",
+        "placeholder": "••••••••"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "placeholder": "••••••••"
+      }
+    },
+    "actions": {
+      "resetting": "Resetting...",
+      "resetPassword": "Reset Password",
+      "backToLogin": "Back to Login"
+    }
+  },
   "users": {
     "profile": {
       "deleted": "This user has been deleted.",

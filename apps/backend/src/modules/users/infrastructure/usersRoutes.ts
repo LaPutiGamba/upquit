@@ -11,8 +11,11 @@ import VerifyUserEmailPostController from "./controllers/VerifyUserEmailPostCont
 import AuthenticateUserPostController from "./controllers/AuthenticateUserPostController.js";
 import RefreshAccessTokenPostController from "./controllers/RefreshAccessTokenPostController.js";
 import LogoutUserPostController from "./controllers/LogoutUserPostController.js";
+import RequestPasswordResetPostController from "./controllers/RequestPasswordResetPostController.js";
+import ResetPasswordPostController from "./controllers/ResetPasswordPostController.js";
 import { JwtAuthMiddleware } from "../../../shared/infrastructure/middlewares/JwtAuthMiddleware.js";
 import { TenantDbMiddleware } from "../../../shared/infrastructure/middlewares/TenantDbMiddleware.js";
+import { rateLimitForgotPassword } from "../../../shared/infrastructure/middlewares/RateLimitMiddleware.js";
 import passport from "passport";
 import GoogleOAuthCallbackController from "./controllers/GoogleOAuthCallbackController.js";
 
@@ -27,6 +30,10 @@ usersRouter.post("/login", AuthenticateUserPostController);
 usersRouter.post("/refresh", RefreshAccessTokenPostController);
 usersRouter.post("/logout", LogoutUserPostController);
 usersRouter.post("/:id/verify-email", VerifyUserEmailPostController);
+usersRouter.post("/request-password-reset", rateLimitForgotPassword, (req, res) =>
+  RequestPasswordResetPostController(req, res)
+);
+usersRouter.post("/reset-password", (req, res) => ResetPasswordPostController(req, res));
 
 // Google OAuth
 usersRouter.get("/auth/google", (req, res, next) => {

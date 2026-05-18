@@ -485,6 +485,61 @@
       "text": "Crea un workspace, invita colaboradores y empieza a moldear tu roadmap en un solo lugar."
     }
   },
+  "ForgotPasswordForm": {
+    "validation": {
+      "email": "Por favor, ingresa una dirección de correo electrónico válida."
+    },
+    "errors": {
+      "generic": "No se pudo enviar el correo de reinicio. Por favor, intenta de nuevo."
+    },
+    "success": {
+      "emailSent": "Correo de reinicio de contraseña enviado exitosamente.",
+      "title": "Revisa tu correo",
+      "description": "Si existe una cuenta con ese correo, hemos enviado un enlace para reiniciar tu contraseña. El enlace vence en 15 minutos."
+    },
+    "title": "¿Olvidaste tu contraseña?",
+    "subtitle": "Ingresa tu dirección de correo electrónico y te enviaremos un enlace para reiniciar tu contraseña",
+    "fields": {
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "m@example.com"
+      }
+    },
+    "actions": {
+      "sending": "Enviando...",
+      "sendReset": "Enviar enlace de reinicio",
+      "backToLogin": "Volver al inicio de sesión"
+    }
+  },
+  "ResetPasswordForm": {
+    "validation": {
+      "password": "La contraseña debe tener al menos 8 caracteres.",
+      "confirmPassword": "Las contraseñas no coinciden"
+    },
+    "errors": {
+      "generic": "No se pudo reiniciar la contraseña. Por favor, intenta de nuevo."
+    },
+    "success": {
+      "passwordReset": "Contraseña reiniciada exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña."
+    },
+    "title": "Reinicia tu contraseña",
+    "subtitle": "Ingresa tu nueva contraseña a continuación",
+    "fields": {
+      "password": {
+        "label": "Nueva contraseña",
+        "placeholder": "••••••••"
+      },
+      "confirmPassword": {
+        "label": "Confirmar contraseña",
+        "placeholder": "••••••••"
+      }
+    },
+    "actions": {
+      "resetting": "Reiniciando...",
+      "resetPassword": "Reiniciar contraseña",
+      "backToLogin": "Volver al inicio de sesión"
+    }
+  },
   "users": {
     "profile": {
       "deleted": "Este usuario ha sido eliminado.",

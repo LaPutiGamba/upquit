@@ -110,6 +110,20 @@ export const authService = {
       method: "POST"
     });
     setAccessToken(null);
+  },
+
+  requestPasswordReset: async (email: string): Promise<{ message: string }> => {
+    return await apiClient<{ message: string }>("/users/request-password-reset", {
+      method: "POST",
+      body: JSON.stringify({ email })
+    });
+  },
+
+  resetPassword: async (token: string, newPassword: string): Promise<UserResponse> => {
+    return await apiClient<UserResponse>("/users/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token, newPassword })
+    });
   }
 };
 

@@ -16,4 +16,14 @@ export default class ConsoleEmailSender implements EmailSender {
       "📧 EMAIL SENT (CONSOLE FALLBACK - Development Mode)"
     );
   }
+
+  async sendPasswordResetEmail(email: string, resetUrl: string): Promise<void> {
+    logger.info(
+      {
+        email,
+        resetUrl
+      },
+      "📧 PASSWORD RESET EMAIL SENT (CONSOLE FALLBACK - Development Mode)"
+    );
+  }
 }

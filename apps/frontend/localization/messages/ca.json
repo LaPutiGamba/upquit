@@ -485,6 +485,61 @@
       "text": "Crea un workspace, convida col-laboradors i comenca a donar forma al teu roadmap en un sol lloc"
     }
   },
+  "ForgotPasswordForm": {
+    "validation": {
+      "email": "Si us plau, introdueix una adreça de correu electrònic vàlida."
+    },
+    "errors": {
+      "generic": "No s'ha pogut enviar el correu de reinici. Si us plau, prova de nou."
+    },
+    "success": {
+      "emailSent": "Correu de reinici de contrasenya enviat correctament.",
+      "title": "Comprova el teu correu",
+      "description": "Si existeix un compte amb aquest correu, hem enviat un enllaç per reiniciar la teva contrasenya. L'enllaç caduca en 15 minuts."
+    },
+    "title": "Has oblidat la teva contrasenya?",
+    "subtitle": "Introdueix la teva adreça de correu electrònic i et enviarem un enllaç per reiniciar la teva contrasenya",
+    "fields": {
+      "email": {
+        "label": "Correu electrònic",
+        "placeholder": "m@example.com"
+      }
+    },
+    "actions": {
+      "sending": "Enviant...",
+      "sendReset": "Enviar enllaç de reinici",
+      "backToLogin": "Torna a l'inici de sessió"
+    }
+  },
+  "ResetPasswordForm": {
+    "validation": {
+      "password": "La contrasenya ha de tenir almenys 8 caràcters.",
+      "confirmPassword": "Les contrasenyes no coincideixen"
+    },
+    "errors": {
+      "generic": "No s'ha pogut reiniciar la contrasenya. Si us plau, prova de nou."
+    },
+    "success": {
+      "passwordReset": "Contrasenya reiniciada correctament. Ara pots iniciar sessió amb la teva nova contrasenya."
+    },
+    "title": "Reinicia la teva contrasenya",
+    "subtitle": "Introdueix la teva nova contrasenya a continuació",
+    "fields": {
+      "password": {
+        "label": "Nova contrasenya",
+        "placeholder": "••••••••"
+      },
+      "confirmPassword": {
+        "label": "Confirmar contrasenya",
+        "placeholder": "••••••••"
+      }
+    },
+    "actions": {
+      "resetting": "Reiniciant...",
+      "resetPassword": "Reiniciar contrasenya",
+      "backToLogin": "Torna a l'inici de sessió"
+    }
+  },
   "users": {
     "profile": {
       "deleted": "Aquest usuari ha estat eliminat",

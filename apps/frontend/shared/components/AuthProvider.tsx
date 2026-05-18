@@ -18,7 +18,7 @@ type AuthContextValue = {
   refreshAuthState: () => Promise<void>;
 };
 
-const AUTH_PATHS = ["/login", "/register", "/verify", "/verify-email"];
+const AUTH_PATHS = ["/login", "/register", "/verify", "/verify-email", "/forgot-password", "/reset-password"];
 const SHELLLESS_PATHS = ["/", "/terms", "/privacy"];
 
 function isAuthPath(pathname: string): boolean {

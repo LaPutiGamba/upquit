@@ -23,4 +23,17 @@ export default class ResendEmailSender implements EmailSender {
       throw new EmailDeliveryFailedException(`Email delivery failed: ${error.message}`);
     }
   }
+
+  async sendPasswordResetEmail(email: string, resetUrl: string): Promise<void> {
+    const { error } = await this.resend.emails.send({
+      from: `UpQuit <${process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev"}>`,
+      to: email,
+      subject: "Reset your UpQuit password",
+      html: `<h1>Password Reset</h1><p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in 15 minutes.</p><p>If you didn't request this, please ignore this email.</p>`
+    });
+
+    if (error) {
+      throw new EmailDeliveryFailedException(`Email delivery failed: ${error.message}`);
+    }
+  }
 }

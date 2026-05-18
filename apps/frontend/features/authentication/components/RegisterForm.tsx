@@ -59,6 +59,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
   const form = useForm<RegisterFormValues>({
+    // @ts-expect-error - Zod v4 compatibility with @hookform/resolvers
     resolver: zodResolver(registerSchema(t)),
     defaultValues: {
       username: "",

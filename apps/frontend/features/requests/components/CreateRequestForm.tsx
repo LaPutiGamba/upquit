@@ -74,6 +74,7 @@ export function CreateRequestForm({
   const [status, setStatus] = useState<RequestStatusValue>("open");
 
   const form = useForm<CreateRequestFormValues>({
+    // @ts-expect-error - Zod v4 compatibility with @hookform/resolvers
     resolver: zodResolver(createRequestSchema),
     defaultValues: {
       title: "",

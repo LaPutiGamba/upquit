@@ -48,6 +48,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
   const { push } = useRouter();
 
   const form = useForm<LoginFormValues>({
+    // @ts-expect-error - Zod v4 compatibility with @hookform/resolvers
     resolver: zodResolver(loginSchema(t)),
     defaultValues: {
       email: "",
