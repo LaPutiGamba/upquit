@@ -5,6 +5,7 @@ export default function LogoutUserPostController(_req: Request, res: Response) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    partitioned: process.env.NODE_ENV === "production",
     path: "/"
   });
 
