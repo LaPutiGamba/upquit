@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "@/localization/i18n/routing";
 import { useFormatter } from "next-intl";
-import { Bell, ArrowLeft } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Link } from "@/localization/i18n/routing";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { useNotifications } from "@/features/notifications/hooks/useNotifications";
@@ -14,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DATE_TIME_FORMAT_OPTIONS } from "@/shared/lib/date";
 
 export function NotificationsPageContent() {
-  const { back } = useRouter();
   const formatter = useFormatter();
   const { boards } = useAuth();
   const { notifications, markAll, markAsRead } = useNotifications(undefined);
@@ -40,15 +38,10 @@ export function NotificationsPageContent() {
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-6 md:px-6">
       <div className="mb-2 flex items-center gap-3">
-        <Button variant="outline" size="icon" onClick={() => back()} className="size-9" title="Go back">
-          <ArrowLeft className="size-4" />
-        </Button>
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-semibold">
-            <Bell className="size-6" />
-            Notifications
-          </h1>
-        </div>
+        <h1 className="flex items-center gap-2 text-2xl font-semibold">
+          <Bell className="size-6" />
+          Notifications
+        </h1>
       </div>
 
       <Card>

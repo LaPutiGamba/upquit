@@ -27,13 +27,15 @@ import type { SidebarItem } from "@/shared/components/app-shell/types";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { CreateBoardModal } from "@/shared/components/app-shell/CreateBoardModal";
 import { UserSettingsModal } from "@/shared/components/app-shell/UserSettingsModal";
+import { PageHeader } from "@/shared/components/PageHeader";
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 const AUTH_PATHS = ["/login", "/register", "/verify", "/verify-email", "/forgot-password", "/reset-password"];
-const SHELLLESS_PATHS = ["/", "/notifications", "/terms", "/privacy"];
+const PAGE_HEADER_PATHS = ["/notifications", "/boards", "/boards/discover"];
+const SHELLLESS_PATHS = ["/", "/terms", "/privacy", ...PAGE_HEADER_PATHS];
 
 const emptySubscribe = () => () => {};
 
@@ -45,8 +47,36 @@ function isShelllessPath(pathname: string): boolean {
   return SHELLLESS_PATHS.includes(pathname);
 }
 
+function hasPageHeader(pathname: string): boolean {
+  // Check exact paths
+  if (PAGE_HEADER_PATHS.includes(pathname)) {
+    return true;
+  }
+
+  // Check for /users/[username] pattern
+  if (pathname.includes("/users/") && pathname !== "/users") {
+    return true;
+  }
+
+  return false;
+}
+
+function normalizePathname(pathname: string) {
+  // Remove locale prefix like /en, /es, /ca if present
+  if (!pathname || pathname === "/") return pathname;
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts.length === 0) return "/";
+
+  if (parts[0].length === 2) {
+    const stripped = "/" + parts.slice(1).join("/");
+    return stripped === "" ? "/" : stripped;
+  }
+  return pathname;
+}
+
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const normalizedPath = normalizePathname(pathname ?? "");
   const { replace, refresh } = useRouter();
   const t = useTranslations("AppShell");
   const { user, boards } = useAuth();
@@ -59,14 +89,17 @@ export function AppShell({ children }: AppShellProps) {
     () => false
   );
 
-  const shouldHideShell = isAuthPath(pathname) || isShelllessPath(pathname);
+  const shouldShowPageHeader = hasPageHeader(normalizedPath);
+  const shouldHideShell = isAuthPath(normalizedPath) || isShelllessPath(normalizedPath) || shouldShowPageHeader;
 
-  const currentBoardSlug = pathname.startsWith("/board/") ? pathname.replace("/board/", "").split("/")[0] : null;
+  const currentBoardSlug = normalizedPath.startsWith("/board/")
+    ? normalizedPath.replace("/board/", "").split("/")[0]
+    : null;
   const activeBoard = boards.find((board) => board.slug === currentBoardSlug) ?? null;
   const boardNavigationSlug = activeBoard?.slug ?? currentBoardSlug;
-  const isMembersTab = pathname.endsWith("/members");
-  const isRequestsTab = pathname.endsWith("/requests");
-  const isUserBoardsDashboard = pathname === "/boards";
+  const isMembersTab = normalizedPath.endsWith("/members");
+  const isRequestsTab = normalizedPath.endsWith("/requests");
+  const isUserBoardsDashboard = normalizedPath === "/boards";
   const shouldShowBoardNavigation = !isUserBoardsDashboard;
   const [canManageActiveBoard, setCanManageActiveBoard] = useState(false);
 
@@ -155,6 +188,20 @@ export function AppShell({ children }: AppShellProps) {
       }
     }
   };
+
+  // Show back button
+  const showBackButton = normalizedPath.startsWith("/users/") || normalizedPath === "/notifications";
+
+  if (shouldHideShell && shouldShowPageHeader) {
+    return (
+      <div className="flex min-h-svh flex-col">
+        <PageHeader showBackButton={showBackButton} />
+        <div className="flex-1">{children}</div>
+        <CreateBoardModal open={isCreateBoardOpen} onOpenChange={setIsCreateBoardOpen} />
+        <UserSettingsModal open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+      </div>
+    );
+  }
 
   if (shouldHideShell) {
     return <>{children}</>;
