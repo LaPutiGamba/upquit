@@ -19,7 +19,7 @@ type AuthContextValue = {
 };
 
 const AUTH_PATHS = ["/login", "/register", "/verify", "/verify-email"];
-const SHELLLESS_PATHS = ["/"];
+const SHELLLESS_PATHS = ["/", "/terms", "/privacy"];
 
 function isAuthPath(pathname: string): boolean {
   return AUTH_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));

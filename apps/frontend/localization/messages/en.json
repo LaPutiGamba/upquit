@@ -192,6 +192,40 @@
       "generic": "Unable to log out right now. Please try again."
     }
   },
+  "LegalPages": {
+    "eyebrow": "Legal",
+    "shared": {
+      "acceptance": {
+        "title": "Acceptance"
+      },
+      "usage": {
+        "title": "Usage"
+      },
+      "changes": {
+        "title": "Changes"
+      },
+      "collection": {
+        "title": "Data collection"
+      },
+      "rights": {
+        "title": "Your rights"
+      }
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "description": "These terms explain how you can use UpQuit.",
+      "acceptance": "By using UpQuit, you agree to these terms and any posted updates.",
+      "usage": "Use the service responsibly and do not abuse, disrupt, or attempt to compromise the platform.",
+      "changes": "We may update these terms from time to time and will post the latest version on this page."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "description": "This policy explains what information UpQuit collects and how it is used.",
+      "collection": "We collect the information needed to provide your account, boards, requests, and notifications.",
+      "usage": "We use data to operate the product, keep accounts secure, and improve the experience.",
+      "rights": "You can request access, correction, or deletion of your personal information where applicable."
+    }
+  },
   "AppShell": {
     "workspace": "Product workspace",
     "section": "Plan",

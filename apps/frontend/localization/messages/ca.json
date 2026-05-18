@@ -193,6 +193,40 @@
       "generic": "No s'ha pogut tancar la sessió ara. Torna-ho a provar"
     }
   },
+  "LegalPages": {
+    "eyebrow": "Legal",
+    "shared": {
+      "acceptance": {
+        "title": "Acceptació"
+      },
+      "usage": {
+        "title": "Ús"
+      },
+      "changes": {
+        "title": "Canvis"
+      },
+      "collection": {
+        "title": "Recollida de dades"
+      },
+      "rights": {
+        "title": "Els teus drets"
+      }
+    },
+    "terms": {
+      "title": "Termes del servei",
+      "description": "Aquests termes expliquen com pots fer servir UpQuit.",
+      "acceptance": "En fer servir UpQuit, acceptes aquests termes i qualsevol actualització publicada.",
+      "usage": "Fes servir el servei de manera responsable i no l'abusis, l'interrompis ni intentis comprometre la plataforma.",
+      "changes": "Podem actualitzar aquests termes de tant en tant i publicarem la darrera versió en aquesta pàgina."
+    },
+    "privacy": {
+      "title": "Política de privacitat",
+      "description": "Aquesta política explica quina informació recull UpQuit i com s'utilitza.",
+      "collection": "Recollim la informació necessària per oferir el teu compte, boards, requests i notificacions.",
+      "usage": "Fem servir les dades per operar el producte, mantenir els comptes segurs i millorar l'experiència.",
+      "rights": "Pots sol·licitar accés, correcció o eliminació de les teves dades personals quan correspongui."
+    }
+  },
   "AppShell": {
     "workspace": "Espai de producte",
     "section": "Plan",

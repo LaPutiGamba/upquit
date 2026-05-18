@@ -33,7 +33,7 @@ interface AppShellProps {
 }
 
 const AUTH_PATHS = ["/login", "/register", "/verify", "/verify-email"];
-const SHELLLESS_PATHS = ["/", "/notifications"];
+const SHELLLESS_PATHS = ["/", "/notifications", "/terms", "/privacy"];
 
 const emptySubscribe = () => () => {};
 

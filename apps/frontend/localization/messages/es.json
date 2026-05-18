@@ -193,6 +193,40 @@
       "generic": "No se pudo cerrar sesión ahora. Inténtalo de nuevo"
     }
   },
+  "LegalPages": {
+    "eyebrow": "Legal",
+    "shared": {
+      "acceptance": {
+        "title": "Aceptación"
+      },
+      "usage": {
+        "title": "Uso"
+      },
+      "changes": {
+        "title": "Cambios"
+      },
+      "collection": {
+        "title": "Recogida de datos"
+      },
+      "rights": {
+        "title": "Tus derechos"
+      }
+    },
+    "terms": {
+      "title": "Términos del servicio",
+      "description": "Estos términos explican cómo puedes usar UpQuit.",
+      "acceptance": "Al usar UpQuit, aceptas estos términos y cualquier actualización publicada.",
+      "usage": "Usa el servicio de forma responsable y no lo abuses, interrumpas ni intentes comprometer la plataforma.",
+      "changes": "Podemos actualizar estos términos de vez en cuando y publicaremos la versión más reciente en esta página."
+    },
+    "privacy": {
+      "title": "Política de privacidad",
+      "description": "Esta política explica qué información recoge UpQuit y cómo se usa.",
+      "collection": "Recogemos la información necesaria para ofrecer tu cuenta, boards, requests y notificaciones.",
+      "usage": "Usamos los datos para operar el producto, mantener las cuentas seguras y mejorar la experiencia.",
+      "rights": "Puedes solicitar acceso, corrección o eliminación de tus datos personales cuando corresponda."
+    }
+  },
   "AppShell": {
     "workspace": "Espacio de producto",
     "section": "Plan",
