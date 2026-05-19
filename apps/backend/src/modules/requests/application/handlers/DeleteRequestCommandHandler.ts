@@ -21,7 +21,7 @@ export default class DeleteRequestCommandHandler {
       throw new RequestNotFoundException(command.requestId);
     }
 
-    const isAuthor = request.authorId.getValue() === requesterUserId.getValue();
+    const isAuthor = request.author.id.getValue() === requesterUserId.getValue();
 
     if (!isAuthor) {
       const canManageBoardRequests = await this.requestRepository.isBoardOwnerOrAdmin(request.boardId, requesterUserId);

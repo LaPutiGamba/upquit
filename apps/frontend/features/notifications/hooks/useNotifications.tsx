@@ -20,6 +20,16 @@ const STICKY_NOTIFICATION_TYPES = new Set([
   "request.status.changed"
 ]);
 
+interface NotificationPayload {
+  title?: string;
+  body?: string;
+  actor?: {
+    displayName?: string | null;
+    avatarUrl?: string | null;
+    username?: string | null;
+  };
+}
+
 export function useNotifications(boardId?: string) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
@@ -34,9 +44,7 @@ export function useNotifications(boardId?: string) {
       setNotifications(list);
       const c = await getUnreadCount(boardId);
       setUnread(c);
-    } catch {
-      // noop
-    }
+    } catch {}
   }, [userId, boardId]);
 
   useEffect(() => {
@@ -52,9 +60,7 @@ export function useNotifications(boardId?: string) {
           setNotifications(list);
         }
       })
-      .catch(() => {
-        // noop
-      });
+      .catch(() => {});
 
     void getUnreadCount(boardId)
       .then((count) => {
@@ -62,67 +68,60 @@ export function useNotifications(boardId?: string) {
           setUnread(count);
         }
       })
-      .catch(() => {
-        // noop
-      });
+      .catch(() => {});
 
     return () => {
       cancelled = true;
     };
   }, [userId, boardId]);
 
-  useChannel<{ title?: string; body?: string } | { type?: string; payload?: { title?: string; body?: string } }>(
-    userId ? `notification.${userId}` : null,
-    (msg) => {
-      const payload = msg.payload;
+  useChannel(userId ? `notification.${userId}` : null, (msg) => {
+    const payload = msg.payload as Record<string, unknown>;
 
-      let title = "New notification";
-      let body = "You have a new update.";
-      let typeVal = "";
+    let body = "You have a new update.";
+    let typeVal = "";
+    let actorDisplayName: string | null = null;
 
-      if (payload && typeof payload === "object" && "payload" in payload) {
-        title = payload.payload?.title ?? title;
-        body = payload.payload?.body ?? body;
-        typeVal = payload.type ?? "";
-      } else if (payload && typeof payload === "object") {
-        const direct = payload as { title?: string; body?: string };
-        title = direct.title ?? title;
-        body = direct.body ?? body;
-      }
-
-      const isSticky = STICKY_NOTIFICATION_TYPES.has(typeVal);
-
-      // clickable toast when payload contains a url
-      const rawPayload = payload as Record<string, unknown>;
-      const nestedUrl =
-        typeof (rawPayload?.payload as Record<string, unknown>)?.url === "string"
-          ? (rawPayload?.payload as Record<string, unknown>)?.url
-          : undefined;
-      const directUrl = typeof rawPayload?.url === "string" ? rawPayload.url : undefined;
-      const url = (nestedUrl ?? directUrl) as string | undefined;
-
-      toast.info(title, {
-        description: body,
-        duration: isSticky ? Infinity : 4000,
-        action: url
-          ? {
-              label: "Open",
-              onClick: () => {
-                try {
-                  router.push(url);
-                } catch {
-                  // noop
-                }
-              }
-            }
-          : undefined
-      });
-
-      void (async () => {
-        await load();
-      })();
+    if (payload && typeof payload === "object" && "payload" in payload) {
+      const nestedPayload = payload.payload as NotificationPayload | undefined;
+      body = nestedPayload?.body ?? body;
+      actorDisplayName = nestedPayload?.actor?.displayName ?? nestedPayload?.actor?.username ?? null;
+      typeVal = (payload.type as string) ?? "";
+    } else if (payload && typeof payload === "object") {
+      const direct = payload as NotificationPayload;
+      body = direct.body ?? body;
+      actorDisplayName = direct.actor?.displayName ?? direct.actor?.username ?? null;
     }
-  );
+
+    const isSticky = STICKY_NOTIFICATION_TYPES.has(typeVal);
+
+    const personalizedMessage = actorDisplayName ? `${actorDisplayName} ${body}` : body;
+
+    const nestedUrl =
+      typeof (payload.payload as Record<string, unknown>)?.url === "string"
+        ? (payload.payload as Record<string, unknown>)?.url
+        : undefined;
+    const directUrl = typeof payload.url === "string" ? payload.url : undefined;
+    const url = (nestedUrl ?? directUrl) as string | undefined;
+
+    toast.info(personalizedMessage, {
+      duration: isSticky ? Infinity : 4000,
+      action: url
+        ? {
+            label: "Open",
+            onClick: () => {
+              try {
+                router.push(url);
+              } catch {}
+            }
+          }
+        : undefined
+    });
+
+    void (async () => {
+      await load();
+    })();
+  });
 
   const markAsRead = useCallback(async (id: string) => {
     await apiMarkAsRead(id);

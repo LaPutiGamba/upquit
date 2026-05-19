@@ -44,7 +44,7 @@ export default class CreateNotificationsOnVoteCreated {
         type: "vote.created",
         payload: {
           title: "New vote",
-          body: `@${actor?.displayName ?? "Someone"} has upvoted your request \"${requestTitle ?? "request"}\"!`,
+          body: `liked your request "${requestTitle ?? "request"}"`,
           actor: {
             id: event.userId,
             username: actor?.username ?? null,

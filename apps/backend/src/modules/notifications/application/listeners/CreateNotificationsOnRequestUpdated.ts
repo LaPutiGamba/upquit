@@ -51,8 +51,8 @@ export default class CreateNotificationsOnRequestUpdated {
         title: "Request updated",
         body:
           changedFields.length === 1
-            ? `@${actor?.displayName ?? "Someone"} updated the ${changedFields[0]} of your request \"${request.title}\".`
-            : `@${actor?.displayName ?? "Someone"} updated ${changedFields.join(", ")} on your request \"${request.title}\".`,
+            ? `updated the ${changedFields[0]} of your request "${request.title}"`
+            : `updated ${changedFields.join(", ")} on your request "${request.title}"`,
         actor: {
           id: event.actorId,
           username: actor?.username ?? null,

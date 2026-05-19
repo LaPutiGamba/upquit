@@ -40,7 +40,7 @@ export default class CreateNotificationsOnRequestCreated {
         type: "request.created",
         payload: {
           title: "New request",
-          body: `@${actor?.displayName ?? "Someone"} created the request \"${event.title}\"!`,
+          body: `created the request "${event.title}"`,
           actor: {
             id: event.authorId,
             username: actor?.username ?? null,
