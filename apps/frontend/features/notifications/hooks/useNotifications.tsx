@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { toast } from "@/shared/components/ui/sonner";
-import { useRouter } from "@/localization/i18n/routing";
 import {
   getNotifications,
   getUnreadCount,
@@ -20,22 +19,11 @@ const STICKY_NOTIFICATION_TYPES = new Set([
   "request.status.changed"
 ]);
 
-interface NotificationPayload {
-  title?: string;
-  body?: string;
-  actor?: {
-    displayName?: string | null;
-    avatarUrl?: string | null;
-    username?: string | null;
-  };
-}
-
 export function useNotifications(boardId?: string) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unread, setUnread] = useState(0);
-  const router = useRouter();
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -76,46 +64,35 @@ export function useNotifications(boardId?: string) {
   }, [userId, boardId]);
 
   useChannel(userId ? `notification.${userId}` : null, (msg) => {
-    const payload = msg.payload as Record<string, unknown>;
+    const wrapper = msg.payload as { data?: NotificationItem; timestamp?: string };
+    const notification = wrapper?.data;
 
-    let body = "You have a new update.";
-    let typeVal = "";
-    let actorDisplayName: string | null = null;
-
-    if (payload && typeof payload === "object" && "payload" in payload) {
-      const nestedPayload = payload.payload as NotificationPayload | undefined;
-      body = nestedPayload?.body ?? body;
-      actorDisplayName = nestedPayload?.actor?.displayName ?? nestedPayload?.actor?.username ?? null;
-      typeVal = (payload.type as string) ?? "";
-    } else if (payload && typeof payload === "object") {
-      const direct = payload as NotificationPayload;
-      body = direct.body ?? body;
-      actorDisplayName = direct.actor?.displayName ?? direct.actor?.username ?? null;
+    if (!notification || typeof notification !== "object") {
+      return;
     }
+
+    const payload = (notification.payload as Record<string, unknown>) ?? {};
+
+    const body = (payload.body as string) ?? "You have a new update.";
+    const title = (payload.title as string) ?? notification.type ?? "";
+    const actor = (payload.actor as {
+      displayName?: string | null;
+      username?: string | null;
+      avatarUrl?: string | null;
+    })
+      ? (payload.actor as { displayName?: string | null; username?: string | null })
+      : undefined;
+    const actorDisplayName = actor?.displayName ?? actor?.username ?? null;
+    const typeVal = notification.type ?? "";
 
     const isSticky = STICKY_NOTIFICATION_TYPES.has(typeVal);
 
-    const personalizedMessage = actorDisplayName ? `${actorDisplayName} ${body}` : body;
+    const toastTitle = title || notification.type || "New notification";
+    const toastDescription = actorDisplayName ? `${actorDisplayName} ${body}` : body;
 
-    const nestedUrl =
-      typeof (payload.payload as Record<string, unknown>)?.url === "string"
-        ? (payload.payload as Record<string, unknown>)?.url
-        : undefined;
-    const directUrl = typeof payload.url === "string" ? payload.url : undefined;
-    const url = (nestedUrl ?? directUrl) as string | undefined;
-
-    toast.info(personalizedMessage, {
-      duration: isSticky ? Infinity : 4000,
-      action: url
-        ? {
-            label: "Open",
-            onClick: () => {
-              try {
-                router.push(url);
-              } catch {}
-            }
-          }
-        : undefined
+    toast.info(toastTitle, {
+      description: toastDescription,
+      duration: isSticky ? Infinity : 4000
     });
 
     void (async () => {
