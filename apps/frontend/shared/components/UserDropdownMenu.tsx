@@ -86,7 +86,7 @@ export function UserDropdownMenu({
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 min-w-56" side="left" align="start" sideOffset={4}>
+        <DropdownMenuContent className="w-56 min-w-56" side="bottom" align="center" sideOffset={4}>
           <DropdownMenuLabel>
             <div className="grid gap-0.5">
               <span className="truncate font-medium">{displayName}</span>
@@ -208,7 +208,7 @@ export function UserDropdownMenu({
           <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]/sidebar-wrapper:hidden" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 min-w-56" side="right" align="end" sideOffset={4}>
+      <DropdownMenuContent className="w-56 min-w-56" side="top" align="center" sideOffset={4}>
         <DropdownMenuLabel>
           <div className="grid gap-0.5">
             <span className="truncate font-medium">{displayName}</span>
