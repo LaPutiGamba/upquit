@@ -10,6 +10,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { DATE_TIME_FORMAT_OPTIONS } from "@/shared/lib/date";
 
 export function NotificationsPageContent() {
@@ -99,6 +100,15 @@ export function NotificationsPageContent() {
                   ? `/board/${notification.payload.boardSlug}/request/${notification.payload.requestId}`
                   : undefined);
 
+              const actor = notification.payload?.actor as
+                | {
+                    displayName?: string | null;
+                    avatarUrl?: string | null;
+                    username?: string | null;
+                  }
+                | undefined;
+              const actorDisplayName = actor?.displayName ?? actor?.username ?? "Someone";
+              const actorProfileUrl = actor?.username ? `/users/${actor.username}` : null;
               const content = (
                 <>
                   <div className="mb-1 flex items-center gap-2">
@@ -109,7 +119,34 @@ export function NotificationsPageContent() {
                       </Badge>
                     )}
                   </div>
-                  <p className="mb-2 text-sm text-muted-foreground">{notification.payload?.body ?? ""}</p>
+                  <p className="mb-2 text-sm text-muted-foreground flex items-center gap-2">
+                    {actorProfileUrl ? (
+                      <Link
+                        href={actorProfileUrl}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-2 hover:underline"
+                      >
+                        {actor?.avatarUrl ? (
+                          <Avatar className="size-6 shrink-0">
+                            <AvatarImage src={actor.avatarUrl} alt={actorDisplayName} />
+                            <AvatarFallback className="text-[10px] font-semibold">
+                              {actorDisplayName.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        ) : (
+                          <Avatar className="size-6 shrink-0">
+                            <AvatarFallback className="text-[10px] font-semibold">
+                              {actorDisplayName.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <span className="font-medium text-foreground">{actorDisplayName}</span>
+                      </Link>
+                    ) : (
+                      <span className="font-medium">{actorDisplayName}</span>
+                    )}
+                    {notification.payload?.body ?? ""}
+                  </p>
                   <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     {notification.boardId && (
                       <p>

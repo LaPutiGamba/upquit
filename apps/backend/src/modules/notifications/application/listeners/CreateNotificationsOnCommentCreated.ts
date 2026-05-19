@@ -45,7 +45,7 @@ export default class CreateNotificationsOnCommentCreated {
         type: "comment.created",
         payload: {
           title: "New comment",
-          body: `@${actor?.displayName ?? "Someone"} commented on your request \"${requestTitle}\".`,
+          body: `commented on your request "${requestTitle}"`,
           actor: {
             id: event.userId,
             username: actor?.username ?? null,
