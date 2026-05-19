@@ -45,7 +45,8 @@ export default class UpdateCommentCommandHandler {
     const response = mapCommentToResponse(
       updatedCommentWithAuthor.comment,
       updatedCommentWithAuthor.authorDisplayName,
-      updatedCommentWithAuthor.authorAvatarUrl
+      updatedCommentWithAuthor.authorAvatarUrl,
+      updatedCommentWithAuthor.authorUsername
     );
 
     this.realtimePublisher.publish(updatedComment.requestId.getValue(), "CommentUpdated", {

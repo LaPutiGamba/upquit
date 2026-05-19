@@ -10,8 +10,8 @@ export default class GetCommentsByRequestIdQueryHandler {
     const requestId = new Uuid(query.requestId);
     const comments = await this.commentRepository.findByRequestIdWithAuthor(requestId);
 
-    return comments.map(({ comment, authorDisplayName, authorAvatarUrl }) =>
-      mapCommentToResponse(comment, authorDisplayName, authorAvatarUrl)
+    return comments.map(({ comment, authorDisplayName, authorAvatarUrl, authorUsername }) =>
+      mapCommentToResponse(comment, authorDisplayName, authorAvatarUrl, authorUsername)
     );
   }
 }

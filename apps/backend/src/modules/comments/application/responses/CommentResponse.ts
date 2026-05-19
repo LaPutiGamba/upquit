@@ -6,6 +6,7 @@ export default interface CommentResponse {
   userId: string;
   authorDisplayName: string | null;
   authorAvatarUrl: string | null;
+  authorUsername: string | null;
   parentId: string | null;
   content: string;
   isAdminReply: boolean | null;
@@ -15,7 +16,8 @@ export default interface CommentResponse {
 export function mapCommentToResponse(
   comment: Comment,
   authorDisplayName: string | null = null,
-  authorAvatarUrl: string | null = null
+  authorAvatarUrl: string | null = null,
+  authorUsername: string | null = null
 ): CommentResponse {
   return {
     id: comment.id.getValue(),
@@ -23,6 +25,7 @@ export function mapCommentToResponse(
     userId: comment.userId.getValue(),
     authorDisplayName,
     authorAvatarUrl,
+    authorUsername,
     parentId: comment.parentId?.getValue() ?? null,
     content: comment.content,
     isAdminReply: comment.isAdminReply,

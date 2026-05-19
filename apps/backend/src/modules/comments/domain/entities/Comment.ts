@@ -26,4 +26,5 @@ export interface CommentWithAuthor {
   comment: Comment;
   authorDisplayName: string | null;
   authorAvatarUrl: string | null;
+  authorUsername: string | null;
 }

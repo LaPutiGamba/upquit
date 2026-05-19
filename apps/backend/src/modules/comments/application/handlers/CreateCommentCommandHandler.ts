@@ -36,7 +36,8 @@ export default class CreateCommentCommandHandler {
     const response = mapCommentToResponse(
       createdCommentWithAuthor.comment,
       createdCommentWithAuthor.authorDisplayName,
-      createdCommentWithAuthor.authorAvatarUrl
+      createdCommentWithAuthor.authorAvatarUrl,
+      createdCommentWithAuthor.authorUsername
     );
 
     this.realtimePublisher.publish(command.requestId, "CommentAdded", {

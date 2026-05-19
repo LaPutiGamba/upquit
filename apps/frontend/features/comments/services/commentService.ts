@@ -6,6 +6,7 @@ export default interface CommentResponse {
   userId: string;
   authorDisplayName: string | null;
   authorAvatarUrl: string | null;
+  authorUsername: string | null;
   parentId: string | null;
   content: string;
   isAdminReply: boolean | null;

@@ -22,7 +22,8 @@ export default class CommentDrizzleRepository implements CommentRepository {
       .select({
         comment: comments,
         authorDisplayName: users.displayName,
-        authorAvatarUrl: users.avatarUrl
+        authorAvatarUrl: users.avatarUrl,
+        authorUsername: users.username
       })
       .from(comments)
       .leftJoin(users, eq(comments.userId, users.id))
@@ -36,7 +37,8 @@ export default class CommentDrizzleRepository implements CommentRepository {
     return {
       comment: this.mapToDomainComment(row.comment),
       authorDisplayName: row.authorDisplayName,
-      authorAvatarUrl: row.authorAvatarUrl
+      authorAvatarUrl: row.authorAvatarUrl,
+      authorUsername: row.authorUsername
     };
   }
 
@@ -50,7 +52,8 @@ export default class CommentDrizzleRepository implements CommentRepository {
       .select({
         comment: comments,
         authorDisplayName: users.displayName,
-        authorAvatarUrl: users.avatarUrl
+        authorAvatarUrl: users.avatarUrl,
+        authorUsername: users.username
       })
       .from(comments)
       .leftJoin(users, eq(comments.userId, users.id))
@@ -59,7 +62,8 @@ export default class CommentDrizzleRepository implements CommentRepository {
     return rows.map((row) => ({
       comment: this.mapToDomainComment(row.comment),
       authorDisplayName: row.authorDisplayName,
-      authorAvatarUrl: row.authorAvatarUrl
+      authorAvatarUrl: row.authorAvatarUrl,
+      authorUsername: row.authorUsername
     }));
   }
 
