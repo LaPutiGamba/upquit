@@ -52,3 +52,5 @@ pgdata/
 redisdata/
 
 .agents/
+.codegraph/
+.cursor/

@@ -51,7 +51,7 @@ export function CommentSection({ requestId, boardId, isDialog = false }: Comment
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className={cn("shrink-0 border-b border-border/60 pb-5", isDialog ? "" : "bg-background/95")}>
+      <div className={cn("shrink-0 border-b border-border/60 pb-6", isDialog ? "" : "bg-background/95")}>
         <CommentForm requestId={requestId} boardId={boardId} onCommentAdded={addComment} isDialog={isDialog} />
       </div>
 

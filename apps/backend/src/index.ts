@@ -2,8 +2,6 @@ import "dotenv/config.js";
 
 import { createServer } from "http";
 import { app } from "./app.js";
-import WebSocketServer from "./shared/infrastructure/websocket/WebSocketServer.js";
-import { registerWebSocketServer } from "./shared/infrastructure/websocket/WebSocketServerRegistry.js";
 import pino from "pino";
 
 const logger = pino({ level: process.env.LOG_LEVEL || "info" });
@@ -12,8 +10,6 @@ const PORT = process.env.BACKEND_PORT || 3000;
 const startServer = () => {
   try {
     const httpServer = createServer(app);
-    const webSocketServer = new WebSocketServer(httpServer);
-    registerWebSocketServer(webSocketServer);
 
     httpServer.listen(PORT, () => {
       logger.info(`🚀 Backend server is running on http://localhost:${PORT}`);

@@ -1,27 +1,46 @@
-import { Server as HttpServer } from "http";
-import { RawData, WebSocketServer as WsServer, WebSocket } from "ws";
+import { RawData, WebSocket } from "ws";
 import { RealtimePayload } from "../../domain/contracts/RealtimePayload.js";
+
+type AliveWebSocket = WebSocket & {
+  isAlive: boolean;
+};
 
 type IncomingClientMessage = {
   type: "SUBSCRIBE" | "UNSUBSCRIBE";
   channel: string;
 };
 
-type OutgoingBroadcastMessage = {
+type OutgoingBroadcastMessage<T> = {
   channel: string;
   event: string;
-  payload: any;
+  payload: RealtimePayload<T>;
   timestamp: string;
 };
 
 export default class WebSocketServer {
-  private readonly wsServer: WsServer;
-  private readonly channelSubscriptions = new Map<string, Set<WebSocket>>();
-  private readonly clientSubscriptions = new Map<WebSocket, Set<string>>();
+  private readonly channelSubscriptions = new Map<string, Set<AliveWebSocket>>();
+  private readonly clientSubscriptions = new Map<AliveWebSocket, Set<string>>();
+  private heartbeatInterval: NodeJS.Timeout | null = null;
 
-  constructor(httpServer: HttpServer) {
-    this.wsServer = new WsServer({ server: httpServer });
-    this.wsServer.on("connection", (socket: WebSocket) => this.handleConnection(socket));
+  constructor(private readonly socket: AliveWebSocket) {
+    this.handleConnection(socket);
+    this.startHeartbeat();
+  }
+
+  private startHeartbeat(): void {
+    this.heartbeatInterval = setInterval(() => {
+      if (this.socket.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      if (!this.socket.isAlive) {
+        this.socket.terminate();
+        return;
+      }
+
+      this.socket.isAlive = false;
+      this.socket.ping();
+    }, 30000);
   }
 
   public broadcast<T = Record<string, unknown>>(channel: string, event: string, payload: RealtimePayload<T>): void {
@@ -30,7 +49,7 @@ export default class WebSocketServer {
       return;
     }
 
-    const message: OutgoingBroadcastMessage = {
+    const message: OutgoingBroadcastMessage<T> = {
       channel,
       event,
       payload,
@@ -46,7 +65,8 @@ export default class WebSocketServer {
     }
   }
 
-  private handleConnection(socket: WebSocket): void {
+  private handleConnection(socket: AliveWebSocket): void {
+    socket.isAlive = true;
     this.clientSubscriptions.set(socket, new Set());
 
     socket.on("message", (rawMessage: RawData) => {
@@ -60,9 +80,13 @@ export default class WebSocketServer {
     socket.on("error", () => {
       this.removeClient(socket);
     });
+
+    socket.on("pong", () => {
+      socket.isAlive = true;
+    });
   }
 
-  private handleClientMessage(socket: WebSocket, rawMessage: string): void {
+  private handleClientMessage(socket: AliveWebSocket, rawMessage: string): void {
     let message: Partial<IncomingClientMessage>;
 
     try {
@@ -85,7 +109,7 @@ export default class WebSocketServer {
     }
   }
 
-  private subscribe(socket: WebSocket, channel: string): void {
+  private subscribe(socket: AliveWebSocket, channel: string): void {
     const subscribedChannels = this.clientSubscriptions.get(socket);
     if (!subscribedChannels) {
       return;
@@ -93,12 +117,12 @@ export default class WebSocketServer {
 
     subscribedChannels.add(channel);
 
-    const channelClients = this.channelSubscriptions.get(channel) ?? new Set<WebSocket>();
+    const channelClients = this.channelSubscriptions.get(channel) ?? new Set<AliveWebSocket>();
     channelClients.add(socket);
     this.channelSubscriptions.set(channel, channelClients);
   }
 
-  private unsubscribe(socket: WebSocket, channel: string): void {
+  private unsubscribe(socket: AliveWebSocket, channel: string): void {
     const subscribedChannels = this.clientSubscriptions.get(socket);
     if (subscribedChannels) {
       subscribedChannels.delete(channel);
@@ -116,7 +140,12 @@ export default class WebSocketServer {
     }
   }
 
-  private removeClient(socket: WebSocket): void {
+  private removeClient(socket: AliveWebSocket): void {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+
     const subscribedChannels = this.clientSubscriptions.get(socket);
     if (!subscribedChannels) {
       return;
@@ -152,5 +181,12 @@ export default class WebSocketServer {
     }
 
     return rawData.toString("utf-8");
+  }
+
+  public destroy(): void {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
   }
 }

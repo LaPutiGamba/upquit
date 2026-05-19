@@ -100,7 +100,7 @@ export function CommentForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-      <div className="relative w-full">
+      <div className="relative w-full px-2 py-1">
         <Textarea
           ref={textareaRef}
           placeholder={parentId ? "Write a reply..." : "Add a comment..."}
@@ -120,7 +120,7 @@ export function CommentForm({
           type="submit"
           disabled={isPending || !content.trim()}
           size="icon-sm"
-          className={cn("absolute right-1.5 top-1.5 transition-all shadow-none", !content.trim() && "opacity-50")}
+          className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-all shadow-none", !content.trim() && "opacity-50")}
         >
           <Send className="size-4" />
           <span className="sr-only">{parentId ? "Send reply" : "Send comment"}</span>

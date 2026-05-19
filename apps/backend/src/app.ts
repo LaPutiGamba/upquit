@@ -1,4 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
+import expressWs, { Application } from "express-ws";
+import { WebSocket } from "ws";
 
 import "./shared/infrastructure/dependencies.js";
 
@@ -18,10 +20,16 @@ import votesRouter from "./modules/votes/infrastructure/votesRoutes.js";
 import notificationsRouter from "./modules/notifications/infrastructure/notificationsRoutes.js";
 import DomainException from "./shared/domain/exceptions/DomainException.js";
 import ApplicationException from "./shared/application/exceptions/ApplicationException.js";
+import { registerWebSocketConnection } from "./shared/infrastructure/websocket/WebSocketServerRegistry.js";
 
 const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 
 export const app = express();
+
+const appWs = expressWs(app);
+appWs.app.ws("/ws", (ws: WebSocket, req: Request) => {
+  registerWebSocketConnection(ws);
+});
 
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
