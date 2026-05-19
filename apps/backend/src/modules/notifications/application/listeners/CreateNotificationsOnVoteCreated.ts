@@ -20,21 +20,17 @@ export default class CreateNotificationsOnVoteCreated {
     const board = await this.boardRepository.findById(new Uuid(event.boardId));
     if (!board) return;
     const request = await this.requestRepository.findById(new Uuid(event.requestId));
+    if (!request) return;
     const actor = await this.userRepository.findById(new Uuid(event.userId));
 
-    const requestTitle = request ? request.title : undefined;
+    const requestTitle = request.title;
     const boardSlug = board.slug.getValue();
 
-    const members = await this.boardRepository.findMembersByBoardId(new Uuid(event.boardId));
-    const recipients = new Set<string>([board.owner.id.getValue()]);
+    const recipients = new Set<string>();
 
-    for (const member of members) {
-      if (member.role === "admin") {
-        recipients.add(member.userId);
-      }
+    if (request.author.id.getValue() !== event.userId) {
+      recipients.add(request.author.id.getValue());
     }
-
-    recipients.delete(event.userId);
 
     for (const recipientId of recipients) {
       const notification = new Notification({

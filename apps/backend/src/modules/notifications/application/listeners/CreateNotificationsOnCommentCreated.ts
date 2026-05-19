@@ -23,20 +23,16 @@ export default class CreateNotificationsOnCommentCreated {
     const board = await this.boardRepository.findById(new Uuid(boardId));
     if (!board) return;
 
-    const members = await this.boardRepository.findMembersByBoardId(new Uuid(boardId));
-    const recipients = new Set<string>([board.owner.id.getValue(), request.author.id.getValue()]);
-
-    for (const member of members) {
-      if (member.role === "admin") {
-        recipients.add(member.userId);
-      }
-    }
-
-    recipients.delete(event.userId);
-
     const actor = await this.userRepository.findById(new Uuid(event.userId));
     const requestTitle = request.title;
     const boardSlug = board.slug.getValue();
+
+    const recipients = new Set<string>();
+
+    if (request.author.id.getValue() !== event.userId) {
+      recipients.add(request.author.id.getValue());
+    }
+
     for (const recipientId of recipients) {
       const notification = new Notification({
         id: crypto.randomUUID(),
