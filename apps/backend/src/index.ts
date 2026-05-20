@@ -1,18 +1,15 @@
 import "dotenv/config.js";
 
-import { createServer } from "http";
 import { app } from "./app.js";
 import pino from "pino";
 
 const logger = pino({ level: process.env.LOG_LEVEL || "info" });
-const PORT = process.env.BACKEND_PORT || 3000;
+const PORT = process.env.PORT || process.env.BACKEND_PORT || 3000;
 
 const startServer = () => {
   try {
-    const httpServer = createServer(app);
-
-    httpServer.listen(PORT, () => {
-      logger.info(`🚀 Backend server is running on http://localhost:${PORT}`);
+    const httpServer = app.listen(PORT, () => {
+      logger.info(`🚀 Backend server is running on port ${PORT}`);
     });
 
     const shutdown = (signal: string) => {
