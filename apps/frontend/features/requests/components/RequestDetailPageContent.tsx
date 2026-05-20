@@ -35,6 +35,8 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { RequestActivityTabs } from "@/features/requests/components/RequestActivityTabs";
+import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
+import { unwrapBroadcastPayload } from "@/shared/lib/realtime";
 
 const sectionLabelClassName = "text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground";
 
@@ -47,15 +49,50 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
   const t = useTranslations("RequestDetailPage");
   const { user } = useAuth();
   const { board, request, loading, notFound } = useRequestDetailPage(slug, id);
-  const [editableRequest, setEditableRequest] = useState<RequestResponse | null>(null);
+  const [optimisticRequest, setOptimisticRequest] = useState<RequestResponse | null>(null);
   const [changelogRefreshKey, setChangelogRefreshKey] = useState(0);
   const [canManageBoard, setCanManageBoard] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    setEditableRequest(request);
-  }, [request]);
+  const editableRequest = useMemo(() => {
+    if (!request) {
+      return optimisticRequest;
+    }
+
+    if (!optimisticRequest) {
+      return request;
+    }
+
+    return optimisticRequest.id === request.id ? optimisticRequest : request;
+  }, [optimisticRequest, request]);
+
+  type RequestUpdatedPayload = {
+    boardId: string;
+    request: RequestResponse;
+  };
+
+  useChannel<RequestUpdatedPayload>(
+    board ? `request.${board.id}` : null,
+    (message: IncomingBroadcastMessage<RequestUpdatedPayload>) => {
+      if (message.event !== "RequestUpdated") {
+        return;
+      }
+
+      if (!editableRequest) {
+        return;
+      }
+
+      const payload = unwrapBroadcastPayload(message.payload);
+
+      if (payload.boardId !== board?.id || payload.request.id !== editableRequest.id) {
+        return;
+      }
+
+      setOptimisticRequest(payload.request);
+      setChangelogRefreshKey((currentValue) => currentValue + 1);
+    }
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -125,7 +162,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     const previousRequest = editableRequest;
     const nextRequest = { ...editableRequest, ...payload };
 
-    setEditableRequest(nextRequest);
+    setOptimisticRequest(nextRequest);
 
     try {
       const updatedRequest = await requestService.updateRequest(editableRequest.id, board.id, payload);
@@ -137,13 +174,13 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
         updatedRequest.categoryIds === undefined &&
         (!updatedRequest.categories || updatedRequest.categories.length === 0);
 
-      setEditableRequest({
+      setOptimisticRequest({
         ...updatedRequest,
         categoryIds: shouldKeepOptimisticCategoryIds ? nextCategoryIds : updatedCategoryIds
       });
       setChangelogRefreshKey((currentValue) => currentValue + 1);
     } catch {
-      setEditableRequest(previousRequest);
+      setOptimisticRequest(previousRequest);
       toast.error("Could not save request changes");
     }
   };
@@ -241,6 +278,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
                 value={categoryIds}
                 onChange={(nextValues) => handleUpdateRequest({ categoryIds: nextValues })}
                 disabled={!canEdit}
+                canCreateCategory={Boolean(user && (board.ownerId === user.id || canManageBoard))}
               />
             </div>
             <RequestMetadataRow

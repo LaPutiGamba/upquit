@@ -325,7 +325,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
 
   if (notFoundRef.current) {
     return (
-      <main className="min-h-svh bg-background">
+      <main className="h-full bg-background">
         <div className="mx-auto flex min-h-svh w-full max-w-6xl items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-md rounded-xl border border-dashed bg-card p-8 text-center">
             <p className="text-muted-foreground">{t("notFound")}</p>
@@ -337,7 +337,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
 
   if (forbiddenRef.current) {
     return (
-      <main className="min-h-svh bg-background">
+      <main className="h-full bg-background">
         <div className="mx-auto flex min-h-svh w-full max-w-6xl items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-md rounded-xl border border-dashed bg-card p-8 text-center">
             <p className="text-muted-foreground">{t("forbidden")}</p>
@@ -348,7 +348,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
   }
 
   return (
-    <main className="min-h-svh bg-background">
+    <main className="h-full bg-background">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 p-6 pb-10 md:p-8 md:pb-12">
         <section className="flex flex-wrap items-start justify-between gap-3 border-b pb-4">
           <div>

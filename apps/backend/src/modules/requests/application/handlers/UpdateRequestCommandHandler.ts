@@ -61,6 +61,7 @@ export default class UpdateRequestCommandHandler {
 
     let removedCategoryNames: { id: string; name: string }[] = [];
     let removedCategoryIds: string[] = [];
+    let deletedCategoryIds: string[] = [];
     if (command.categoryIds !== undefined) {
       const oldCategoryIds = request.categoryIds;
       const newCategoryIds = command.categoryIds;
@@ -73,7 +74,7 @@ export default class UpdateRequestCommandHandler {
       await this.requestRepository.setRequestCategories(requestId, newCategoryIds);
 
       if (removedCategoryIds.length > 0) {
-        await this.requestRepository.removeUnusedCategories(removedCategoryIds);
+        deletedCategoryIds = await this.requestRepository.removeUnusedCategories(removedCategoryIds);
       }
     }
 
@@ -121,6 +122,16 @@ export default class UpdateRequestCommandHandler {
       },
       timestamp: new Date().toISOString()
     });
+
+    if (deletedCategoryIds.length > 0) {
+      this.realtimePublisher.publish(updatedRequest.boardId.getValue(), "CategoryDeleted", {
+        data: {
+          boardId: updatedRequest.boardId.getValue(),
+          categoryIds: deletedCategoryIds
+        },
+        timestamp: new Date().toISOString()
+      });
+    }
 
     return response;
   }

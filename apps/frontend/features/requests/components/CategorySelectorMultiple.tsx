@@ -19,6 +19,7 @@ import {
 import { cn } from "@/shared/lib/utils";
 import { getAccessToken } from "@/shared/lib/apiClient";
 import { toast } from "@/shared/components/ui/sonner";
+import { unwrapBroadcastPayload } from "@/shared/lib/realtime";
 
 interface CategorySelectorMultipleProps {
   boardId: string;
@@ -26,6 +27,7 @@ interface CategorySelectorMultipleProps {
   onChange: (categoryIds: string[]) => void | Promise<void>;
   placeholder?: string;
   disabled?: boolean;
+  canCreateCategory?: boolean;
 }
 
 function generateColorFromString(str: string): string {
@@ -45,7 +47,8 @@ export function CategorySelectorMultiple({
   value,
   onChange,
   placeholder = "Add categories...",
-  disabled = false
+  disabled = false,
+  canCreateCategory = false
 }: CategorySelectorMultipleProps) {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -112,6 +115,7 @@ export function CategorySelectorMultiple({
 
   const handleCreateCategory = async () => {
     if (!searchString.trim() || hasExactMatch) return;
+    if (!canCreateCategory) return;
 
     setIsCreatingCategory(true);
     try {
@@ -146,7 +150,7 @@ export function CategorySelectorMultiple({
       return;
     }
 
-    if (!searchString.trim() || hasExactMatch || isCreatingCategory) {
+    if (!searchString.trim() || hasExactMatch || isCreatingCategory || !canCreateCategory) {
       return;
     }
 
@@ -173,7 +177,7 @@ export function CategorySelectorMultiple({
     }
   };
 
-  const canCreateCategory = Boolean(searchString.trim()) && !hasExactMatch;
+  const canShowCreateCategory = canCreateCategory && Boolean(searchString.trim()) && !hasExactMatch;
 
   return (
     <Combobox
@@ -250,7 +254,7 @@ export function CategorySelectorMultiple({
                   );
                 })}
 
-                {canCreateCategory && (
+                {canShowCreateCategory && (
                   <>
                     <div className="my-1 h-px bg-border" />
                     <ComboboxItem

@@ -7,6 +7,7 @@ import AddBoardCategoryCommandHandler from "../../application/handlers/AddBoardC
 import BoardNotFoundException from "../../application/exceptions/BoardNotFoundException.js";
 import InvalidUuidException from "../../../../shared/domain/exceptions/InvalidUuidException.js";
 import WebSocketRealtimePublisher from "../../../../shared/infrastructure/services/WebSocketRealtimePublisher.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default async function AddBoardCategoryPostController(req: Request, res: Response) {
   const commandHandler = new AddBoardCategoryCommandHandler(
@@ -19,7 +20,7 @@ export default async function AddBoardCategoryPostController(req: Request, res: 
       return res.status(401).send({ error: "UNAUTHORIZED", message: "User not authenticated" });
     }
 
-    const command = new AddBoardCategoryCommand(req.params.id as string, req.body.name);
+    const command = new AddBoardCategoryCommand(req.params.id as string, req.body.name, req.userId);
 
     const response = await commandHandler.execute(command);
     return res.status(201).json(response);
@@ -33,6 +34,12 @@ export default async function AddBoardCategoryPostController(req: Request, res: 
     if (ex instanceof InvalidUuidException) {
       return res.status(400).send({
         error: "INVALID_BOARD_ID",
+        message: ex.message
+      });
+    }
+    if (ex instanceof UnauthorizedActionException) {
+      return res.status(403).send({
+        error: "FORBIDDEN",
         message: ex.message
       });
     }

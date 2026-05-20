@@ -316,9 +316,9 @@ export default class RequestDrizzleRepository implements RequestRepository {
     return rows.map((row) => row.categoryId);
   }
 
-  public async removeUnusedCategories(categoryIds: string[]): Promise<void> {
+  public async removeUnusedCategories(categoryIds: string[]): Promise<string[]> {
     if (categoryIds.length === 0) {
-      return;
+      return [];
     }
 
     const unusedCategories = await this.db
@@ -339,7 +339,10 @@ export default class RequestDrizzleRepository implements RequestRepository {
     if (unusedCategories.length > 0) {
       const unusedCategoryIds = unusedCategories.map((cat) => cat.id);
       await this.db.delete(categories).where(inArray(categories.id, unusedCategoryIds));
+      return unusedCategoryIds;
     }
+
+    return [];
   }
 
   // =========================================================================

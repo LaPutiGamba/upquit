@@ -24,7 +24,7 @@ export default interface RequestRepository {
   // Request Categories Operations
   setRequestCategories(requestId: Uuid, categoryIds: string[]): Promise<void>;
   getRequestCategoryIds(requestId: Uuid): Promise<string[]>;
-  removeUnusedCategories(categoryIds: string[]): Promise<void>;
+  removeUnusedCategories(categoryIds: string[]): Promise<string[]>;
 
   // Subscription Operations
   addSubscription(subscription: Subscription): Promise<void>;

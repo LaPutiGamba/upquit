@@ -57,7 +57,7 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
 
   if (notFound || !board) {
     return (
-      <main className="min-h-svh bg-background">
+      <main className="h-full bg-background">
         <div className="mx-auto flex min-h-svh w-full max-w-6xl items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-md rounded-xl border border-dashed bg-card p-8 text-center">
             <p className="text-muted-foreground">Board not found.</p>
@@ -68,7 +68,7 @@ export function BoardPageContent({ slug }: BoardPageContentProps) {
   }
 
   return (
-    <main className="min-h-svh bg-background">
+    <main className="h-full bg-background">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6 pb-10 md:p-8 md:pb-12">
         <section>
           <BoardHeader board={board} canManage={canManageBoard} manageLabel={t("actions.editSettings")} />

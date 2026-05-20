@@ -5,6 +5,7 @@ import RealtimePublisher from "../../../../shared/domain/contracts/RealtimePubli
 import AddBoardCategoryCommand from "../commands/AddBoardCategoryCommand.js";
 import BoardNotFoundException from "../exceptions/BoardNotFoundException.js";
 import CategoryResponse, { mapCategoryToResponse } from "../responses/CategoryResponse.js";
+import UnauthorizedActionException from "../../../../shared/application/exceptions/UnauthorizedActionException.js";
 
 export default class AddBoardCategoryCommandHandler {
   constructor(
@@ -15,9 +16,20 @@ export default class AddBoardCategoryCommandHandler {
   async execute(command: AddBoardCategoryCommand): Promise<CategoryResponse> {
     const boardId = new Uuid(command.boardId);
     const board = await this.boardRepository.findById(boardId);
+    const requesterUserId = new Uuid(command.requesterUserId);
 
     if (!board) {
       throw new BoardNotFoundException(command.boardId);
+    }
+
+    const requesterIsBoardOwner = board.owner.id.getValue() === requesterUserId.getValue();
+
+    if (!requesterIsBoardOwner) {
+      const requesterMembership = await this.boardRepository.findMemberByBoardIdAndUserId(boardId, requesterUserId);
+
+      if (requesterMembership?.role !== "admin") {
+        throw new UnauthorizedActionException("Only board owners or admins can manage categories");
+      }
     }
 
     const category = new Category(crypto.randomUUID(), command.boardId, command.name, new Date());

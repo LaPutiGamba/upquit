@@ -53,6 +53,7 @@ interface CreateRequestFormProps {
   boardId: string;
   giveToGetEnabled?: boolean | null;
   canManageStatus?: boolean;
+  canCreateCategory?: boolean;
   onRequestCreated?: (request: RequestResponse) => void | Promise<void>;
 }
 
@@ -62,6 +63,7 @@ export function CreateRequestForm({
   boardId,
   giveToGetEnabled,
   canManageStatus = false,
+  canCreateCategory = false,
   onRequestCreated
 }: CreateRequestFormProps) {
   const router = useRouter();
@@ -227,6 +229,7 @@ export function CreateRequestForm({
             value={categoryIds}
             onChange={setCategoryIds}
             disabled={isSubmitting}
+            canCreateCategory={canCreateCategory}
           />
         </div>
 
