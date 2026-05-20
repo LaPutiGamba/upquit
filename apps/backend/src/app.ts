@@ -43,7 +43,7 @@ app.use(
         Boolean
       );
 
-      if (allowedOrigins.includes(origin!) || (process.env.NODE_ENV === "development" && !origin)) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"), false);
