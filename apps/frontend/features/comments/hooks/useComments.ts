@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
+import { unwrapBroadcastPayload } from "@/shared/lib/realtime";
 import { commentService, type default as CommentResponse } from "../services/commentService";
 
 type UseCommentsResult = {
@@ -40,8 +41,7 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
     });
   }, []);
 
-  const fetchComments = useCallback(async () => {
-    setIsLoading(true);
+  const loadComments = useCallback(async () => {
     try {
       const fetchedComments = await commentService.getCommentsByRequestId(requestId, boardId);
       setComments(fetchedComments);
@@ -53,9 +53,20 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
     }
   }, [requestId, boardId]);
 
+  const refetchComments = useCallback(async () => {
+    setIsLoading(true);
+    await loadComments();
+  }, [loadComments]);
+
   useEffect(() => {
-    void fetchComments();
-  }, [fetchComments]);
+    const timeoutId = window.setTimeout(() => {
+      void loadComments();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [loadComments]);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") return;
@@ -69,7 +80,7 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
           return;
         }
 
-        void fetchComments();
+        void loadComments();
       }
     };
 
@@ -78,11 +89,11 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
       channel.removeEventListener("message", handleSyncMessage);
       channel.close();
     };
-  }, [addComment, fetchComments, syncChannelName]);
+  }, [addComment, loadComments, syncChannelName]);
 
   const handleCommentsChannelMessage = useCallback(
     (message: IncomingBroadcastMessage<CommentRealtimePayload>) => {
-      const payload = message.payload;
+      const payload = unwrapBroadcastPayload(message.payload);
 
       if (message.event === "CommentAdded") {
         if ("comment" in payload) {
@@ -112,7 +123,7 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
   return {
     comments,
     isLoading,
-    refetch: fetchComments,
+    refetch: refetchComments,
     addComment
   };
 }
