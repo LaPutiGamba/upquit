@@ -45,7 +45,8 @@ export default async function RequestPasswordResetPostController(
       throw new InvalidEmailException(String(req.body.email));
     }
 
-    const query = new RequestPasswordResetQuery(req.body.email);
+    const locale = typeof req.query.locale === "string" ? req.query.locale : "en";
+    const query = new RequestPasswordResetQuery(req.body.email, locale);
     const result = await queryHandler.execute(query);
 
     return res.status(200).json(result);

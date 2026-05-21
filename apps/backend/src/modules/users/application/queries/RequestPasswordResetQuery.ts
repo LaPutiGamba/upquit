@@ -1,3 +1,6 @@
 export default class RequestPasswordResetQuery {
-  constructor(readonly email: string) {}
+  constructor(
+    readonly email: string,
+    readonly locale: string = "en",
+  ) {}
 }

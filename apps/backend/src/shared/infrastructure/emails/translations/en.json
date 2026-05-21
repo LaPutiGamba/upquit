@@ -1,0 +1,17 @@
+{
+  "welcome": {
+    "preview": "Welcome to {company}, {userName}! Please verify your email.",
+    "heading": "Welcome to {company}, {userName}!",
+    "body": "We're so glad to have you on board. Please verify your email address to get started.",
+    "cta": "Verify Email",
+    "footer": "If you didn't create this account, you can safely ignore this email."
+  },
+  "passwordReset": {
+    "preview": "Reset your {company} password",
+    "heading": "Reset Your Password",
+    "body": "We received a request to reset your {company} password. Click the button below to set a new one.",
+    "cta": "Reset Password",
+    "expiry": "This link expires in 15 minutes.",
+    "footer": "If you didn't request a password reset, you can safely ignore this email."
+  }
+}

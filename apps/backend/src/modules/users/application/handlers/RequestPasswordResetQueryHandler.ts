@@ -26,7 +26,7 @@ export default class RequestPasswordResetQueryHandler {
 
     const resetUrl = `${process.env.FRONTEND_URL!}/reset-password?token=${resetToken}`;
 
-    await this.emailSender.sendPasswordResetEmail(user.email.getValue(), resetUrl);
+    await this.emailSender.sendPasswordResetEmail(user.email.getValue(), resetUrl, query.locale);
 
     return { message: "If an account exists with this email, a password reset link has been sent." };
   }
