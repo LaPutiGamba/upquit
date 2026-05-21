@@ -1,6 +1,10 @@
-import en from "./en.json" with { type: "json" };
-import es from "./es.json" with { type: "json" };
-import ca from "./ca.json" with { type: "json" };
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+
+const en = require("./en.json") as Record<string, Record<string, string>>;
+const es = require("./es.json") as Record<string, Record<string, string>>;
+const ca = require("./ca.json") as Record<string, Record<string, string>>;
 
 const translations: Record<string, Record<string, Record<string, string>>> = { en, es, ca };
 
