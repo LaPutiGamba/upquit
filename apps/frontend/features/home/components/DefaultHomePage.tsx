@@ -73,6 +73,7 @@ export function DefaultHomePage() {
                 width={100}
                 height={100}
                 className="rounded-xl"
+                priority
               />
               <div className="flex flex-col leading-tight">
                 <span className={homeDisplay.className + " text-lg font-semibold"}>UpQuit</span>

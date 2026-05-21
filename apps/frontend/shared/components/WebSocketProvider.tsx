@@ -49,10 +49,13 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
   const subscribersRef = useRef<Map<string, Set<SubscriberCallback>>>(new Map());
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasConnectedOnceRef = useRef(false);
+  const isUnmountingRef = useRef(false);
 
   const [isConnected, setIsConnected] = useState(false);
 
   const connect = useCallback(function connect() {
+    if (isUnmountingRef.current) return;
+
     if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
       return;
     }
@@ -63,14 +66,18 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (isUnmountingRef.current) return;
         hasConnectedOnceRef.current = true;
         setIsConnected(true);
         subscribersRef.current.forEach((_, channel) => {
-          ws.send(JSON.stringify({ type: "SUBSCRIBE", channel }));
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "SUBSCRIBE", channel }));
+          }
         });
       };
 
       ws.onmessage = (event) => {
+        if (isUnmountingRef.current) return;
         try {
           const data = JSON.parse(event.data) as IncomingBroadcastMessage<unknown>;
           const callbacks = subscribersRef.current.get(data.channel);
@@ -82,41 +89,84 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         }
       };
 
-      ws.onclose = () => {
+      ws.onclose = (event) => {
         setIsConnected(false);
 
+        if (isUnmountingRef.current) return;
+
         if (!hasConnectedOnceRef.current) {
+          return;
+        }
+
+        if (event.wasClean) {
           return;
         }
 
         reconnectTimeoutRef.current = setTimeout(connect, 3000);
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = () => {
+        if (isUnmountingRef.current) return;
         setIsConnected(false);
-
-        if (hasConnectedOnceRef.current) {
-          console.warn(`WebSocket connection failed for ${wsEndpoint}, falling back to graceful degradation:`, error);
-        }
       };
     } catch (error) {
-      console.warn("Failed to create WebSocket connection:", error);
+      if (!isUnmountingRef.current) {
+        console.warn("Failed to create WebSocket connection:", error);
+      }
       setIsConnected(false);
     }
   }, []);
 
   useEffect(() => {
-    connect();
+    isUnmountingRef.current = false;
+    
+    const shouldConnect = () => {
+      return !isUnmountingRef.current && document.visibilityState === "visible";
+    };
+    
+    const connectTimer = setTimeout(() => {
+      if (shouldConnect()) {
+        connect();
+      }
+    }, 200);
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && !isUnmountingRef.current && !wsRef.current) {
+        connect();
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    
     return () => {
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
-        wsRef.current.onclose = null;
-        wsRef.current.close();
+      isUnmountingRef.current = true;
+      clearTimeout(connectTimer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      const ws = wsRef.current;
+      if (ws) {
+        wsRef.current = null;
+        ws.onopen = null;
+        ws.onmessage = null;
+        ws.onclose = null;
+        ws.onerror = null;
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+          try {
+            ws.close(1000, "Navigation");
+          } catch {
+            // Ignore errors during cleanup
+          }
+        }
       }
     };
   }, [connect]);
 
   const subscribe = <T,>(channel: string, callback: (data: IncomingBroadcastMessage<T>) => void) => {
+    if (isUnmountingRef.current) return;
+
     if (!subscribersRef.current.has(channel)) {
       subscribersRef.current.set(channel, new Set());
 
@@ -128,7 +178,9 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         wsRef.current.addEventListener(
           "open",
           () => {
-            wsRef.current?.send(subscribeMessage);
+            if (wsRef.current?.readyState === WebSocket.OPEN) {
+              wsRef.current.send(subscribeMessage);
+            }
           },
           { once: true }
         );
