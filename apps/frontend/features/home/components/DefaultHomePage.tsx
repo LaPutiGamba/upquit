@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Manrope, Sora } from "next/font/google";
 import type { CSSProperties } from "react";
 import { useTranslations } from "next-intl";
@@ -66,9 +67,13 @@ export function DefaultHomePage() {
             style={{ "--reveal-delay": "60ms" } as CSSProperties}
           >
             <div className="flex items-center gap-3">
-              <span className="inline-flex size-10 items-center justify-center rounded-xl bg-secondary text-sm font-semibold text-foreground ring-1 ring-border">
-                UQ
-              </span>
+              <Image
+                src="/upquit-logo.webp"
+                alt="UpQuit"
+                width={100}
+                height={100}
+                className="rounded-xl"
+              />
               <div className="flex flex-col leading-tight">
                 <span className={homeDisplay.className + " text-lg font-semibold"}>UpQuit</span>
                 <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{t("header.kicker")}</span>

@@ -12,7 +12,7 @@ import {
 import { Link } from "@/localization/i18n/routing";
 import { useRouter, usePathname } from "@/localization/i18n/routing";
 import { useLocale } from "next-intl";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/shared/components/ThemeProvider";
 import { useTransition } from "react";
 
 import {

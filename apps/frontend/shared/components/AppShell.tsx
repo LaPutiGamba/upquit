@@ -261,7 +261,6 @@ export function AppShell({ children }: AppShellProps) {
         <div className="flex min-h-svh flex-col">
           <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border/65 bg-background/84 px-4 backdrop-blur-md">
             <SidebarTrigger className="-ml-1" />
-            <p className="text-sm font-semibold tracking-tight md:hidden">UpQuit</p>
             <div className="ml-auto flex items-center gap-2">
               <NotificationBell />
             </div>
