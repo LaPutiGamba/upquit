@@ -9,7 +9,6 @@
     "title": "Tus tableros",
     "subtitle": "Gestiona tus tableros personales y los tableros a los que te has unido.",
     "discoverBoards": "Descubrir tableros",
-    "importBoard": "Importar tablero",
     "createBoard": "Crear tablero",
     "dialogTitle": "Crear un nuevo tablero",
     "dialogDescription": "Responde estas preguntas rápidas para configurar tu espacio",
@@ -64,7 +63,6 @@
       "slugPattern": "Usa solo minúsculas, números y guiones"
     },
     "errors": {
-      "unauthenticated": "No estás autenticado",
       "createFailed": "Error al crear el tablero"
     },
     "success": {
@@ -95,8 +93,6 @@
       "password": "La contraseña es obligatoria"
     },
     "errors": {
-      "readToken": "No se pudo leer el token de autenticación",
-      "invalidToken": "Token de autenticación inválido",
       "invalidCredentialsOrRegister": "No encontramos una cuenta con esos datos. Prueba a registrarte primero",
       "generic": "No se pudo iniciar sesión ahora. Inténtalo de nuevo"
     },
@@ -236,20 +232,14 @@
     },
     "navigation": {
       "dashboard": "Dashboard",
-      "overview": "Resumen",
-      "boards": "Tableros",
       "requests": "Solicitudes",
-      "team": "Equipo",
-      "comments": "Comentarios",
-      "reports": "Informes",
-      "comingSoon": "Próximamente"
+      "team": "Equipo"
     },
     "user": {
       "name": "Usuario del workspace",
       "role": "Product owner"
     },
     "actions": {
-      "signOut": "Salir",
       "logOut": "Cerrar sesión",
       "dashboard": "Dashboard",
       "settings": "Configuración",
@@ -295,7 +285,6 @@
     "featureRequestsTitle": "Solicitudes de funcionalidades",
     "emptyRequests": "Aun no hay solicitudes. ¡Se el primero en sugerir algo!",
     "actions": {
-      "goToDashboard": "Ir al dashboard",
       "editSettings": "Editar configuración"
     }
   },

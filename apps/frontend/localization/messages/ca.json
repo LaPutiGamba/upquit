@@ -9,7 +9,6 @@
     "title": "Els teus taulers",
     "subtitle": "Gestiona els teus taulers personals i els taulers als quals t'has unit.",
     "discoverBoards": "Descobrir taulers",
-    "importBoard": "Importar tauler",
     "createBoard": "Crear tauler",
     "dialogTitle": "Crea un tauler nou",
     "dialogDescription": "Respon aquestes preguntes ràpides per configurar el teu espai",
@@ -64,7 +63,6 @@
       "slugPattern": "Utilitza nomes minúscules, números i guions"
     },
     "errors": {
-      "unauthenticated": "No estas autenticat",
       "createFailed": "Error en crear el tauler"
     },
     "success": {
@@ -95,8 +93,6 @@
       "password": "La contrasenya és obligatòria"
     },
     "errors": {
-      "readToken": "No s'ha pogut llegir el token d'autenticació",
-      "invalidToken": "Token d'autenticació invalid",
       "invalidCredentialsOrRegister": "No hem trobat cap compte amb aquestes dades. Prova de registrar-te primer",
       "generic": "No s'ha pogut iniciar sessió ara. Torna-ho a provar"
     },
@@ -236,20 +232,14 @@
     },
     "navigation": {
       "dashboard": "Dashboard",
-      "overview": "Vista general",
-      "boards": "Taulers",
       "requests": "Sol-licituds",
-      "team": "Equip",
-      "comments": "Comentaris",
-      "reports": "Informes",
-      "comingSoon": "Properament"
+      "team": "Equip"
     },
     "user": {
       "name": "Usuari del workspace",
       "role": "Product owner"
     },
     "actions": {
-      "signOut": "Sortir",
       "logOut": "Tancar sessió",
       "dashboard": "Dashboard",
       "settings": "Configuració",
@@ -295,7 +285,6 @@
     "featureRequestsTitle": "Solicituds de funcionalitats",
     "emptyRequests": "Encara no n'hi han sol·licituds. Sigues el primer a suggerir-ne una!",
     "actions": {
-      "goToDashboard": "Anar al dashboard",
       "editSettings": "Editar configuració"
     }
   },

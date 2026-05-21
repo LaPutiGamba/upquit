@@ -63,7 +63,6 @@
       "slugPattern": "Use lowercase letters, numbers, and hyphens only."
     },
     "errors": {
-      "unauthenticated": "You are not authenticated.",
       "createFailed": "Error creating the board."
     },
     "success": {
@@ -94,8 +93,6 @@
       "password": "Password is required."
     },
     "errors": {
-      "readToken": "Unable to read authentication token.",
-      "invalidToken": "Invalid authentication token.",
       "invalidCredentialsOrRegister": "We couldn't find an account with those credentials. Try signing up first.",
       "generic": "Unable to login right now. Please try again."
     },
@@ -235,20 +232,14 @@
     },
     "navigation": {
       "dashboard": "Dashboard",
-      "overview": "Overview",
-      "boards": "Boards",
       "requests": "Requests",
-      "team": "Team",
-      "comments": "Comments",
-      "reports": "Reports",
-      "comingSoon": "Coming soon"
+      "team": "Team"
     },
     "user": {
       "name": "Workspace User",
       "role": "Product owner"
     },
     "actions": {
-      "signOut": "Sign out",
       "logOut": "Log out",
       "dashboard": "Dashboard",
       "settings": "Settings",
@@ -294,7 +285,6 @@
     "featureRequestsTitle": "Feature Requests",
     "emptyRequests": "No feature requests yet. Be the first to suggest something!",
     "actions": {
-      "goToDashboard": "Go to dashboard",
       "editSettings": "Edit settings"
     }
   },
