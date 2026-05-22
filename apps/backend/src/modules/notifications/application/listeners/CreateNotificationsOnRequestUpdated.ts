@@ -28,7 +28,7 @@ export default class CreateNotificationsOnRequestUpdated {
   ) {}
 
   async handle(event: RequestUpdatedEvent): Promise<void> {
-    if (event.actorId === event.authorId || event.changedFields.length === 0) {
+    if (event.changedFields.length === 0) {
       return;
     }
 
@@ -41,39 +41,49 @@ export default class CreateNotificationsOnRequestUpdated {
     const actor = await this.userRepository.findById(new Uuid(event.actorId));
     const boardSlug = board.slug.getValue();
     const changedFields = event.changedFields.map((field) => FIELD_LABELS[field] ?? field);
+    const requestSubscribers = await this.requestRepository.findSubscribersByRequestId(new Uuid(event.requestId));
+    const recipients = new Set<string>([event.authorId, ...requestSubscribers]);
 
-    const notification = new Notification({
-      id: crypto.randomUUID(),
-      userId: event.authorId,
-      boardId: event.boardId,
-      type: "request.updated",
-      payload: {
-        title: "Request updated",
-        body:
-          changedFields.length === 1
-            ? `updated the ${changedFields[0]} of your request "${request.title}"`
-            : `updated ${changedFields.join(", ")} on your request "${request.title}"`,
-        actor: {
-          id: event.actorId,
-          username: actor?.username ?? null,
-          displayName: actor?.displayName ?? null,
-          avatarUrl: actor?.avatarUrl ?? null,
-          profileUrl: actor?.username ? `/users/${actor.username}` : null
+    recipients.delete(event.actorId);
+
+    for (const recipientId of recipients) {
+      const notification = new Notification({
+        id: crypto.randomUUID(),
+        userId: recipientId,
+        boardId: event.boardId,
+        type: "request.updated",
+        payload: {
+          title: "Request updated",
+          body:
+            recipientId === event.authorId
+              ? changedFields.length === 1
+                ? `updated the ${changedFields[0]} of your request "${request.title}"`
+                : `updated ${changedFields.join(", ")} on your request "${request.title}"`
+              : changedFields.length === 1
+                ? `updated the ${changedFields[0]} on a request you watch "${request.title}"`
+                : `updated ${changedFields.join(", ")} on a request you watch "${request.title}"`,
+          actor: {
+            id: event.actorId,
+            username: actor?.username ?? null,
+            displayName: actor?.displayName ?? null,
+            avatarUrl: actor?.avatarUrl ?? null,
+            profileUrl: actor?.username ? `/users/${actor.username}` : null
+          },
+          requestId: event.requestId,
+          requestTitle: request.title,
+          changedFields,
+          boardSlug,
+          url: `/board/${boardSlug}/request/${event.requestId}`
         },
-        requestId: event.requestId,
-        requestTitle: request.title,
-        changedFields,
-        boardSlug,
-        url: `/board/${boardSlug}/request/${event.requestId}`
-      },
-      read: false,
-      createdAt: new Date().toISOString()
-    });
+        read: false,
+        createdAt: new Date().toISOString()
+      });
 
-    await this.notificationRepository.create(notification);
-    this.realtimePublisher.publish(`notification.${event.authorId}`, "NotificationCreated", {
-      data: notification,
-      timestamp: notification.createdAt
-    });
+      await this.notificationRepository.create(notification);
+      this.realtimePublisher.publish(`notification.${recipientId}`, "NotificationCreated", {
+        data: notification,
+        timestamp: notification.createdAt
+      });
+    }
   }
 }

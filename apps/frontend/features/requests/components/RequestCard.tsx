@@ -18,7 +18,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { Badge } from "@/shared/components/ui/badge";
 import { Link } from "@/localization/i18n/routing";
-import { Copy, Maximize2 } from "lucide-react";
+import { Copy, Eye, EyeOff, Loader2, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { RequestActivityTabs } from "@/features/requests/components/RequestActivityTabs";
 import { getRequestCategoryIds } from "@/features/requests/services/requestService";
@@ -34,10 +34,49 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
   const [isOpen, setIsOpen] = useState(false);
   const [editableRequest, setEditableRequest] = useState(request);
   const [changelogRefreshKey, setChangelogRefreshKey] = useState(0);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
+  const [isSubscriptionSaving, setIsSubscriptionSaving] = useState(false);
+  const canWatchRequest = Boolean(currentUserId && currentUserId !== editableRequest.authorId);
 
   useEffect(() => {
     setEditableRequest(request);
   }, [request]);
+
+  useEffect(() => {
+    if (!isOpen || !canWatchRequest) {
+      setIsSubscribed(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadSubscriptionState = async () => {
+      setIsSubscriptionLoading(true);
+
+      try {
+        const subscribed = await requestService.isSubscribedToRequest(editableRequest.id, editableRequest.boardId);
+
+        if (!cancelled) {
+          setIsSubscribed(subscribed);
+        }
+      } catch {
+        if (!cancelled) {
+          setIsSubscribed(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSubscriptionLoading(false);
+        }
+      }
+    };
+
+    void loadSubscriptionState();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canWatchRequest, editableRequest.boardId, editableRequest.id, isOpen]);
 
   const canEdit = useMemo(() => {
     if (!currentUserId) {
@@ -86,6 +125,31 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
     } catch {
       setEditableRequest(previousRequest);
       toast.error("Could not save request changes");
+    }
+  };
+
+  const handleToggleSubscription = async () => {
+    if (!canWatchRequest || isSubscriptionLoading || isSubscriptionSaving) {
+      return;
+    }
+
+    const previousSubscribed = isSubscribed;
+    setIsSubscriptionSaving(true);
+    setIsSubscribed(!previousSubscribed);
+
+    try {
+      if (previousSubscribed) {
+        await requestService.unsubscribeFromRequest(editableRequest.id, editableRequest.boardId);
+        toast.success("You are no longer watching this request");
+      } else {
+        await requestService.subscribeToRequest(editableRequest.id, editableRequest.boardId);
+        toast.success("You are now watching this request");
+      }
+    } catch {
+      setIsSubscribed(previousSubscribed);
+      toast.error("Could not update watch status");
+    } finally {
+      setIsSubscriptionSaving(false);
     }
   };
 
@@ -138,6 +202,24 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
         className="flex flex-col w-[96vw] max-h-[90dvh] max-w-[96vw] gap-0 overflow-hidden rounded-xl border border-border/70 bg-card p-0 sm:max-w-5xl"
         topRightActions={
           <>
+            {canWatchRequest ? (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleToggleSubscription}
+                aria-label={isSubscribed ? "Unwatch request" : "Watch request"}
+                disabled={isSubscriptionLoading || isSubscriptionSaving}
+              >
+                {isSubscriptionLoading || isSubscriptionSaving ? (
+                  <Loader2 className="animate-spin" />
+                ) : isSubscribed ? (
+                  <EyeOff />
+                ) : (
+                  <Eye />
+                )}
+                <span className="sr-only">{isSubscribed ? "Unwatch Request" : "Watch Request"}</span>
+              </Button>
+            ) : null}
             <Button variant="ghost" size="icon-sm" onClick={handleCopyLink} aria-label="Copy request link">
               <Copy />
               <span className="sr-only">Copy Link</span>

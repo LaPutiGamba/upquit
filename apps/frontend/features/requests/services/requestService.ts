@@ -69,6 +69,12 @@ export interface UpdateRequestPayload {
   categoryIds?: string[];
 }
 
+export interface SubscriptionResponse {
+  userId: string;
+  requestId: string;
+  createdAt: string | null;
+}
+
 export function getRequestCategoryIds(request: Pick<RequestResponse, "categoryIds" | "categories">): string[] {
   if (request.categoryIds !== undefined) {
     return request.categoryIds;
@@ -118,6 +124,29 @@ export const requestService = {
       tenantId: boardId,
       body: JSON.stringify(payload)
     });
+  },
+
+  subscribeToRequest: async (id: string, boardId: string): Promise<SubscriptionResponse> => {
+    return await apiClient<SubscriptionResponse>(`/requests/${id}/subscriptions`, {
+      method: "POST",
+      tenantId: boardId
+    });
+  },
+
+  unsubscribeFromRequest: async (id: string, boardId: string): Promise<void> => {
+    await apiClient<void>(`/requests/${id}/subscriptions`, {
+      method: "DELETE",
+      tenantId: boardId
+    });
+  },
+
+  isSubscribedToRequest: async (id: string, boardId: string): Promise<boolean> => {
+    const response = await apiClient<{ isSubscribed: boolean }>(`/requests/${id}/subscriptions`, {
+      method: "GET",
+      tenantId: boardId
+    });
+
+    return response.isSubscribed ?? false;
   },
 
   deleteRequest: async (id: string): Promise<void> => {

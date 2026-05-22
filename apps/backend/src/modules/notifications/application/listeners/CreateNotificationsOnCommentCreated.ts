@@ -26,12 +26,10 @@ export default class CreateNotificationsOnCommentCreated {
     const actor = await this.userRepository.findById(new Uuid(event.userId));
     const requestTitle = request.title;
     const boardSlug = board.slug.getValue();
+    const requestSubscribers = await this.requestRepository.findSubscribersByRequestId(new Uuid(event.requestId));
 
-    const recipients = new Set<string>();
-
-    if (request.author.id.getValue() !== event.userId) {
-      recipients.add(request.author.id.getValue());
-    }
+    const recipients = new Set<string>([request.author.id.getValue(), ...requestSubscribers]);
+    recipients.delete(event.userId);
 
     for (const recipientId of recipients) {
       const notification = new Notification({
@@ -41,7 +39,10 @@ export default class CreateNotificationsOnCommentCreated {
         type: "comment.created",
         payload: {
           title: "New comment",
-          body: `commented on your request "${requestTitle}"`,
+          body:
+            recipientId === request.author.id.getValue()
+              ? `commented on your request "${requestTitle}"`
+              : `commented on a request you watch "${requestTitle}"`,
           actor: {
             id: event.userId,
             username: actor?.username ?? null,

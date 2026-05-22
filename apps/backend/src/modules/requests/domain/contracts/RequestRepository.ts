@@ -30,4 +30,5 @@ export default interface RequestRepository {
   addSubscription(subscription: Subscription): Promise<void>;
   removeSubscription(userId: Uuid, requestId: Uuid): Promise<void>;
   isSubscribed(userId: Uuid, requestId: Uuid): Promise<boolean>;
+  findSubscribersByRequestId(requestId: Uuid): Promise<string[]>;
 }

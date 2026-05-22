@@ -25,12 +25,10 @@ export default class CreateNotificationsOnVoteCreated {
 
     const requestTitle = request.title;
     const boardSlug = board.slug.getValue();
+    const requestSubscribers = await this.requestRepository.findSubscribersByRequestId(new Uuid(event.requestId));
 
-    const recipients = new Set<string>();
-
-    if (request.author.id.getValue() !== event.userId) {
-      recipients.add(request.author.id.getValue());
-    }
+    const recipients = new Set<string>([request.author.id.getValue(), ...requestSubscribers]);
+    recipients.delete(event.userId);
 
     for (const recipientId of recipients) {
       const notification = new Notification({
@@ -40,7 +38,10 @@ export default class CreateNotificationsOnVoteCreated {
         type: "vote.created",
         payload: {
           title: "New vote",
-          body: `liked your request "${requestTitle ?? "request"}"`,
+          body:
+            recipientId === request.author.id.getValue()
+              ? `liked your request "${requestTitle ?? "request"}"`
+              : `liked a request you watch "${requestTitle ?? "request"}"`,
           actor: {
             id: event.userId,
             username: actor?.username ?? null,

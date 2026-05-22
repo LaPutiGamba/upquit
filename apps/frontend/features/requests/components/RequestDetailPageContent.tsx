@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Trash2 } from "lucide-react";
 
 import { boardService } from "@/features/boards/services/boardService";
 import { useRequestDetailPage } from "@/features/requests/hooks/useRequestDetailPage";
@@ -27,12 +27,7 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/shared/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/shared/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { RequestActivityTabs } from "@/features/requests/components/RequestActivityTabs";
 import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
@@ -54,6 +49,9 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
   const [canManageBoard, setCanManageBoard] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
+  const [isSubscriptionSaving, setIsSubscriptionSaving] = useState(false);
 
   const editableRequest = useMemo(() => {
     if (!request) {
@@ -149,6 +147,14 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     return editableRequest.authorId === user.id || board.ownerId === user.id || canManageBoard;
   }, [board, canManageBoard, editableRequest, user]);
 
+  const canWatchRequest = useMemo(() => {
+    if (!user || !editableRequest) {
+      return false;
+    }
+
+    return editableRequest.authorId !== user.id;
+  }, [editableRequest, user]);
+
   const categoryIds = useMemo(
     () => getRequestCategoryIds(editableRequest ?? { categoryIds: [], categories: [] }),
     [editableRequest]
@@ -182,6 +188,66 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
     } catch {
       setOptimisticRequest(previousRequest);
       toast.error("Could not save request changes");
+    }
+  };
+
+  useEffect(() => {
+    if (!board || !editableRequest || !canWatchRequest) {
+      setIsSubscribed(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadSubscriptionState = async () => {
+      setIsSubscriptionLoading(true);
+
+      try {
+        const subscribed = await requestService.isSubscribedToRequest(editableRequest.id, board.id);
+
+        if (!cancelled) {
+          setIsSubscribed(subscribed);
+        }
+      } catch {
+        if (!cancelled) {
+          setIsSubscribed(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSubscriptionLoading(false);
+        }
+      }
+    };
+
+    void loadSubscriptionState();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [board, canWatchRequest, editableRequest]);
+
+  const handleToggleSubscription = async () => {
+    if (!board || !editableRequest || !canWatchRequest || isSubscriptionLoading || isSubscriptionSaving) {
+      return;
+    }
+
+    const previousSubscribed = isSubscribed;
+    setIsSubscriptionSaving(true);
+    setIsSubscribed(!previousSubscribed);
+
+    try {
+      if (previousSubscribed) {
+        await requestService.unsubscribeFromRequest(editableRequest.id, board.id);
+        toast.success("You are no longer watching this request");
+      } else {
+        await requestService.subscribeToRequest(editableRequest.id, board.id);
+        toast.success("You are now watching this request");
+      }
+    } catch {
+      setIsSubscribed(previousSubscribed);
+      toast.error("Could not update watch status");
+    } finally {
+      setIsSubscriptionSaving(false);
     }
   };
 
@@ -239,22 +305,52 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
             authorUsername={editableRequest.authorUsername}
             authorIsActive={editableRequest.authorIsActive}
             actions={
-              canDelete ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon-sm">
-                      <MoreHorizontal className="size-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
-                      <Trash2 className="size-4" />
-                      {t("actions.delete")}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : null
+              <div className="flex items-center gap-1.5">
+                {canWatchRequest ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={handleToggleSubscription}
+                          aria-label={isSubscribed ? "Unwatch request" : "Watch request"}
+                          disabled={isSubscriptionLoading || isSubscriptionSaving}
+                        >
+                          {isSubscriptionLoading || isSubscriptionSaving ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : isSubscribed ? (
+                            <EyeOff className="size-4" />
+                          ) : (
+                            <Eye className="size-4" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        {isSubscribed ? "Unwatch request" : "Watch request"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : null}
+
+                {canDelete ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="icon-sm"
+                          onClick={() => setIsDeleteDialogOpen(true)}
+                          aria-label={t("actions.delete")}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">{t("actions.delete")}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : null}
+              </div>
             }
           >
             <RequestTitle

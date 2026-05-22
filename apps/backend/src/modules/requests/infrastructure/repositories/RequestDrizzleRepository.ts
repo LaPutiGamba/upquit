@@ -373,6 +373,15 @@ export default class RequestDrizzleRepository implements RequestRepository {
     return !!row;
   }
 
+  public async findSubscribersByRequestId(requestId: Uuid): Promise<string[]> {
+    const rows = await this.db
+      .select({ userId: subscriptions.userId })
+      .from(subscriptions)
+      .where(eq(subscriptions.requestId, requestId.getValue()));
+
+    return rows.map((row) => row.userId);
+  }
+
   // =========================================================================
   // MAPPER
   // =========================================================================
