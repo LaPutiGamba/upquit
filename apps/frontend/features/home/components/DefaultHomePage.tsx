@@ -74,6 +74,7 @@ export function DefaultHomePage() {
                 height={100}
                 className="rounded-xl"
                 priority
+                fetchPriority="high"
               />
               <div className="flex flex-col leading-tight">
                 <span className={homeDisplay.className + " text-lg font-semibold"}>UpQuit</span>

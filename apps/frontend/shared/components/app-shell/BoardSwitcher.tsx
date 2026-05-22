@@ -40,7 +40,13 @@ export function BoardSwitcher({
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent">
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent"
+              tooltip={{
+                children: <span>Switch board</span>
+              }}
+            >
               <Avatar className="size-8 rounded-lg border">
                 {activeBoard?.logoUrl ? <AvatarImage src={activeBoard.logoUrl} alt={activeBoard.name} /> : null}
                 <AvatarFallback className="rounded-lg text-xs font-semibold">

@@ -17,6 +17,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { Badge } from "@/shared/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { Link } from "@/localization/i18n/routing";
 import { Copy, Eye, EyeOff, Loader2, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
@@ -203,33 +204,48 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
         topRightActions={
           <>
             {canWatchRequest ? (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleToggleSubscription}
-                aria-label={isSubscribed ? "Unwatch request" : "Watch request"}
-                disabled={isSubscriptionLoading || isSubscriptionSaving}
-              >
-                {isSubscriptionLoading || isSubscriptionSaving ? (
-                  <Loader2 className="animate-spin" />
-                ) : isSubscribed ? (
-                  <EyeOff />
-                ) : (
-                  <Eye />
-                )}
-                <span className="sr-only">{isSubscribed ? "Unwatch Request" : "Watch Request"}</span>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={handleToggleSubscription}
+                    aria-label={isSubscribed ? "Unwatch request" : "Watch request"}
+                    disabled={isSubscriptionLoading || isSubscriptionSaving}
+                  >
+                    {isSubscriptionLoading || isSubscriptionSaving ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : isSubscribed ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                    <span className="sr-only">{isSubscribed ? "Unwatch Request" : "Watch Request"}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">{isSubscribed ? "Unwatch request" : "Watch request"}</TooltipContent>
+              </Tooltip>
             ) : null}
-            <Button variant="ghost" size="icon-sm" onClick={handleCopyLink} aria-label="Copy request link">
-              <Copy />
-              <span className="sr-only">Copy Link</span>
-            </Button>
-            <Button asChild variant="ghost" size="icon-sm">
-              <Link href={`/board/${boardSlug}/request/${request.id}`} aria-label="Open request full page">
-                <Maximize2 />
-                <span className="sr-only">Open Full Page</span>
-              </Link>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon-sm" onClick={handleCopyLink} aria-label="Copy request link">
+                  <Copy />
+                  <span className="sr-only">Copy Link</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Copy request link</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button asChild variant="ghost" size="icon-sm">
+                  <Link href={`/board/${boardSlug}/request/${request.id}`} aria-label="Open request full page">
+                    <Maximize2 />
+                    <span className="sr-only">Open Full Page</span>
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Open full page</TooltipContent>
+            </Tooltip>
           </>
         }
       >

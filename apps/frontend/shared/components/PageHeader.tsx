@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "@/localization/i18n/routing";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { Button } from "@/shared/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import NotificationBell from "@/features/notifications/components/NotificationBell";
 import { UserDropdownMenu } from "@/shared/components/UserDropdownMenu";
 import { getInitials } from "@/shared/components/app-shell/utils";
@@ -59,9 +60,14 @@ export function PageHeader({ showBackButton = true }: PageHeaderProps) {
     <>
       <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border/65 bg-background/84 px-4 backdrop-blur-md">
         {showBackButton && (
-          <Button variant="ghost" size="icon" onClick={handleBack} className="-ml-2">
-            <ArrowLeft className="size-5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={handleBack} className="-ml-2">
+                <ArrowLeft className="size-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Go back</TooltipContent>
+          </Tooltip>
         )}
         <div className="ml-auto flex items-center gap-2">
           <NotificationBell />

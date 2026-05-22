@@ -99,6 +99,7 @@ export default function UserProfileContent({ user }: UserProfileContentProps) {
                 height={120}
                 className="rounded-full size-32 object-cover"
                 priority
+                fetchPriority="high"
               />
             ) : (
               <div className="size-32 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center">

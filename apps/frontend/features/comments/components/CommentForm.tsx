@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import { Kbd, KbdGroup } from "@/shared/components/ui/kbd";
 import { Send } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { commentService, type default as CommentResponse } from "../services/commentService";
@@ -116,15 +118,44 @@ export function CommentForm({
           )}
           rows={1}
         />
-        <Button
-          type="submit"
-          disabled={isPending || !content.trim()}
-          size="icon-sm"
-          className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-all shadow-none", !content.trim() && "opacity-50")}
-        >
-          <Send className="size-4" />
-          <span className="sr-only">{parentId ? "Send reply" : "Send comment"}</span>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="submit"
+              disabled={isPending || !content.trim()}
+              size="icon-sm"
+              className={cn(
+                "absolute right-4 top-1/2 -translate-y-1/2 transition-all shadow-none",
+                !content.trim() && "opacity-50"
+              )}
+            >
+              <Send className="size-4" />
+              <span className="sr-only">{parentId ? "Send reply" : "Send comment"}</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">{parentId ? "Send reply" : "Send comment"}</TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 px-2 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <span>Press</span>
+          <KbdGroup>
+            <Kbd>Ctrl</Kbd>
+            <span>/</span>
+            <Kbd>Cmd</Kbd>
+            <span>+</span>
+            <Kbd>Enter</Kbd>
+          </KbdGroup>
+          <span>to send</span>
+        </span>
+        {onCancel ? (
+          <span className="flex items-center gap-1.5">
+            <span>| Press</span>
+            <Kbd>Esc</Kbd>
+            <span>to cancel</span>
+          </span>
+        ) : null}
       </div>
 
       {onCancel && (
