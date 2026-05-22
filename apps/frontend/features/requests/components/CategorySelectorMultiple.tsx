@@ -42,6 +42,18 @@ function generateColorFromString(str: string): string {
   return `hsl(${hue}, 70%, 60%)`;
 }
 
+function dedupeCategories(categories: CategoryResponse[]): CategoryResponse[] {
+  const uniqueCategories = new Map<string, CategoryResponse>();
+
+  for (const category of categories) {
+    if (!uniqueCategories.has(category.id)) {
+      uniqueCategories.set(category.id, category);
+    }
+  }
+
+  return [...uniqueCategories.values()];
+}
+
 export function CategorySelectorMultiple({
   boardId,
   value,
@@ -69,7 +81,7 @@ export function CategorySelectorMultiple({
       setIsLoadingCategories(true);
       const token = getAccessToken() ?? undefined;
       const fetchedCategories = await boardService.getBoardCategories(boardId, token);
-      setCategories(fetchedCategories);
+      setCategories(dedupeCategories(fetchedCategories));
     } catch (error) {
       console.error("Failed to fetch categories:", error);
       toast.error("Failed to load categories");
@@ -100,19 +112,17 @@ export function CategorySelectorMultiple({
     if (!newCategory) return;
 
     setCategories((prev) => {
-      if (prev.some((cat) => cat.id === newCategory.id)) {
-        return prev;
-      }
-      return [...prev, newCategory];
+      return dedupeCategories([...prev, newCategory]);
     });
   }, []);
 
   useChannel<CategoryAddedPayload>(boardId, handleCategoryAdded);
 
   const normalizedSearchString = searchString.trim().toLowerCase();
-  const hasExactMatch = normalizedSearchString
-    ? categories.some((cat) => cat.name.trim().toLowerCase() === normalizedSearchString)
-    : false;
+  const exactMatchCategory = normalizedSearchString
+    ? categories.find((cat) => cat.name.trim().toLowerCase() === normalizedSearchString)
+    : undefined;
+  const hasExactMatch = Boolean(exactMatchCategory);
 
   const categoryNames = new Map(categories.map((cat) => [cat.id, cat.name]));
 
@@ -127,7 +137,7 @@ export function CategorySelectorMultiple({
       const token = getAccessToken() ?? undefined;
       const newCategory = await boardService.addBoardCategory(boardId, trimmedSearchString, token);
 
-      setCategories((prev) => [...prev, newCategory]);
+      setCategories((prev) => dedupeCategories([...prev, newCategory]));
 
       onChange([...value, newCategory.id]);
 
@@ -139,6 +149,18 @@ export function CategorySelectorMultiple({
     } finally {
       setIsCreatingCategory(false);
     }
+  };
+
+  const handleSelectExistingCategory = async (categoryId: string) => {
+    if (value.includes(categoryId)) {
+      setSearchString("");
+      setIsOpen(false);
+      return;
+    }
+
+    await onChange([...value, categoryId]);
+    setSearchString("");
+    setIsOpen(false);
   };
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -155,12 +177,22 @@ export function CategorySelectorMultiple({
       return;
     }
 
-    if (!searchString.trim() || hasExactMatch || isCreatingCategory || !canCreateCategory) {
+    if (!searchString.trim() || isCreatingCategory) {
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
+
+    if (exactMatchCategory) {
+      void handleSelectExistingCategory(exactMatchCategory.id);
+      return;
+    }
+
+    if (!canCreateCategory) {
+      return;
+    }
+
     void handleCreateCategory();
   };
 

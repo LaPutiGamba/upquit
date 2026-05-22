@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { RequestResponse, requestService, type UpdateRequestPayload } from "../services/requestService";
+import { CategorySelectorMultiple } from "@/features/requests/components/CategorySelectorMultiple";
 import { RequestDescription, RequestHeader, RequestTitle } from "@/features/requests/components/RequestHeader";
 import { RequestMetadataRow } from "@/features/requests/components/RequestMetadataRow";
 import {
@@ -20,6 +21,7 @@ import { Link } from "@/localization/i18n/routing";
 import { Copy, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { RequestActivityTabs } from "@/features/requests/components/RequestActivityTabs";
+import { getRequestCategoryIds } from "@/features/requests/services/requestService";
 
 interface RequestCardProps {
   request: RequestResponse;
@@ -46,6 +48,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
   }, [currentUserId, editableRequest.authorId, isBoardAdmin]);
 
   const categories = editableRequest.categories ?? [];
+  const categoryIds = getRequestCategoryIds(editableRequest);
 
   const handleCopyLink = async () => {
     const currentUrl = window.location.href.replace(/\/$/, "");
@@ -67,7 +70,18 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
 
     try {
       const updatedRequest = await requestService.updateRequest(editableRequest.id, editableRequest.boardId, payload);
-      setEditableRequest(updatedRequest);
+
+      const updatedCategoryIds = getRequestCategoryIds(updatedRequest);
+      const nextCategoryIds = getRequestCategoryIds(nextRequest);
+      const shouldKeepOptimisticCategoryIds =
+        payload.categoryIds !== undefined &&
+        updatedRequest.categoryIds === undefined &&
+        (!updatedRequest.categories || updatedRequest.categories.length === 0);
+
+      setEditableRequest({
+        ...updatedRequest,
+        categoryIds: shouldKeepOptimisticCategoryIds ? nextCategoryIds : updatedCategoryIds
+      });
       setChangelogRefreshKey((currentValue) => currentValue + 1);
     } catch {
       setEditableRequest(previousRequest);
@@ -173,20 +187,16 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
                 {editableRequest.description ?? ""}
               </RequestDescription>
 
-              {categories.length > 0 ? (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {categories.map((category) => (
-                    <Badge key={category.id} variant="outline" className="gap-1.5 border-border/70 bg-background/60">
-                      <span
-                        className="size-2 rounded-full"
-                        style={{ backgroundColor: category.hexColor }}
-                        aria-hidden="true"
-                      />
-                      <span className="max-w-48 truncate">{category.name}</span>
-                    </Badge>
-                  ))}
-                </div>
-              ) : null}
+              <div className="mt-4 space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Categories</p>
+                <CategorySelectorMultiple
+                  boardId={editableRequest.boardId}
+                  value={categoryIds}
+                  onChange={(nextValues) => handleUpdateRequest({ categoryIds: nextValues })}
+                  disabled={!canEdit}
+                  canCreateCategory={isBoardAdmin}
+                />
+              </div>
 
               <RequestMetadataRow
                 request={editableRequest}
@@ -196,7 +206,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
                 canManageStatus={isBoardAdmin}
                 onStatusSave={(nextStatus) => handleUpdateRequest({ status: nextStatus })}
                 size="sm"
-                className="mt-4"
+                className="mt-5"
               />
             </div>
           </div>
