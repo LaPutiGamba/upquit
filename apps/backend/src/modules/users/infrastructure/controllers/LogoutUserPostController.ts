@@ -4,8 +4,8 @@ export default function LogoutUserPostController(_req: Request, res: Response) {
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    partitioned: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    domain: process.env.NODE_ENV === "production" ? ".upquit.com" : undefined,
     path: "/"
   });
 

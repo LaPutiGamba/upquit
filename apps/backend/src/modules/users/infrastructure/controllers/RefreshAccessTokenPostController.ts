@@ -42,8 +42,8 @@ export default async function RefreshAccessTokenPostController(req: Request, res
     res.cookie("refreshToken", rotatedRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      partitioned: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      domain: process.env.NODE_ENV === "production" ? ".upquit.com" : undefined,
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000
     });

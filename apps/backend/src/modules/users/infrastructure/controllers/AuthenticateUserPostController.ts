@@ -25,7 +25,7 @@ export default async function AuthenticateUserPostController(req: Request<Authen
       message: "JWT_ACCESS_SECRET environment variable is required"
     });
   }
-  
+
   const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || jwtAccessSecret;
 
   const queryHandler = new AuthenticateUserQueryHandler(
@@ -54,8 +54,8 @@ export default async function AuthenticateUserPostController(req: Request<Authen
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      partitioned: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      domain: process.env.NODE_ENV === "production" ? ".upquit.com" : undefined,
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
