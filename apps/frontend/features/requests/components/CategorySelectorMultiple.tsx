@@ -14,12 +14,12 @@ import {
   ComboboxEmpty,
   ComboboxItem,
   ComboboxList,
+  ComboboxSeparator,
   useComboboxAnchor
 } from "@/shared/components/ui/combobox";
 import { cn } from "@/shared/lib/utils";
 import { getAccessToken } from "@/shared/lib/apiClient";
 import { toast } from "@/shared/components/ui/sonner";
-import { unwrapBroadcastPayload } from "@/shared/lib/realtime";
 
 interface CategorySelectorMultipleProps {
   boardId: string;
@@ -109,18 +109,23 @@ export function CategorySelectorMultiple({
 
   useChannel<CategoryAddedPayload>(boardId, handleCategoryAdded);
 
-  const hasExactMatch = categories.some((cat) => cat.name.toLowerCase() === searchString.toLowerCase());
+  const normalizedSearchString = searchString.trim().toLowerCase();
+  const hasExactMatch = normalizedSearchString
+    ? categories.some((cat) => cat.name.trim().toLowerCase() === normalizedSearchString)
+    : false;
 
   const categoryNames = new Map(categories.map((cat) => [cat.id, cat.name]));
 
   const handleCreateCategory = async () => {
-    if (!searchString.trim() || hasExactMatch) return;
+    const trimmedSearchString = searchString.trim();
+
+    if (!trimmedSearchString || hasExactMatch) return;
     if (!canCreateCategory) return;
 
     setIsCreatingCategory(true);
     try {
       const token = getAccessToken() ?? undefined;
-      const newCategory = await boardService.addBoardCategory(boardId, searchString.trim(), token);
+      const newCategory = await boardService.addBoardCategory(boardId, trimmedSearchString, token);
 
       setCategories((prev) => [...prev, newCategory]);
 
@@ -177,7 +182,7 @@ export function CategorySelectorMultiple({
     }
   };
 
-  const canShowCreateCategory = canCreateCategory && Boolean(searchString.trim()) && !hasExactMatch;
+  const canShowCreateCategory = canCreateCategory && Boolean(normalizedSearchString) && !hasExactMatch;
 
   return (
     <Combobox
@@ -237,28 +242,10 @@ export function CategorySelectorMultiple({
               </div>
             ) : (
               <>
-                {categories.length === 0 && <ComboboxEmpty>No categories yet</ComboboxEmpty>}
-
-                {categories.map((category) => {
-                  const backgroundColor = category.hexColor ?? generateColorFromString(category.name);
-
-                  return (
-                    <ComboboxItem key={category.id} value={category.id}>
-                      <div
-                        className="size-2 rounded-full"
-                        style={{ backgroundColor }}
-                        aria-label={`Category color for ${category.name}`}
-                      />
-                      <span>{category.name}</span>
-                    </ComboboxItem>
-                  );
-                })}
-
                 {canShowCreateCategory && (
                   <>
-                    <div className="my-1 h-px bg-border" />
                     <ComboboxItem
-                      value={`__create__${searchString}`}
+                      value={`__create__${normalizedSearchString}`}
                       onMouseDown={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -279,13 +266,31 @@ export function CategorySelectorMultiple({
                       ) : (
                         <>
                           <span className="text-sm">
-                            Create <span className="font-semibold">{searchString}</span>
+                            Create <span className="font-semibold">{searchString.trim()}</span>
                           </span>
                         </>
                       )}
                     </ComboboxItem>
+                    {categories.length > 0 ? <ComboboxSeparator /> : null}
                   </>
                 )}
+
+                {categories.length === 0 && <ComboboxEmpty>No categories yet</ComboboxEmpty>}
+
+                {categories.map((category) => {
+                  const backgroundColor = category.hexColor ?? generateColorFromString(category.name);
+
+                  return (
+                    <ComboboxItem key={category.id} value={category.id}>
+                      <div
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor }}
+                        aria-label={`Category color for ${category.name}`}
+                      />
+                      <span>{category.name}</span>
+                    </ComboboxItem>
+                  );
+                })}
               </>
             )}
           </ComboboxList>
