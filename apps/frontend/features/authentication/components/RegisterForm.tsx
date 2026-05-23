@@ -28,7 +28,7 @@ function registerSchema(t: (key: string) => string) {
         .max(30, t("validation.username"))
         .regex(/^[a-z0-9][a-z0-9._-]{1,28}[a-z0-9]$/, t("validation.usernamePattern")),
       displayName: z.string().min(2, t("validation.displayName")),
-      email: z.email(t("validation.email")),
+      email: z.string().email(t("validation.email")),
       password: z.string().min(8, t("validation.password")),
       confirmPassword: z.string()
     })

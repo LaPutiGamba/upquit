@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  ChevronsUpDown,
-  LayoutGrid,
-  LogOut,
-  Settings2,
-  Globe,
-  Moon,
-  Sun
-} from "lucide-react";
+import { ChevronsUpDown, LayoutGrid, LogOut, Settings2, Globe, Moon, Sun } from "lucide-react";
 import { Link } from "@/localization/i18n/routing";
 import { useRouter, usePathname } from "@/localization/i18n/routing";
 import { useLocale } from "next-intl";
@@ -27,6 +19,7 @@ import {
   DropdownMenuPortal,
   DropdownMenuTrigger
 } from "@/shared/components/ui/dropdown-menu";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 
@@ -78,14 +71,19 @@ export function UserDropdownMenu({
   if (variant === "header") {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Avatar className="size-8">
-              {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} /> : null}
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Avatar className="size-8">
+                  {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} /> : null}
+                  <AvatarFallback>{initials}</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={6}>Account</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent className="w-56 min-w-56" side="bottom" align="center" sideOffset={4}>
           <DropdownMenuLabel>
             <div className="grid gap-0.5">
@@ -191,23 +189,28 @@ export function UserDropdownMenu({
   // Sidebar variant (original NavUser behavior)
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="lg"
-          className="w-full h-auto px-2 py-2 justify-start data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]/sidebar-wrapper:px-0"
-        >
-          <Avatar className="size-8 rounded-lg">
-            {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} /> : null}
-            <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-          </Avatar>
-          <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]/sidebar-wrapper:hidden">
-            <span className="truncate font-medium">{displayName}</span>
-            <span className="truncate text-xs text-sidebar-foreground/70">{email}</span>
-          </div>
-          <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]/sidebar-wrapper:hidden" />
-        </Button>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="lg"
+              className="w-full h-auto px-2 py-2 justify-start data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]/sidebar-wrapper:px-0"
+            >
+              <Avatar className="size-8 rounded-lg">
+                {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} /> : null}
+                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]/sidebar-wrapper:hidden">
+                <span className="truncate font-medium">{displayName}</span>
+                <span className="truncate text-xs text-sidebar-foreground/70">{email}</span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]/sidebar-wrapper:hidden" />
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent sideOffset={6}>Account</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent className="w-56 min-w-56" side="top" align="center" sideOffset={4}>
         <DropdownMenuLabel>
           <div className="grid gap-0.5">

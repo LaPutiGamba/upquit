@@ -19,7 +19,7 @@ import { useTranslations } from "next-intl";
 
 function forgotPasswordSchema(t: (key: string) => string) {
   return z.object({
-    email: z.email(t("validation.email"))
+    email: z.string().email(t("validation.email"))
   });
 }
 

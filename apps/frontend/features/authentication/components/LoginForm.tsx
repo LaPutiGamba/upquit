@@ -22,7 +22,7 @@ import { useEffect } from "react";
 
 function loginSchema(t: (key: string) => string) {
   return z.object({
-    email: z.email(t("validation.email")),
+    email: z.string().email(t("validation.email")),
     password: z.string().min(1, t("validation.password"))
   });
 }
