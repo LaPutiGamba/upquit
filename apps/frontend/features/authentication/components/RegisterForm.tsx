@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
 import { authService } from "@/features/authentication/services/authService";
 import { resolveAuthenticatedRedirectPath } from "@/features/authentication/services/authRedirectService";
@@ -28,7 +28,7 @@ function registerSchema(t: (key: string) => string) {
         .max(30, t("validation.username"))
         .regex(/^[a-z0-9][a-z0-9._-]{1,28}[a-z0-9]$/, t("validation.usernamePattern")),
       displayName: z.string().min(2, t("validation.displayName")),
-      email: z.string().email(t("validation.email")),
+      email: z.email(t("validation.email")),
       password: z.string().min(8, t("validation.password")),
       confirmPassword: z.string()
     })
@@ -59,7 +59,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
   const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema(t)),
+    resolver: standardSchemaResolver(registerSchema(t)),
     defaultValues: {
       username: "",
       displayName: "",

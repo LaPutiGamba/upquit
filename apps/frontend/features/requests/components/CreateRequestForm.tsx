@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
 import { giveToGetService, GiveToGetProgressResponse } from "@/features/give-to-get/services/giveToGetService";
 import { CategorySelectorMultiple } from "@/features/requests/components/CategorySelectorMultiple";
@@ -76,7 +76,7 @@ export function CreateRequestForm({
   const [status, setStatus] = useState<RequestStatusValue>("open");
 
   const form = useForm<CreateRequestFormValues>({
-    resolver: zodResolver(createRequestSchema),
+    resolver: standardSchemaResolver(createRequestSchema),
     defaultValues: {
       title: "",
       description: ""

@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -43,7 +43,7 @@ export default function ResetPasswordForm({ token, className, ...props }: ResetP
   const { push } = useRouter();
 
   const form = useForm<ResetPasswordFormValues>({
-    resolver: zodResolver(resetPasswordSchema(t)),
+    resolver: standardSchemaResolver(resetPasswordSchema(t)),
     defaultValues: {
       password: "",
       confirmPassword: ""

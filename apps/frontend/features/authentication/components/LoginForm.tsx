@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
 import { authService } from "@/features/authentication/services/authService";
 import { resolveAuthenticatedRedirectPath } from "@/features/authentication/services/authRedirectService";
@@ -22,7 +22,7 @@ import { useEffect } from "react";
 
 function loginSchema(t: (key: string) => string) {
   return z.object({
-    email: z.string().email(t("validation.email")),
+    email: z.email(t("validation.email")),
     password: z.string().min(1, t("validation.password"))
   });
 }
@@ -48,7 +48,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
   const { push } = useRouter();
 
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema(t)),
+    resolver: standardSchemaResolver(loginSchema(t)),
     defaultValues: {
       email: "",
       password: ""

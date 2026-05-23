@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useTranslations } from "next-intl";
 
 import { boardService } from "@/features/boards/services/boardService";
@@ -44,7 +44,7 @@ export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
   const boardSchema = useMemo(() => createBoardSchema(t), [t]);
 
   const form = useForm<CreateBoardFormValues>({
-    resolver: zodResolver(boardSchema),
+    resolver: standardSchemaResolver(boardSchema),
     defaultValues: {
       name: "",
       slug: "",

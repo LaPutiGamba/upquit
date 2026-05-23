@@ -1,8 +1,8 @@
 "use client";
 
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,7 +19,7 @@ import { useTranslations } from "next-intl";
 
 function forgotPasswordSchema(t: (key: string) => string) {
   return z.object({
-    email: z.string().email(t("validation.email"))
+    email: z.email(t("validation.email"))
   });
 }
 
@@ -32,7 +32,7 @@ export default function ForgotPasswordForm({ className, ...props }: React.Compon
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm<ForgotPasswordFormValues>({
-    resolver: zodResolver(forgotPasswordSchema(t)),
+    resolver: standardSchemaResolver(forgotPasswordSchema(t)),
     defaultValues: {
       email: ""
     }
