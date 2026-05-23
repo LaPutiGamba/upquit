@@ -8,7 +8,16 @@ export default class GetRequestChangelogByRequestIdQueryHandler {
 
   async execute(query: GetRequestChangelogByRequestIdQuery): Promise<RequestChangelogResponse[]> {
     const requestId = new Uuid(query.requestId);
-    const changelogEntries = await this.requestRepository.findChangelogByRequestId(requestId);
+
+    const filters = {
+      field: query.field,
+      userId: query.userId,
+      search: query.search,
+      limit: query.limit,
+      offset: query.offset
+    };
+
+    const changelogEntries = await this.requestRepository.findChangelogByRequestId(requestId, filters);
 
     return changelogEntries.map((entry) => mapRequestChangelogToResponse(entry));
   }

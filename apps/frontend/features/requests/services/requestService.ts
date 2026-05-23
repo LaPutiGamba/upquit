@@ -83,9 +83,54 @@ export function getRequestCategoryIds(request: Pick<RequestResponse, "categoryId
   return request.categories?.map((category) => category.id) ?? [];
 }
 
+export interface GetRequestsFilters {
+  status?: string[];
+  categoryId?: string;
+  search?: string;
+  sortBy?: "newest" | "oldest" | "recently_updated";
+  authorId?: string;
+  pinnedOnly?: boolean;
+  excludePinned?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
 export const requestService = {
-  getRequestsByBoardId: async (boardId: string): Promise<RequestResponse[]> => {
-    return await apiClient<RequestResponse[]>(`/requests?boardId=${boardId}`, {
+  getRequestsByBoardId: async (boardId: string, filters?: GetRequestsFilters): Promise<RequestResponse[]> => {
+    const params = new URLSearchParams();
+    params.set("boardId", boardId);
+
+    if (filters?.status) {
+      for (const s of filters.status) {
+        params.append("status", s);
+      }
+    }
+    if (filters?.categoryId) {
+      params.set("categoryId", filters.categoryId);
+    }
+    if (filters?.search) {
+      params.set("search", filters.search);
+    }
+    if (filters?.sortBy) {
+      params.set("sortBy", filters.sortBy);
+    }
+    if (filters?.authorId) {
+      params.set("authorId", filters.authorId);
+    }
+    if (filters?.pinnedOnly) {
+      params.set("pinnedOnly", "true");
+    }
+    if (filters?.excludePinned) {
+      params.set("excludePinned", "true");
+    }
+    if (filters?.limit) {
+      params.set("limit", String(filters.limit));
+    }
+    if (filters?.offset) {
+      params.set("offset", String(filters.offset));
+    }
+
+    return await apiClient<RequestResponse[]>(`/requests?${params.toString()}`, {
       method: "GET",
       cache: "no-store",
       tenantId: boardId
@@ -155,8 +200,26 @@ export const requestService = {
     });
   },
 
-  getRequestChangelogByRequestId: async (requestId: string, boardId: string): Promise<RequestChangelogResponse[]> => {
-    return await apiClient<RequestChangelogResponse[]>(`/requests/${requestId}/changelog`, {
+  getRequestChangelogByRequestId: async (
+    requestId: string,
+    boardId: string,
+    filters?: { field?: string[]; userId?: string; search?: string; limit?: number; offset?: number }
+  ): Promise<RequestChangelogResponse[]> => {
+    const params = new URLSearchParams();
+    if (filters?.field) {
+      for (const field of filters.field) {
+        params.append("field", field);
+      }
+    }
+    if (filters?.userId) params.set("userId", filters.userId);
+    if (filters?.search) params.set("search", filters.search);
+    if (filters?.limit) params.set("limit", String(filters.limit));
+    if (filters?.offset) params.set("offset", String(filters.offset));
+
+    const queryString = params.toString();
+    const url = `/requests/${requestId}/changelog${queryString ? `?${queryString}` : ""}`;
+
+    return await apiClient<RequestChangelogResponse[]>(url, {
       method: "GET",
       cache: "no-store",
       tenantId: boardId

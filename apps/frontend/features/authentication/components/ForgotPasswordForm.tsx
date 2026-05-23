@@ -32,7 +32,6 @@ export default function ForgotPasswordForm({ className, ...props }: React.Compon
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm<ForgotPasswordFormValues>({
-    // @ts-expect-error - Zod v4 compatibility with @hookform/resolvers
     resolver: zodResolver(forgotPasswordSchema(t)),
     defaultValues: {
       email: ""

@@ -5,8 +5,10 @@ export default async function MarkNotificationReadPatchController(req: Request, 
   const userId = req.userId;
   if (!userId) return res.status(401).json({ error: { message: "Unauthorized" } });
 
-  const id = req.params.id;
-  if (!id) return res.status(400).json({ error: { message: "Missing id" } });
+  const rawId = req.params.id;
+  if (!rawId) return res.status(400).json({ error: { message: "Missing id" } });
+
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
   await notificationRepository.markAsRead(id, userId);
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
-import { UserPlus2, Trash2, Shield, Crown } from "lucide-react";
+import { UserPlus2, Trash2, Shield, Crown, Search } from "lucide-react";
 
 import {
   boardService,
@@ -17,6 +17,14 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/shared/components/ui/empty";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { Separator } from "@/shared/components/ui/separator";
@@ -32,7 +40,7 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
   const t = useTranslations("BoardMembersPage");
   const { user } = useAuth();
 
-  const loadingRef = useRef(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [board, setBoard] = useState<BoardResponse | null>(null);
   const [members, setMembers] = useState<BoardMember[]>([]);
@@ -41,6 +49,9 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [canManageBoard, setCanManageBoard] = useState(false);
+  const [memberFilters, setMemberFilters] = useState<{ role?: "admin" | "member"; search?: string }>({});
+  const [searchInput, setSearchInput] = useState("");
+  const [memberToRemove, setMemberToRemove] = useState<BoardMember | null>(null);
 
   const isBoardOwner = Boolean(user?.id && board?.ownerId && user.id === board.ownerId);
   const isLimitedAdmin = canManageBoard && !isBoardOwner;
@@ -57,17 +68,17 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
     });
   }, [board?.ownerId, members]);
 
-  const loadMembers = async (boardId: string) => {
-    const nextMembers = await boardService.getBoardMembers(boardId);
+  const loadMembers = useCallback(async (boardId: string, filters?: { role?: "admin" | "member"; search?: string }) => {
+    const nextMembers = await boardService.getBoardMembers(boardId, filters);
     setMembers(nextMembers);
     return nextMembers;
-  };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadBoardMembers = async () => {
-      loadingRef.current = true;
+      setIsLoading(true);
       setNotFound(false);
 
       try {
@@ -103,7 +114,7 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
         setNotFound(true);
       } finally {
         if (!cancelled) {
-          loadingRef.current = false;
+          setIsLoading(false);
         }
       }
     };
@@ -113,7 +124,17 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
     return () => {
       cancelled = true;
     };
-  }, [slug, user?.id]);
+  }, [slug, user?.id, loadMembers]);
+
+  useEffect(() => {
+    if (!board) return;
+
+    const timeout = setTimeout(() => {
+      void loadMembers(board.id, { ...memberFilters, search: searchInput || undefined });
+    }, 250);
+
+    return () => clearTimeout(timeout);
+  }, [board, memberFilters, searchInput, loadMembers]);
 
   const handleAddMember = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -198,7 +219,19 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
     }
   };
 
-  if (loadingRef.current) {
+  const confirmRemoveMember = async () => {
+    if (!memberToRemove) {
+      return;
+    }
+
+    const nextMember = memberToRemove;
+    setMemberToRemove(null);
+    await handleRemoveMember(nextMember);
+  };
+
+  const activeFilterCount = [memberFilters.role, memberFilters.search].filter(Boolean).length;
+
+  if (isLoading) {
     return null;
   }
 
@@ -265,10 +298,43 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
         </Card>
 
         <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold tracking-tight">{t("members.title")}</h2>
               <Badge variant="outline">{sortedMembers.length}</Badge>
+              {activeFilterCount > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  {activeFilterCount} active
+                </Badge>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-9 h-8 w-full sm:w-56"
+                  placeholder="Search members..."
+                />
+              </div>
+
+              <Select
+                value={memberFilters.role ?? "all"}
+                onValueChange={(v) =>
+                  setMemberFilters((f) => ({ ...f, role: v === "all" ? undefined : (v as "admin" | "member") }))
+                }
+              >
+                <SelectTrigger className="h-8 w-full sm:w-32">
+                  <SelectValue placeholder="All roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All roles</SelectItem>
+                  <SelectItem value="admin">Admins</SelectItem>
+                  <SelectItem value="member">Members</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -324,7 +390,7 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                      <div className="flex flex-col sm:flex-row sm:items-end">
                         {isOwner ? null : (
                           <div className="flex min-w-36 flex-col gap-1">
                             <span className="text-xs font-medium text-muted-foreground">{t("members.role")}</span>
@@ -351,13 +417,14 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
                         {canRemoveMember ? (
                           <Button
                             type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => void handleRemoveMember(member)}
+                            variant="destructive"
+                            size="icon"
+                            className="size-8 shrink-0"
+                            onClick={() => setMemberToRemove(member)}
                             disabled={!canRemoveMember}
+                            aria-label={t("members.remove")}
                           >
                             <Trash2 className="size-4" />
-                            {t("members.remove")}
                           </Button>
                         ) : null}
                       </div>
@@ -370,6 +437,27 @@ export function BoardMembersPageContent({ slug }: BoardMembersPageContentProps) 
           )}
         </section>
       </div>
+
+      <Dialog open={Boolean(memberToRemove)} onOpenChange={(open) => !open && setMemberToRemove(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("removeDialog.title")}</DialogTitle>
+            <DialogDescription>
+              {memberToRemove
+                ? t("removeDialog.description", { name: memberToRemove.displayName || memberToRemove.email })
+                : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setMemberToRemove(null)}>
+              {t("removeDialog.cancel")}
+            </Button>
+            <Button type="button" variant="destructive" onClick={() => void confirmRemoveMember()}>
+              {t("removeDialog.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

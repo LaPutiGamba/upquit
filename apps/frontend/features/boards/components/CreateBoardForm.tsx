@@ -44,7 +44,6 @@ export function CreateBoardForm({ onSuccess }: CreateBoardFormProps) {
   const boardSchema = useMemo(() => createBoardSchema(t), [t]);
 
   const form = useForm<CreateBoardFormValues>({
-    // @ts-expect-error - Zod v4 compatibility with @hookform/resolvers
     resolver: zodResolver(boardSchema),
     defaultValues: {
       name: "",

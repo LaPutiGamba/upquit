@@ -1,4 +1,4 @@
-import { and, asc, eq, sql, not, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, sql, not, inArray, ilike, or } from "drizzle-orm";
 import {
   requestChangelogs,
   requests,
@@ -8,7 +8,7 @@ import {
 } from "../schema.js";
 import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
-import RequestRepository from "../../domain/contracts/RequestRepository.js";
+import RequestRepository, { FindByBoardIdFilters } from "../../domain/contracts/RequestRepository.js";
 import type {
   RequestChangelogCreateInput,
   RequestChangelogWithAuthor
@@ -53,7 +53,76 @@ export default class RequestDrizzleRepository implements RequestRepository {
     return this.mapToDomainRequest(row.request, categoryIds, author);
   }
 
-  public async findByBoardId(boardId: Uuid): Promise<Request[]> {
+  public async findByBoardId(boardId: Uuid, filters?: FindByBoardIdFilters): Promise<Request[]> {
+    const boardIdValue = boardId.getValue();
+
+    let whereClause = eq(requests.boardId, boardIdValue);
+
+    if (filters) {
+      const conditions = [eq(requests.boardId, boardIdValue)];
+
+      if (filters.status && filters.status.length > 0) {
+        const statusValues = filters.status as Array<"open" | "planned" | "in_progress" | "completed" | "rejected">;
+        conditions.push(inArray(requests.status, statusValues));
+      }
+
+      if (filters.categoryId) {
+        const requestIdsWithCategory = await this.db
+          .select({ requestId: requestCategories.requestId })
+          .from(requestCategories)
+          .where(eq(requestCategories.categoryId, filters.categoryId));
+
+        if (requestIdsWithCategory.length > 0) {
+          const ids = requestIdsWithCategory.map((r) => r.requestId);
+          conditions.push(inArray(requests.id, ids));
+        } else {
+          return [];
+        }
+      }
+
+      if (filters.search) {
+        conditions.push(
+          or(ilike(requests.title, `%${filters.search}%`), ilike(requests.description, `%${filters.search}%`))!
+        );
+      }
+
+      if (filters.authorId) {
+        conditions.push(eq(requests.authorId, filters.authorId));
+      }
+
+      if (filters.pinnedOnly) {
+        conditions.push(eq(requests.isPinned, true));
+      }
+
+      if (filters.excludePinned) {
+        conditions.push(not(eq(requests.isPinned, true)));
+      }
+
+      whereClause = and(...conditions)!;
+    }
+
+    let orderByClause = desc(requests.createdAt);
+
+    if (filters?.sortBy) {
+      switch (filters.sortBy) {
+        case "oldest":
+          orderByClause = asc(requests.createdAt);
+          break;
+        case "recently_updated":
+          orderByClause = desc(
+            sql<Date>`coalesce((select max(created_at) from request_changelogs where request_id = ${requests.id}), ${requests.createdAt})`
+          );
+          break;
+        case "newest":
+        default:
+          orderByClause = desc(requests.createdAt);
+          break;
+      }
+    }
+
+    const limit = filters?.limit ?? 100;
+    const offset = filters?.offset ?? 0;
+
     const rows = await this.db
       .select({
         request: requests,
@@ -61,7 +130,10 @@ export default class RequestDrizzleRepository implements RequestRepository {
       })
       .from(requests)
       .leftJoin(users, eq(requests.authorId, users.id))
-      .where(eq(requests.boardId, boardId.getValue()));
+      .where(whereClause)
+      .orderBy(orderByClause)
+      .limit(limit)
+      .offset(offset);
 
     if (rows.length === 0) {
       return [];
@@ -189,7 +261,34 @@ export default class RequestDrizzleRepository implements RequestRepository {
     );
   }
 
-  public async findChangelogByRequestId(id: Uuid): Promise<RequestChangelogWithAuthor[]> {
+  public async findChangelogByRequestId(
+    id: Uuid,
+    filters?: { field?: string[]; userId?: string; search?: string; limit?: number; offset?: number }
+  ): Promise<RequestChangelogWithAuthor[]> {
+    const conditions = [eq(requestChangelogs.requestId, id.getValue())];
+
+    if (filters?.field && filters.field.length > 0) {
+      conditions.push(inArray(requestChangelogs.field, filters.field));
+    }
+
+    if (filters?.userId) {
+      conditions.push(eq(requestChangelogs.userId, filters.userId));
+    }
+
+    if (filters?.search) {
+      conditions.push(
+        or(
+          ilike(requestChangelogs.oldValue, `%${filters.search}%`),
+          ilike(requestChangelogs.newValue, `%${filters.search}%`)
+        )!
+      );
+    }
+
+    const whereClause = and(...conditions)!;
+
+    const limit = filters?.limit ?? 50;
+    const offset = filters?.offset ?? 0;
+
     const rows = await this.db
       .select({
         changelog: requestChangelogs,
@@ -197,8 +296,10 @@ export default class RequestDrizzleRepository implements RequestRepository {
       })
       .from(requestChangelogs)
       .leftJoin(users, eq(requestChangelogs.userId, users.id))
-      .where(eq(requestChangelogs.requestId, id.getValue()))
-      .orderBy(asc(requestChangelogs.createdAt), asc(requestChangelogs.id));
+      .where(whereClause)
+      .orderBy(asc(requestChangelogs.createdAt), asc(requestChangelogs.id))
+      .limit(limit)
+      .offset(offset);
 
     const changelogEntries: RequestChangelogWithAuthor[] = rows.map((row) => ({
       id: row.changelog.id,

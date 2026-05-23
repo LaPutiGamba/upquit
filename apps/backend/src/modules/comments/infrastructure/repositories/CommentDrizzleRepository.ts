@@ -1,9 +1,9 @@
-import { eq } from "drizzle-orm";
+import { and, eq, desc, asc } from "drizzle-orm";
 import { comments } from "../schema.js";
 import { users } from "../../../users/infrastructure/schema.js";
 import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
 
-import CommentRepository from "../../domain/contracts/CommentRepository.js";
+import CommentRepository, { FindCommentsFilters } from "../../domain/contracts/CommentRepository.js";
 import Comment, { CommentWithAuthor } from "../../domain/entities/Comment.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 
@@ -47,7 +47,23 @@ export default class CommentDrizzleRepository implements CommentRepository {
     return rows.map((row) => this.mapToDomainComment(row));
   }
 
-  public async findByRequestIdWithAuthor(requestId: Uuid): Promise<CommentWithAuthor[]> {
+  public async findByRequestIdWithAuthor(requestId: Uuid, filters?: FindCommentsFilters): Promise<CommentWithAuthor[]> {
+    let orderByClause = desc(comments.createdAt);
+
+    if (filters?.sortBy === "oldest_first") {
+      orderByClause = asc(comments.createdAt);
+    }
+
+    const whereConditions = [eq(comments.requestId, requestId.getValue())];
+
+    if (filters?.adminOnly) {
+      whereConditions.push(eq(comments.isAdminReply, true));
+    }
+
+    const limit = filters?.limit ?? 100;
+    const offset = filters?.offset ?? 0;
+    const whereClause = and(...whereConditions)!;
+
     const rows = await this.db
       .select({
         comment: comments,
@@ -57,7 +73,10 @@ export default class CommentDrizzleRepository implements CommentRepository {
       })
       .from(comments)
       .leftJoin(users, eq(comments.userId, users.id))
-      .where(eq(comments.requestId, requestId.getValue()));
+      .where(whereClause)
+      .orderBy(orderByClause)
+      .limit(limit)
+      .offset(offset);
 
     return rows.map((row) => ({
       comment: this.mapToDomainComment(row.comment),

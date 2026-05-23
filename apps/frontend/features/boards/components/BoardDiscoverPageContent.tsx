@@ -80,6 +80,7 @@ export function BoardDiscoverPageContent() {
   }, [offset, searchTerm, sortBy, t]);
 
   const joinedBoardIds = useMemo(() => new Set(boards.map((board) => board.id)), [boards]);
+  const shouldShowPagination = offset > 0 || hasNextPage;
 
   const handleJoinBoard = async (board: BoardResponse) => {
     if (!user) {
@@ -142,7 +143,7 @@ export function BoardDiscoverPageContent() {
           </div>
         </section>
 
-        {loading ? (
+        {loading && results.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
         ) : results.length === 0 ? (
           <div className="rounded-xl border border-dashed p-10 text-center text-muted-foreground">{t("empty")}</div>
@@ -188,15 +189,17 @@ export function BoardDiscoverPageContent() {
                         <Link href={`/board/${board.slug}`}>{t("viewBoard")}</Link>
                       </Button>
                     )}
-                    <Button
-                      size="sm"
-                      disabled={isJoined || isJoining}
-                      onClick={() => {
-                        void handleJoinBoard(board);
-                      }}
-                    >
-                      {isJoined ? t("joined") : isJoining ? t("joining") : t("join")}
-                    </Button>
+                    {!isJoined ? (
+                      <Button
+                        size="sm"
+                        disabled={isJoining}
+                        onClick={() => {
+                          void handleJoinBoard(board);
+                        }}
+                      >
+                        {isJoining ? t("joining") : t("join")}
+                      </Button>
+                    ) : null}
                   </CardFooter>
                 </Card>
               );
@@ -204,22 +207,24 @@ export function BoardDiscoverPageContent() {
           </section>
         )}
 
-        <section className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            disabled={offset === 0 || loading}
-            onClick={() => setOffset((previousOffset) => Math.max(0, previousOffset - PAGE_SIZE))}
-          >
-            {t("pagination.previous")}
-          </Button>
-          <Button
-            variant="outline"
-            disabled={!hasNextPage || loading}
-            onClick={() => setOffset((previousOffset) => previousOffset + PAGE_SIZE)}
-          >
-            {t("pagination.next")}
-          </Button>
-        </section>
+        {shouldShowPagination ? (
+          <section className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              disabled={offset === 0 || loading}
+              onClick={() => setOffset((previousOffset) => Math.max(0, previousOffset - PAGE_SIZE))}
+            >
+              {t("pagination.previous")}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!hasNextPage || loading}
+              onClick={() => setOffset((previousOffset) => previousOffset + PAGE_SIZE)}
+            >
+              {t("pagination.next")}
+            </Button>
+          </section>
+        ) : null}
       </div>
     </main>
   );

@@ -92,7 +92,7 @@ export function CategorySelectorMultiple({
   }, [boardId]);
 
   useEffect(() => {
-    void fetchCategories();
+    void Promise.resolve().then(fetchCategories);
   }, [fetchCategories]);
 
   type CategoryAddedPayload = {

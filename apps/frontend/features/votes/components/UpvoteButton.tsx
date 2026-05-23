@@ -39,10 +39,6 @@ export function UpvoteButton({ requestId, boardId, initialVoteCount, className }
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    setVoteCount(initialVoteCount);
-  }, [initialVoteCount]);
-
   const channelName = boardId ? `request.${boardId}` : null;
 
   useChannel<RequestUpdatedBroadcastPayload>(channelName, (message) => {

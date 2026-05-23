@@ -1,10 +1,10 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import type { CurrentDatabase } from "../../../../shared/infrastructure/database/connection.js";
-import type INotificationRepository from "../../domain/contracts/INotificationRepository.js";
+import type NotificationRepository from "../../domain/contracts/NotificationRepository.js";
 import Notification from "../../domain/entities/Notification.js";
 import { notifications } from "../schema.js";
 
-export default class NotificationDrizzleRepository implements INotificationRepository {
+export default class NotificationDrizzleRepository implements NotificationRepository {
   constructor(private readonly db: CurrentDatabase) {}
 
   async create(notification: Notification): Promise<void> {
@@ -21,14 +21,30 @@ export default class NotificationDrizzleRepository implements INotificationRepos
 
   async listByUser(
     userId: string,
-    opts?: { boardId?: string | null; limit?: number; offset?: number }
+    opts?: { boardId?: string | null; limit?: number; offset?: number; read?: boolean; type?: string; search?: string }
   ): Promise<Notification[]> {
     const limit = opts?.limit ?? 20;
     const offset = opts?.offset ?? 0;
 
-    const whereClause = opts?.boardId
-      ? and(eq(notifications.userId, userId), eq(notifications.boardId, opts.boardId))
-      : eq(notifications.userId, userId);
+    const conditions = [eq(notifications.userId, userId)];
+
+    if (opts?.boardId) {
+      conditions.push(eq(notifications.boardId, opts.boardId));
+    }
+
+    if (opts?.read !== undefined) {
+      conditions.push(eq(notifications.read, opts.read));
+    }
+
+    if (opts?.type) {
+      conditions.push(eq(notifications.type, opts.type));
+    }
+
+    if (opts?.search) {
+      conditions.push(sql`${notifications.payload}::text ILIKE ${`%${opts.search}%`}`);
+    }
+
+    const whereClause = and(...conditions)!;
 
     const rows = await this.db
       .select()
@@ -45,7 +61,7 @@ export default class NotificationDrizzleRepository implements INotificationRepos
           userId: row.userId,
           boardId: row.boardId,
           type: row.type,
-          payload: row.payload,
+          payload: row.payload as Record<string, unknown>,
           read: row.read ?? false,
           createdAt: row.createdAt ? row.createdAt.toISOString() : new Date().toISOString()
         })

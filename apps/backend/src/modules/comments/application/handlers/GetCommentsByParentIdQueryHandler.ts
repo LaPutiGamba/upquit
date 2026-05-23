@@ -16,6 +16,6 @@ export default class GetCommentsByParentIdQueryHandler {
     }
 
     const comments = await this.commentRepository.findByParentId(parentId);
-    return comments.map(mapCommentToResponse);
+    return comments.map((c) => mapCommentToResponse(c));
   }
 }

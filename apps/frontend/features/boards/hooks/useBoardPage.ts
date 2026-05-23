@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { boardService, BoardResponse } from "@/features/boards/services/boardService";
-import { requestService, RequestResponse } from "@/features/requests/services/requestService";
+import { requestService, RequestResponse, GetRequestsFilters } from "@/features/requests/services/requestService";
 import { UnauthorizedError } from "@/shared/lib/apiClient";
 import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
 import { useAuth } from "@/shared/components/AuthProvider";
@@ -17,6 +17,7 @@ interface UseBoardPageResult {
   loading: boolean;
   notFound: boolean;
   addRequest: (request: RequestResponse) => void;
+  refetchRequests: () => void;
 }
 
 type RequestRealtimeMessagePayload =
@@ -33,41 +34,69 @@ type RequestRealtimeMessagePayload =
       voteCount: number | null;
     };
 
-export function useBoardPage(slug: string, isRequestsTab: boolean): UseBoardPageResult {
+export function useBoardPage(slug: string, isRequestsTab: boolean, filters?: GetRequestsFilters): UseBoardPageResult {
   const router = useRouter();
   const { isAuthLoading } = useAuth();
+  const sortBy = filters?.sortBy ?? "newest";
 
   const [board, setBoard] = useState<BoardResponse | null>(null);
   const [requests, setRequests] = useState<RequestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const addRequest = useCallback((request: RequestResponse) => {
-    setRequests((prev) => {
-      const exists = prev.some((r) => r.id === request.id);
-      if (exists) {
-        return prev;
-      }
+  const [refetchKey, setRefetchKey] = useState(0);
 
-      return [request, ...prev];
-    });
-  }, []);
+  const filtersKey = useMemo(() => JSON.stringify(filters ?? {}), [filters]);
 
-  const requestsSortedByDate = useMemo(() => {
-    return requests.toSorted((a, b) => {
-      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+  const addRequest = useCallback(
+    (request: RequestResponse) => {
+      setRequests((prev) => {
+        const exists = prev.some((r) => r.id === request.id);
+        if (exists) {
+          return prev;
+        }
 
-      return bTime - aTime;
-    });
-  }, [requests]);
+        const next = [...prev, request];
+
+        return next.toSorted((a, b) => {
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
+          switch (sortBy) {
+            case "oldest":
+              return aTime - bTime;
+            case "recently_updated":
+            case "newest":
+            default:
+              return bTime - aTime;
+          }
+        });
+      });
+    },
+    [sortBy]
+  );
 
   const latestRequestDate = useMemo(() => {
-    const latest = requestsSortedByDate[0];
-    if (!latest?.createdAt) return null;
+    let latestTime = 0;
+    let latestDate: string | null = null;
 
-    const date = latest.createdAt;
-    return typeof date === "string" ? date : date.toISOString();
-  }, [requestsSortedByDate]);
+    for (const request of requests) {
+      if (!request.createdAt) {
+        continue;
+      }
+
+      const requestTime = new Date(request.createdAt).getTime();
+      if (requestTime >= latestTime) {
+        latestTime = requestTime;
+        latestDate = typeof request.createdAt === "string" ? request.createdAt : request.createdAt.toISOString();
+      }
+    }
+
+    return latestDate;
+  }, [requests]);
+
+  const refetchRequests = useCallback(() => {
+    setRefetchKey((k) => k + 1);
+  }, []);
 
   useEffect(() => {
     if (isAuthLoading) {
@@ -90,13 +119,11 @@ export function useBoardPage(slug: string, isRequestsTab: boolean): UseBoardPage
         setBoard(currentBoard);
 
         if (isRequestsTab) {
-          const boardRequests = await requestService.getRequestsByBoardId(currentBoard.id).catch(() => []);
+          const boardRequests = await requestService.getRequestsByBoardId(currentBoard.id, filters).catch(() => []);
 
-          if (cancelled) {
-            return;
+          if (!cancelled) {
+            setRequests(boardRequests);
           }
-
-          setRequests(boardRequests);
         } else {
           setRequests([]);
         }
@@ -123,7 +150,7 @@ export function useBoardPage(slug: string, isRequestsTab: boolean): UseBoardPage
     return () => {
       cancelled = true;
     };
-  }, [isAuthLoading, isRequestsTab, router, slug]);
+  }, [isAuthLoading, isRequestsTab, router, slug, filters, filtersKey, refetchKey]);
 
   const handleBoardChannelMessage = useCallback(
     (message: IncomingBroadcastMessage<RequestRealtimeMessagePayload>) => {
@@ -160,5 +187,5 @@ export function useBoardPage(slug: string, isRequestsTab: boolean): UseBoardPage
 
   useChannel<RequestRealtimeMessagePayload>(board ? `request.${board.id}` : null, handleBoardChannelMessage);
 
-  return { board, requests: requestsSortedByDate, latestRequestDate, loading, notFound, addRequest };
+  return { board, requests, latestRequestDate, loading, notFound, addRequest, refetchRequests };
 }

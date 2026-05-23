@@ -16,7 +16,7 @@ export default function NotificationBell() {
   const currentBoardSlug = pathname.startsWith("/board/") ? pathname.replace("/board/", "").split("/")[0] : null;
   const currentBoard = boards.find((board) => board.slug === currentBoardSlug);
   const currentBoardId = currentBoard?.id;
-  const { notifications, unread, markAsRead, markAll } = useNotifications(currentBoardId);
+  const { notifications, unread, markAsRead, markAll } = useNotifications(currentBoardId ? { boardId: currentBoardId } : undefined);
 
   return (
     <DropdownMenu>

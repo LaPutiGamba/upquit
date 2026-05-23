@@ -63,8 +63,20 @@ export interface CategoryResponse {
 export type PublicBoardSortBy = "recent" | "name" | "members";
 
 export const boardService = {
-  getMyBoards: async (token?: string): Promise<BoardResponse[]> => {
-    return await apiClient<BoardResponse[]>("/boards/mine", {
+  getMyBoards: async (
+    filters?: { search?: string; sortBy?: "name" | "recent"; limit?: number; offset?: number },
+    token?: string
+  ): Promise<BoardResponse[]> => {
+    const params = new URLSearchParams();
+    if (filters?.search) params.set("search", filters.search);
+    if (filters?.sortBy) params.set("sortBy", filters.sortBy);
+    if (filters?.limit) params.set("limit", String(filters.limit));
+    if (filters?.offset) params.set("offset", String(filters.offset));
+
+    const queryString = params.toString();
+    const url = `/boards/mine${queryString ? `?${queryString}` : ""}`;
+
+    return await apiClient<BoardResponse[]>(url, {
       method: "GET",
       token
     });
@@ -140,8 +152,21 @@ export const boardService = {
     });
   },
 
-  getBoardMembers: async (boardId: string, token?: string): Promise<BoardMember[]> => {
-    return await apiClient<BoardMember[]>(`/boards/${boardId}/members`, {
+  getBoardMembers: async (
+    boardId: string,
+    filters?: { role?: "admin" | "member"; search?: string; limit?: number; offset?: number },
+    token?: string
+  ): Promise<BoardMember[]> => {
+    const params = new URLSearchParams();
+    if (filters?.role) params.set("role", filters.role);
+    if (filters?.search) params.set("search", filters.search);
+    if (filters?.limit) params.set("limit", String(filters.limit));
+    if (filters?.offset) params.set("offset", String(filters.offset));
+
+    const queryString = params.toString();
+    const url = `/boards/${boardId}/members${queryString ? `?${queryString}` : ""}`;
+
+    return await apiClient<BoardMember[]>(url, {
       method: "GET",
       token
     });

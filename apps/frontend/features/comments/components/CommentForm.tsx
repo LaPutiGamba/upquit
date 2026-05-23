@@ -13,6 +13,7 @@ import { commentService, type default as CommentResponse } from "../services/com
 interface CommentFormProps {
   requestId: string;
   boardId: string;
+  isBoardAdmin?: boolean;
   onCommentAdded: (comment: CommentResponse) => void;
   isDialog?: boolean;
   parentId?: string;
@@ -22,6 +23,7 @@ interface CommentFormProps {
 export function CommentForm({
   requestId,
   boardId,
+  isBoardAdmin = false,
   onCommentAdded,
   isDialog = false,
   parentId,
@@ -66,7 +68,13 @@ export function CommentForm({
 
     startTransition(async () => {
       try {
-        const createdComment = await commentService.createComment(requestId, boardId, content.trim(), parentId);
+        const createdComment = await commentService.createComment(
+          requestId,
+          boardId,
+          content.trim(),
+          parentId,
+          isBoardAdmin
+        );
 
         setContent("");
         notifyOtherTabs(createdComment);

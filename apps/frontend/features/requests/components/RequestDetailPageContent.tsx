@@ -193,7 +193,6 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
 
   useEffect(() => {
     if (!board || !editableRequest || !canWatchRequest) {
-      setIsSubscribed(false);
       return;
     }
 
@@ -415,6 +414,7 @@ export function RequestDetailPageContent({ slug, id }: RequestDetailPageContentP
           <RequestActivityTabs
             requestId={editableRequest.id}
             boardId={board.id}
+            isBoardAdmin={canManageBoard}
             refreshToken={changelogRefreshKey}
             className="mt-4 flex h-[66vh] min-h-90 flex-col min-w-0 overflow-hidden"
           />

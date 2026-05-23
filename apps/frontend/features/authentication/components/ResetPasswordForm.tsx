@@ -43,7 +43,6 @@ export default function ResetPasswordForm({ token, className, ...props }: ResetP
   const { push } = useRouter();
 
   const form = useForm<ResetPasswordFormValues>({
-    // @ts-expect-error - Zod v4 compatibility with @hookform/resolvers
     resolver: zodResolver(resetPasswordSchema(t)),
     defaultValues: {
       password: "",

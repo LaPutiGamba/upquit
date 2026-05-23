@@ -2,17 +2,33 @@ import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
 import Request from "../entities/Request.js";
 import Subscription from "../entities/Subscription.js";
 import type { RequestChangelogCreateInput, RequestChangelogWithAuthor } from "./RequestChangelog.js";
+import type { RequestSortBy } from "../../application/queries/GetRequestsByBoardIdQuery.js";
+
+export interface FindByBoardIdFilters {
+  status?: string[];
+  categoryId?: string;
+  search?: string;
+  sortBy?: RequestSortBy;
+  authorId?: string;
+  pinnedOnly?: boolean;
+  excludePinned?: boolean;
+  limit?: number;
+  offset?: number;
+}
 
 export default interface RequestRepository {
   // Request Operations
   findById(id: Uuid): Promise<Request | null>;
-  findByBoardId(boardId: Uuid): Promise<Request[]>;
+  findByBoardId(boardId: Uuid, filters?: FindByBoardIdFilters): Promise<Request[]>;
   isBoardOwnerOrAdmin(boardId: Uuid, userId: Uuid): Promise<boolean>;
   save(request: Request): Promise<void>;
   update(request: Request): Promise<void>;
   delete(id: string): Promise<void>;
   addChangelogEntries(entries: RequestChangelogCreateInput[]): Promise<void>;
-  findChangelogByRequestId(id: Uuid): Promise<RequestChangelogWithAuthor[]>;
+  findChangelogByRequestId(
+    id: Uuid,
+    filters?: { field?: string[]; userId?: string; search?: string; limit?: number; offset?: number }
+  ): Promise<RequestChangelogWithAuthor[]>;
   getCategoryNamesByIds(categoryIds: string[]): Promise<{ id: string; name: string }[]>;
   addDeletedCategoriesForChangelog(
     records: { requestChangelogId: string; categoryId: string; categoryName: string }[]

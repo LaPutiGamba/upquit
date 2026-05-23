@@ -16,6 +16,7 @@
     "emptyDescription": "You haven't created any boards yet. Get started by creating your first board",
     "personalTitle": "Personal boards",
     "personalDescription": "Boards you own and control.",
+    "searchPlaceholder": "Search boards...",
     "personalEmpty": "No personal boards yet.",
     "joinedTitle": "Joined boards",
     "joinedDescription": "Boards where you are a member.",
@@ -307,6 +308,12 @@
       "role": "Role",
       "remove": "Remove"
     },
+    "removeDialog": {
+      "title": "Remove member?",
+      "description": "This will remove {name} from the board.",
+      "cancel": "Cancel",
+      "confirm": "Remove"
+    },
     "roles": {
       "owner": "Owner",
       "admin": "Admin",
@@ -544,5 +551,22 @@
       "joinedBoard": "Joined {boardName}.",
       "joinBoardFailed": "Could not join this board."
     }
+  },
+  "RequestFilters": {
+    "searchPlaceholder": "Search requests...",
+    "sortLabel": "Sort by",
+    "sortNewest": "Newest",
+    "sortOldest": "Oldest",
+    "sortRecentlyUpdated": "Recently Updated",
+    "filters": "Filters",
+    "advancedFilters": "Advanced Filters",
+    "clearAll": "Clear all",
+    "statusLabel": "Status",
+    "allStatuses": "All statuses",
+    "selectedStatuses": "{count} selected",
+    "categoryLabel": "Category",
+    "allCategories": "All",
+    "pinnedOnly": "Pinned only",
+    "hidePinned": "Hide pinned"
   }
 }

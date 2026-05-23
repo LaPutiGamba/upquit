@@ -1,5 +1,5 @@
 import RequestCreatedEvent from "../../../requests/domain/events/RequestCreatedEvent.js";
-import type INotificationRepository from "../../domain/contracts/INotificationRepository.js";
+import type NotificationRepository from "../../domain/contracts/NotificationRepository.js";
 import Notification from "../../domain/entities/Notification.js";
 import BoardRepository from "../../../boards/domain/contracts/BoardRepository.js";
 import Uuid from "../../../../shared/domain/value-objects/Uuid.js";
@@ -8,7 +8,7 @@ import UserRepository from "../../../users/domain/contracts/UserRepository.js";
 
 export default class CreateNotificationsOnRequestCreated {
   constructor(
-    private readonly notificationRepository: INotificationRepository,
+    private readonly notificationRepository: NotificationRepository,
     private readonly boardRepository: BoardRepository,
     private readonly userRepository: UserRepository,
     private readonly realtimePublisher: RealtimePublisher

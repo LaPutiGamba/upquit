@@ -33,20 +33,22 @@ interface RequestCardProps {
 
 export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }: RequestCardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [editableRequest, setEditableRequest] = useState(request);
+  const [optimisticRequest, setOptimisticRequest] = useState<RequestResponse | null>(null);
   const [changelogRefreshKey, setChangelogRefreshKey] = useState(0);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
   const [isSubscriptionSaving, setIsSubscriptionSaving] = useState(false);
+  const editableRequest = useMemo(() => {
+    if (!optimisticRequest) {
+      return request;
+    }
+
+    return optimisticRequest.id === request.id ? optimisticRequest : request;
+  }, [optimisticRequest, request]);
   const canWatchRequest = Boolean(currentUserId && currentUserId !== editableRequest.authorId);
 
   useEffect(() => {
-    setEditableRequest(request);
-  }, [request]);
-
-  useEffect(() => {
     if (!isOpen || !canWatchRequest) {
-      setIsSubscribed(false);
       return;
     }
 
@@ -106,7 +108,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
     const previousRequest = editableRequest;
     const nextRequest = { ...editableRequest, ...payload };
 
-    setEditableRequest(nextRequest);
+    setOptimisticRequest(nextRequest);
 
     try {
       const updatedRequest = await requestService.updateRequest(editableRequest.id, editableRequest.boardId, payload);
@@ -118,13 +120,13 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
         updatedRequest.categoryIds === undefined &&
         (!updatedRequest.categories || updatedRequest.categories.length === 0);
 
-      setEditableRequest({
+      setOptimisticRequest({
         ...updatedRequest,
         categoryIds: shouldKeepOptimisticCategoryIds ? nextCategoryIds : updatedCategoryIds
       });
       setChangelogRefreshKey((currentValue) => currentValue + 1);
     } catch {
-      setEditableRequest(previousRequest);
+      setOptimisticRequest(previousRequest);
       toast.error("Could not save request changes");
     }
   };
@@ -155,7 +157,15 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          setIsSubscribed(false);
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <article className="flex w-full flex-col rounded-lg border border-border/70 px-4 py-3 text-left transition-colors hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2">
           <div className="min-w-0">
@@ -314,6 +324,7 @@ export function RequestCard({ request, boardSlug, currentUserId, isBoardAdmin }:
             <RequestActivityTabs
               requestId={editableRequest.id}
               boardId={editableRequest.boardId}
+              isBoardAdmin={isBoardAdmin}
               refreshToken={changelogRefreshKey}
               isDialog
               className="flex min-h-0 flex-1 flex-col"

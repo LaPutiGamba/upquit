@@ -5,7 +5,9 @@ import type { CurrentDatabase } from "../../../../shared/infrastructure/database
 
 import BoardRepository, {
   type BoardMemberRecord,
-  type PublicBoardSortBy
+  type PublicBoardSortBy,
+  type FindMembersFilters,
+  type FindBoardsByUserFilters
 } from "../../domain/contracts/BoardRepository.js";
 import Board from "../../domain/entities/Board.js";
 import BoardMember from "../../domain/entities/BoardMember.js";
@@ -56,12 +58,27 @@ export default class BoardDrizzleRepository implements BoardRepository {
     return this.mapToDomainBoard(row.board, owner);
   }
 
-  public async findByUserId(userId: Uuid): Promise<Board[]> {
+  public async findByUserId(userId: Uuid, filters?: FindBoardsByUserFilters): Promise<Board[]> {
     const boardIds = await this.findBoardIdsByUserId(userId);
 
     if (boardIds.length === 0) {
       return [];
     }
+
+    const conditions = [inArray(boards.id, boardIds)];
+
+    if (filters?.search) {
+      conditions.push(or(ilike(boards.name, `%${filters.search}%`), ilike(boards.description, `%${filters.search}%`))!);
+    }
+
+    let orderByClause = asc(boards.name);
+
+    if (filters?.sortBy === "recent") {
+      orderByClause = desc(boards.createdAt);
+    }
+
+    const limit = filters?.limit ?? 50;
+    const offset = filters?.offset ?? 0;
 
     const rows = await this.db
       .select({
@@ -70,7 +87,11 @@ export default class BoardDrizzleRepository implements BoardRepository {
       })
       .from(boards)
       .leftJoin(users, eq(boards.ownerId, users.id))
-      .where(inArray(boards.id, boardIds));
+      .where(and(...conditions)!)
+      .orderBy(orderByClause)
+      .limit(limit)
+      .offset(offset);
+
     return rows.map((row) => {
       const owner = row.owner ? this.mapToDomainUser(row.owner) : null;
       return this.mapToDomainBoard(row.board, owner);
@@ -117,7 +138,7 @@ export default class BoardDrizzleRepository implements BoardRepository {
         .from(boards)
         .leftJoin(users, eq(boards.ownerId, users.id))
         .where(whereCondition)
-        .orderBy(sortBy === "name" ? asc(boards.name) : desc(boards.createdAt), desc(boards.createdAt))
+        .orderBy(sortBy === "name" ? asc(sql`lower(${boards.name})`) : desc(boards.createdAt), desc(boards.createdAt))
         .limit(limit)
         .offset(offset);
 
@@ -264,7 +285,20 @@ export default class BoardDrizzleRepository implements BoardRepository {
     });
   }
 
-  public async findMembersByBoardId(boardId: Uuid): Promise<BoardMemberRecord[]> {
+  public async findMembersByBoardId(boardId: Uuid, filters?: FindMembersFilters): Promise<BoardMemberRecord[]> {
+    const conditions = [eq(boardMembers.boardId, boardId.getValue())];
+
+    if (filters?.role) {
+      conditions.push(eq(boardMembers.role, filters.role));
+    }
+
+    if (filters?.search) {
+      conditions.push(or(ilike(users.displayName, `%${filters.search}%`), ilike(users.email, `%${filters.search}%`))!);
+    }
+
+    const limit = filters?.limit ?? 50;
+    const offset = filters?.offset ?? 0;
+
     return await this.db
       .select({
         userId: boardMembers.userId,
@@ -277,7 +311,10 @@ export default class BoardDrizzleRepository implements BoardRepository {
       })
       .from(boardMembers)
       .innerJoin(users, eq(users.id, boardMembers.userId))
-      .where(eq(boardMembers.boardId, boardId.getValue()));
+      .where(and(...conditions)!)
+      .orderBy(asc(users.displayName))
+      .limit(limit)
+      .offset(offset);
   }
 
   public async findMemberByBoardIdAndUserId(boardId: Uuid, userId: Uuid): Promise<BoardMemberRecord | null> {

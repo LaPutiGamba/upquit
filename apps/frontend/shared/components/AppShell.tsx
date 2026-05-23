@@ -79,7 +79,7 @@ export function AppShell({ children }: AppShellProps) {
   const normalizedPath = normalizePathname(pathname ?? "");
   const { replace, refresh } = useRouter();
   const t = useTranslations("AppShell");
-  const { user, boards } = useAuth();
+  const { user, boards, refreshBoards } = useAuth();
 
   const [isCreateBoardOpen, setIsCreateBoardOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -106,6 +106,29 @@ export function AppShell({ children }: AppShellProps) {
   const boardDashboardHref = boardNavigationSlug ? `/board/${boardNavigationSlug}` : "/boards";
   const boardRequestsHref = boardNavigationSlug ? `/board/${boardNavigationSlug}/requests` : "/boards";
   const boardMembersHref = boardNavigationSlug ? `/board/${boardNavigationSlug}/members` : "/boards";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const ensureBoardsLoadedForBoardRoute = async () => {
+      if (!user || !currentBoardSlug || boards.length > 0) {
+        return;
+      }
+
+      try {
+        await refreshBoards();
+      } catch {
+        if (!cancelled) {
+        }
+      }
+    };
+
+    void ensureBoardsLoadedForBoardRoute();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [boards.length, currentBoardSlug, refreshBoards, user]);
 
   useEffect(() => {
     let cancelled = false;

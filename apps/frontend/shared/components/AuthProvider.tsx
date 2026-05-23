@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const [profile, userBoards] = await Promise.all([
         authService.getUserProfile(userId, token),
-        boardService.getMyBoards(token)
+        boardService.getMyBoards(undefined, token)
       ]);
 
       setUser(profile);

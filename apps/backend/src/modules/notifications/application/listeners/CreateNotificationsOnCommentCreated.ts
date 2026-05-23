@@ -1,5 +1,5 @@
 import CommentCreatedEvent from "../../../comments/domain/events/CommentCreatedEvent.js";
-import type INotificationRepository from "../../domain/contracts/INotificationRepository.js";
+import type NotificationRepository from "../../domain/contracts/NotificationRepository.js";
 import Notification from "../../domain/entities/Notification.js";
 import BoardRepository from "../../../boards/domain/contracts/BoardRepository.js";
 import RequestRepository from "../../../requests/domain/contracts/RequestRepository.js";
@@ -9,7 +9,7 @@ import RealtimePublisher from "../../../../shared/domain/contracts/RealtimePubli
 
 export default class CreateNotificationsOnCommentCreated {
   constructor(
-    private readonly notificationRepository: INotificationRepository,
+    private readonly notificationRepository: NotificationRepository,
     private readonly boardRepository: BoardRepository,
     private readonly requestRepository: RequestRepository,
     private readonly userRepository: UserRepository,

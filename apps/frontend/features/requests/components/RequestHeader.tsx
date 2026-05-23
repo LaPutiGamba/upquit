@@ -118,18 +118,15 @@ export function RequestTitle({
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [value, setValue] = useState(initialText);
-
-  useEffect(() => {
-    if (!isEditing) setValue(initialText);
-  }, [initialText, isEditing]);
+  const [draftValue, setDraftValue] = useState(initialText);
+  const value = isEditing ? draftValue : initialText;
 
   const commitTitle = async () => {
-    const nextTitle = value.trim();
+    const nextTitle = draftValue.trim();
     setIsEditing(false);
 
     if (!nextTitle || nextTitle === initialText || !onSave) {
-      setValue(initialText);
+      setDraftValue(initialText);
       return;
     }
 
@@ -137,7 +134,7 @@ export function RequestTitle({
     try {
       await onSave(nextTitle);
     } catch {
-      setValue(initialText);
+      setDraftValue(initialText);
     } finally {
       setIsSaving(false);
     }
@@ -147,8 +144,11 @@ export function RequestTitle({
     return (
       <Input
         value={value}
-        onChange={(event) => setValue(event.target.value)}
-        onFocus={() => setIsEditing(true)}
+        onChange={(event) => setDraftValue(event.target.value)}
+        onFocus={() => {
+          setDraftValue(initialText);
+          setIsEditing(true);
+        }}
         onBlur={() => void commitTitle()}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
@@ -157,7 +157,7 @@ export function RequestTitle({
           }
           if (event.key === "Escape") {
             event.preventDefault();
-            setValue(initialText);
+            setDraftValue(initialText);
             setIsEditing(false);
             event.currentTarget.blur();
           }
@@ -208,19 +208,14 @@ export function RequestDescription({
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [value, setValue] = useState(initialText);
+  const [draftValue, setDraftValue] = useState(initialText);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const value = isEditing ? draftValue : initialText;
 
   const adjustHeight = (el: HTMLTextAreaElement) => {
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
   };
-
-  useEffect(() => {
-    if (!isEditing) {
-      setValue(initialText);
-    }
-  }, [initialText, isEditing]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -231,14 +226,14 @@ export function RequestDescription({
   }, [initialText, isEditing]);
 
   const commitDescription = async () => {
-    const trimmed = value.trim();
-    const nextDescription = trimmed.length > 0 ? value : null;
+    const trimmed = draftValue.trim();
+    const nextDescription = trimmed.length > 0 ? draftValue : null;
     const previousDescription = initialText.trim().length > 0 ? initialText : null;
 
     setIsEditing(false);
 
     if (nextDescription === previousDescription || !onSave) {
-      setValue(initialText);
+      setDraftValue(initialText);
       return;
     }
 
@@ -246,7 +241,7 @@ export function RequestDescription({
     try {
       await onSave(nextDescription);
     } catch {
-      setValue(initialText);
+      setDraftValue(initialText);
     } finally {
       setIsSaving(false);
     }
@@ -262,15 +257,18 @@ export function RequestDescription({
           rows={1}
           value={value}
           onChange={(event) => {
-            setValue(event.target.value);
+            setDraftValue(event.target.value);
             adjustHeight(event.target);
           }}
-          onFocus={() => setIsEditing(true)}
+          onFocus={() => {
+            setDraftValue(initialText);
+            setIsEditing(true);
+          }}
           onBlur={() => void commitDescription()}
           onKeyDown={(event) => {
             if (event.key === "Escape") {
               event.preventDefault();
-              setValue(initialText);
+              setDraftValue(initialText);
               setIsEditing(false);
               event.currentTarget.blur();
             }

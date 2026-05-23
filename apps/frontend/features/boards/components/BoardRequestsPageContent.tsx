@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 
 import { useBoardPage } from "@/features/boards/hooks/useBoardPage";
 import { boardService } from "@/features/boards/services/boardService";
 import { RequestCard } from "@/features/requests/components/RequestCard";
 import { CreateRequestForm } from "@/features/requests/components/CreateRequestForm";
+import { RequestFilterBar, type RequestFilters } from "@/features/requests/components/RequestFilterBar";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { Badge } from "@/shared/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/shared/components/ui/empty";
 import { MessageSquareDashed } from "lucide-react";
 import { formatRequestDateWithFormatter } from "@/shared/lib/date";
+import type { GetRequestsFilters } from "@/features/requests/services/requestService";
 
 interface BoardRequestsPageContentProps {
   slug: string;
@@ -21,8 +23,27 @@ export function BoardRequestsPageContent({ slug }: BoardRequestsPageContentProps
   const t = useTranslations("BoardPage");
   const formatter = useFormatter();
   const { user } = useAuth();
-  const { board, requests, latestRequestDate, loading, notFound, addRequest } = useBoardPage(slug, true);
+  const [filters, setFilters] = useState<GetRequestsFilters>({});
+  const { board, requests, latestRequestDate, loading, notFound, addRequest } = useBoardPage(slug, true, filters);
   const [canManageBoard, setCanManageBoard] = useState(false);
+
+  const handleFilterChange = useCallback((newFilters: RequestFilters) => {
+    setFilters(newFilters);
+  }, []);
+
+  const categories = useMemo(() => {
+    const categoryMap = new Map<string, { id: string; name: string; hexColor: string }>();
+    for (const request of requests) {
+      if (request.categories) {
+        for (const cat of request.categories) {
+          if (!categoryMap.has(cat.id)) {
+            categoryMap.set(cat.id, cat);
+          }
+        }
+      }
+    }
+    return Array.from(categoryMap.values());
+  }, [requests]);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,7 +77,7 @@ export function BoardRequestsPageContent({ slug }: BoardRequestsPageContentProps
     };
   }, [board, user]);
 
-  if (loading) {
+  if (loading && !board) {
     return null;
   }
 
@@ -97,6 +118,14 @@ export function BoardRequestsPageContent({ slug }: BoardRequestsPageContentProps
               onRequestCreated={addRequest}
             />
           </div>
+
+          <RequestFilterBar
+            board={board}
+            categories={categories}
+            authors={[]}
+            requests={requests}
+            onFilterChange={handleFilterChange}
+          />
 
           {requests.length === 0 ? (
             <Empty className="rounded-xl border border-dashed py-12">

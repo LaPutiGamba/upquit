@@ -16,6 +16,7 @@
     "emptyDescription": "Encara no has creat cap tauler. Comença creant el primer",
     "personalTitle": "Taulers personals",
     "personalDescription": "Taulers que poses i controles.",
+    "searchPlaceholder": "Cerca taulers...",
     "personalEmpty": "Encara no tens taulers personals.",
     "joinedTitle": "Taulers units",
     "joinedDescription": "Taulers en els quals participes com a membre.",
@@ -307,6 +308,12 @@
       "role": "Rol",
       "remove": "Eliminar"
     },
+    "removeDialog": {
+      "title": "Eliminar membre?",
+      "description": "Això eliminarà {name} del tauler.",
+      "cancel": "Cancel·lar",
+      "confirm": "Eliminar"
+    },
     "roles": {
       "owner": "Propietari",
       "admin": "Admin",
@@ -544,5 +551,22 @@
       "joinedBoard": "T'has unit a {boardName}.",
       "joinBoardFailed": "No s'ha pogut unir a aquest tauler."
     }
+  },
+  "RequestFilters": {
+    "searchPlaceholder": "Cercar sol·licituds...",
+    "sortLabel": "Ordenar per",
+    "sortNewest": "Més recents",
+    "sortOldest": "Més antigues",
+    "sortRecentlyUpdated": "Actualitzades recentment",
+    "filters": "Filtres",
+    "advancedFilters": "Filtres avançats",
+    "clearAll": "Netejar tot",
+    "statusLabel": "Estat",
+    "allStatuses": "Tots els estats",
+    "selectedStatuses": "{count} seleccionats",
+    "categoryLabel": "Categoria",
+    "allCategories": "Totes",
+    "pinnedOnly": "Només fixades",
+    "hidePinned": "Amaga fixades"
   }
 }

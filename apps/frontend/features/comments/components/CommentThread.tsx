@@ -15,6 +15,7 @@ type CommentThreadProps = {
   replies: CommentResponse[];
   requestId: string;
   boardId: string;
+  isBoardAdmin?: boolean;
   isDialog: boolean;
   replyingTo: string | null;
   setReplyingTo: React.Dispatch<React.SetStateAction<string | null>>;
@@ -41,6 +42,7 @@ export const CommentThread = memo(function CommentThread({
   replies,
   requestId,
   boardId,
+  isBoardAdmin = false,
   isDialog,
   replyingTo,
   setReplyingTo,
@@ -83,7 +85,10 @@ export const CommentThread = memo(function CommentThread({
         <div className="min-w-0 flex-1 space-y-1.5 pb-1">
           <div className="flex items-center gap-2">
             {getProfileUrl(rootComment) ? (
-              <Link href={getProfileUrl(rootComment)!} className="text-sm font-semibold text-foreground hover:underline">
+              <Link
+                href={getProfileUrl(rootComment)!}
+                className="text-sm font-semibold text-foreground hover:underline"
+              >
                 {getDisplayName(rootComment)}
               </Link>
             ) : (
@@ -179,6 +184,7 @@ export const CommentThread = memo(function CommentThread({
               <CommentForm
                 requestId={requestId}
                 boardId={boardId}
+                isBoardAdmin={isBoardAdmin}
                 parentId={rootComment.id}
                 isDialog={isDialog}
                 onCommentAdded={(comment) => {

@@ -1,7 +1,7 @@
 import Notification from "../../domain/entities/Notification.js";
-import type INotificationRepository from "../../domain/contracts/INotificationRepository.js";
+import type NotificationRepository from "../../domain/contracts/NotificationRepository.js";
 
-export default class InMemoryNotificationRepository implements INotificationRepository {
+export default class InMemoryNotificationRepository implements NotificationRepository {
   private store: Map<string, Notification[]> = new Map();
 
   async create(notification: Notification): Promise<void> {

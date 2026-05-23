@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/shared/components/AuthProvider";
 import { useChannel } from "@/shared/hooks/useChannel";
 import { toast } from "@/shared/components/ui/sonner";
@@ -8,7 +8,8 @@ import {
   getNotifications,
   getUnreadCount,
   markAsRead as apiMarkAsRead,
-  markAllRead as apiMarkAllRead
+  markAllRead as apiMarkAllRead,
+  type NotificationFilters
 } from "../services/notificationsApi";
 import type { NotificationItem } from "../services/notificationsApi";
 
@@ -19,21 +20,11 @@ const STICKY_NOTIFICATION_TYPES = new Set([
   "request.status.changed"
 ]);
 
-export function useNotifications(boardId?: string) {
+export function useNotifications(filters?: NotificationFilters) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unread, setUnread] = useState(0);
-
-  const load = useCallback(async () => {
-    if (!userId) return;
-    try {
-      const list = await getNotifications(boardId);
-      setNotifications(list);
-      const c = await getUnreadCount(boardId);
-      setUnread(c);
-    } catch {}
-  }, [userId, boardId]);
 
   useEffect(() => {
     if (!userId) {
@@ -42,7 +33,7 @@ export function useNotifications(boardId?: string) {
 
     let cancelled = false;
 
-    void getNotifications(boardId)
+    void getNotifications(filters)
       .then((list) => {
         if (!cancelled) {
           setNotifications(list);
@@ -50,7 +41,7 @@ export function useNotifications(boardId?: string) {
       })
       .catch(() => {});
 
-    void getUnreadCount(boardId)
+    void getUnreadCount(filters?.boardId)
       .then((count) => {
         if (!cancelled) {
           setUnread(count);
@@ -61,7 +52,17 @@ export function useNotifications(boardId?: string) {
     return () => {
       cancelled = true;
     };
-  }, [userId, boardId]);
+  }, [userId, filters]);
+
+  const reload = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const list = await getNotifications(filters);
+      setNotifications(list);
+      const c = await getUnreadCount(filters?.boardId);
+      setUnread(c);
+    } catch {}
+  }, [userId, filters]);
 
   useChannel(userId ? `notification.${userId}` : null, (msg) => {
     const wrapper = msg.payload as { data?: NotificationItem; timestamp?: string };
@@ -96,7 +97,7 @@ export function useNotifications(boardId?: string) {
     });
 
     void (async () => {
-      await load();
+      await reload();
     })();
   });
 
@@ -112,5 +113,5 @@ export function useNotifications(boardId?: string) {
     setUnread(0);
   }, []);
 
-  return { notifications, unread, reload: load, markAsRead, markAll };
+  return { notifications, unread, reload, markAsRead, markAll };
 }

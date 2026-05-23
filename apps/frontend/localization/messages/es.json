@@ -16,6 +16,7 @@
     "emptyDescription": "Todavía no has creado ningun tablero. Empieza creando el primero",
     "personalTitle": "Tableros personales",
     "personalDescription": "Tableros que posees y controlas.",
+    "searchPlaceholder": "Buscar tableros...",
     "personalEmpty": "Todavía no tienes tableros personales.",
     "joinedTitle": "Tableros unidos",
     "joinedDescription": "Tableros en los que participas como miembro.",
@@ -307,6 +308,12 @@
       "role": "Rol",
       "remove": "Eliminar"
     },
+    "removeDialog": {
+      "title": "¿Eliminar miembro?",
+      "description": "Esto eliminará a {name} del tablero.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    },
     "roles": {
       "owner": "Propietario",
       "admin": "Admin",
@@ -544,5 +551,22 @@
       "joinedBoard": "Te has unido a {boardName}.",
       "joinBoardFailed": "No se pudo unir a este tablero."
     }
+  },
+  "RequestFilters": {
+    "searchPlaceholder": "Buscar solicitudes...",
+    "sortLabel": "Ordenar por",
+    "sortNewest": "Más recientes",
+    "sortOldest": "Más antiguas",
+    "sortRecentlyUpdated": "Actualizadas recientemente",
+    "filters": "Filtros",
+    "advancedFilters": "Filtros avanzados",
+    "clearAll": "Limpiar todo",
+    "statusLabel": "Estado",
+    "allStatuses": "Todos los estados",
+    "selectedStatuses": "{count} seleccionados",
+    "categoryLabel": "Categoría",
+    "allCategories": "Todas",
+    "pinnedOnly": "Solo fijadas",
+    "hidePinned": "Ocultar fijadas"
   }
 }

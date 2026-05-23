@@ -14,11 +14,23 @@ export interface NotificationItem {
   createdAt: string;
 }
 
-export async function getNotifications(boardId?: string, limit = 10, offset = 0): Promise<NotificationItem[]> {
+export interface NotificationFilters {
+  boardId?: string;
+  read?: boolean;
+  type?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export async function getNotifications(filters?: NotificationFilters): Promise<NotificationItem[]> {
   const params = new URLSearchParams();
-  if (boardId) params.set("boardId", boardId);
-  params.set("limit", String(limit));
-  params.set("offset", String(offset));
+  if (filters?.boardId) params.set("boardId", filters.boardId);
+  if (filters?.read !== undefined) params.set("read", String(filters.read));
+  if (filters?.type) params.set("type", filters.type);
+  if (filters?.search) params.set("search", filters.search);
+  params.set("limit", String(filters?.limit ?? 50));
+  params.set("offset", String(filters?.offset ?? 0));
 
   const response = await apiClient<{ data: NotificationItem[] }>(`/notifications?${params.toString()}`, {
     method: "GET"

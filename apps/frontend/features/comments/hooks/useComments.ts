@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { useChannel, type IncomingBroadcastMessage } from "@/shared/hooks/useChannel";
 import { unwrapBroadcastPayload } from "@/shared/lib/realtime";
-import { commentService, type default as CommentResponse } from "../services/commentService";
+import { commentService, type default as CommentResponse, type CommentFilters } from "../services/commentService";
 
 type UseCommentsResult = {
   comments: CommentResponse[];
@@ -24,12 +24,11 @@ type CommentRealtimePayload =
       commentId: string;
     };
 
-export function useComments(requestId: string, boardId: string): UseCommentsResult {
+export function useComments(requestId: string, boardId: string, filters?: CommentFilters): UseCommentsResult {
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const syncChannelName = `comments:${requestId}`;
-
   const addComment = useCallback((comment: CommentResponse) => {
     setComments((prev) => {
       const exists = prev.some((item) => item.id === comment.id);
@@ -43,7 +42,7 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
 
   const loadComments = useCallback(async () => {
     try {
-      const fetchedComments = await commentService.getCommentsByRequestId(requestId, boardId);
+      const fetchedComments = await commentService.getCommentsByRequestId(requestId, boardId, filters);
       setComments(fetchedComments);
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -51,7 +50,7 @@ export function useComments(requestId: string, boardId: string): UseCommentsResu
     } finally {
       setIsLoading(false);
     }
-  }, [requestId, boardId]);
+  }, [requestId, boardId, filters]);
 
   const refetchComments = useCallback(async () => {
     setIsLoading(true);

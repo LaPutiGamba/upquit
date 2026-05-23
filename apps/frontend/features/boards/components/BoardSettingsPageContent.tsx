@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type Resolver, type SubmitHandler, useForm } from "react-hook-form";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { type Resolver, type SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -95,9 +95,9 @@ type BoardSettingsFormValues = {
 export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps) {
   const t = useTranslations("BoardSettingsPage");
   const { user, refreshBoards } = useAuth();
-  const loadingRef = useRef(true);
-  const notFoundRef = useRef(false);
-  const forbiddenRef = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isNotFound, setIsNotFound] = useState(false);
+  const [isForbidden, setIsForbidden] = useState(false);
   const [boardId, setBoardId] = useState<string | null>(null);
   const [ownerId, setOwnerId] = useState<string | null>(null);
 
@@ -105,10 +105,6 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const isOwner = Boolean(user?.id && ownerId && user.id === ownerId);
-
-  const setForbiddenRef = (value: boolean) => {
-    forbiddenRef.current = value;
-  };
 
   const boardSettingsSchema = useMemo(() => createBoardSettingsSchema(t), [t]);
 
@@ -163,13 +159,18 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
     }
   });
 
+  const giveToGetEnabled = useWatch({
+    control: form.control,
+    name: "giveToGetEnabled"
+  });
+
   useEffect(() => {
     let cancelled = false;
 
     const loadBoard = async () => {
-      loadingRef.current = true;
-      notFoundRef.current = false;
-      setForbiddenRef(false);
+      setIsLoading(true);
+      setIsNotFound(false);
+      setIsForbidden(false);
 
       try {
         const board = await boardService.getBoardBySlug(slug);
@@ -187,7 +188,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
         );
 
         if (!canManage) {
-          setForbiddenRef(true);
+          setIsForbidden(true);
           return;
         }
 
@@ -216,10 +217,10 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
           return;
         }
 
-        notFoundRef.current = true;
+        setIsNotFound(true);
       } finally {
         if (!cancelled) {
-          loadingRef.current = false;
+          setIsLoading(false);
         }
       }
     };
@@ -319,11 +320,11 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
     }
   };
 
-  if (loadingRef.current) {
+  if (isLoading) {
     return null;
   }
 
-  if (notFoundRef.current) {
+  if (isNotFound) {
     return (
       <main className="h-full bg-background">
         <div className="mx-auto flex min-h-svh w-full max-w-6xl items-center justify-center p-6 md:p-10">
@@ -335,7 +336,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
     );
   }
 
-  if (forbiddenRef.current) {
+  if (isForbidden) {
     return (
       <main className="h-full bg-background">
         <div className="mx-auto flex min-h-svh w-full max-w-6xl items-center justify-center p-6 md:p-10">
@@ -562,7 +563,7 @@ export function BoardSettingsPageContent({ slug }: BoardSettingsPageContentProps
                 )}
               />
 
-              {form.watch("giveToGetEnabled") && (
+              {giveToGetEnabled && (
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}

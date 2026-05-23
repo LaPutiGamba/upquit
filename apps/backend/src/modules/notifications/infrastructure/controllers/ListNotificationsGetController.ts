@@ -9,7 +9,13 @@ export default async function ListNotificationsGetController(req: Request, res: 
   const limit = req.query.limit ? Number(req.query.limit) : 20;
   const offset = req.query.offset ? Number(req.query.offset) : 0;
 
-  const list = await notificationRepository.listByUser(userId, { boardId, limit, offset });
+  const readQuery = req.query.read;
+  const read = readQuery !== undefined ? readQuery === "true" : undefined;
+
+  const type = typeof req.query.type === "string" ? req.query.type : undefined;
+  const search = typeof req.query.search === "string" ? req.query.search : undefined;
+
+  const list = await notificationRepository.listByUser(userId, { boardId, limit, offset, read, type, search });
 
   res.json({ data: list });
 }

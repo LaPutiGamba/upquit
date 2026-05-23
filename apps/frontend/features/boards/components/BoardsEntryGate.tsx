@@ -3,12 +3,12 @@
 import { Link } from "@/localization/i18n/routing";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRightIcon, Plus, Presentation } from "lucide-react";
+import { ChevronRightIcon, Plus, Presentation, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { boardService, BoardResponse } from "@/features/boards/services/boardService";
-import { CreateBoardForm } from "@/features/boards/components/CreateBoardForm";
 import { useAuth } from "@/shared/components/AuthProvider";
+import { CreateBoardForm } from "@/features/boards/components/CreateBoardForm";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -27,6 +27,7 @@ import {
   EmptyTitle
 } from "@/shared/components/ui/empty";
 import { Item, ItemGroup, ItemTitle, ItemDescription, ItemContent, ItemActions } from "@/shared/components/ui/item";
+import { Input } from "@/shared/components/ui/input";
 
 export function BoardsEntryGate() {
   const t = useTranslations("BoardsEntryGate");
@@ -35,20 +36,25 @@ export function BoardsEntryGate() {
   const [boards, setBoards] = useState<BoardResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const fetchBoards = async () => {
-    const availableBoards = await boardService.getMyBoards();
-
-    setBoards(availableBoards);
-    setLoading(false);
-  };
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearchTerm(searchInput);
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
 
   useEffect(() => {
     let cancelled = false;
 
     const resolveBoardsRoute = async () => {
       try {
-        const availableBoards = await boardService.getMyBoards();
+        setLoading(true);
+        const availableBoards = await boardService.getMyBoards({
+          search: searchTerm || undefined
+        });
 
         if (!cancelled) {
           setBoards(availableBoards);
@@ -66,9 +72,12 @@ export function BoardsEntryGate() {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, searchTerm]);
 
-  const sortedBoards = useMemo(() => boards.toSorted((a, b) => a.name.localeCompare(b.name)), [boards]);
+  const sortedBoards = useMemo(() => {
+    return boards.toSorted((a, b) => a.name.localeCompare(b.name));
+  }, [boards]);
+
   const personalBoards = useMemo(
     () => sortedBoards.filter((board) => board.ownerId === user?.id),
     [sortedBoards, user?.id]
@@ -78,9 +87,12 @@ export function BoardsEntryGate() {
     [sortedBoards, user?.id]
   );
 
-  if (loading) {
-    return null;
-  }
+  const isSearchSettling = searchInput !== searchTerm;
+  const isBusy = loading || isSearchSettling;
+  const showEmptyState = !isBusy && sortedBoards.length === 0 && !searchInput;
+  const showStatus = isBusy && sortedBoards.length === 0;
+  const showPersonalSection = personalBoards.length > 0;
+  const showJoinedSection = joinedBoards.length > 0;
 
   return (
     <main className="min-h-svh bg-background">
@@ -113,14 +125,29 @@ export function BoardsEntryGate() {
               <CreateBoardForm
                 onSuccess={async () => {
                   setCreateDialogOpen(false);
-                  await fetchBoards();
+                  const availableBoards = await boardService.getMyBoards({
+                    search: searchTerm || undefined
+                  });
+                  setBoards(availableBoards);
                 }}
               />
             </DialogContent>
           </Dialog>
         </header>
 
-        {sortedBoards.length === 0 ? (
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-9"
+            placeholder={t("searchPlaceholder") || "Search boards..."}
+          />
+        </div>
+
+        {showStatus ? (
+          <p className="pt-1 text-sm text-muted-foreground">{loading ? "Loading boards..." : "Searching boards..."}</p>
+        ) : showEmptyState ? (
           <section className="rounded-xl border border-dashed p-2">
             <Empty className="border-0 bg-transparent p-6 md:p-12">
               <EmptyHeader>
@@ -137,21 +164,19 @@ export function BoardsEntryGate() {
               </EmptyContent>
             </Empty>
           </section>
+        ) : personalBoards.length === 0 && joinedBoards.length === 0 && searchInput ? (
+          <p className="pt-1 text-sm text-muted-foreground">No boards match your search.</p>
         ) : (
           <div className="flex flex-col gap-8">
-            <section className="flex flex-col gap-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold tracking-tight">{t("personalTitle")}</h2>
-                  <p className="text-sm text-muted-foreground">{t("personalDescription")}</p>
+            {showPersonalSection ? (
+              <section className="flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-tight">{t("personalTitle")}</h2>
+                    <p className="text-sm text-muted-foreground">{t("personalDescription")}</p>
+                  </div>
+                  <span className="text-sm text-muted-foreground">{personalBoards.length}</span>
                 </div>
-                <span className="text-sm text-muted-foreground">{personalBoards.length}</span>
-              </div>
-              {personalBoards.length === 0 ? (
-                <p className="rounded-xl border border-dashed px-4 py-5 text-sm text-muted-foreground">
-                  {t("personalEmpty")}
-                </p>
-              ) : (
                 <ItemGroup className="gap-2">
                   {personalBoards.map((board) => (
                     <Item
@@ -172,22 +197,18 @@ export function BoardsEntryGate() {
                     </Item>
                   ))}
                 </ItemGroup>
-              )}
-            </section>
+              </section>
+            ) : null}
 
-            <section className="flex flex-col gap-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold tracking-tight">{t("joinedTitle")}</h2>
-                  <p className="text-sm text-muted-foreground">{t("joinedDescription")}</p>
+            {showJoinedSection ? (
+              <section className="flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-tight">{t("joinedTitle")}</h2>
+                    <p className="text-sm text-muted-foreground">{t("joinedDescription")}</p>
+                  </div>
+                  <span className="text-sm text-muted-foreground">{joinedBoards.length}</span>
                 </div>
-                <span className="text-sm text-muted-foreground">{joinedBoards.length}</span>
-              </div>
-              {joinedBoards.length === 0 ? (
-                <p className="rounded-xl border border-dashed px-4 py-5 text-sm text-muted-foreground">
-                  {t("joinedEmpty")}
-                </p>
-              ) : (
                 <ItemGroup className="gap-2">
                   {joinedBoards.map((board) => (
                     <Item
@@ -208,8 +229,8 @@ export function BoardsEntryGate() {
                     </Item>
                   ))}
                 </ItemGroup>
-              )}
-            </section>
+              </section>
+            ) : null}
           </div>
         )}
       </div>
