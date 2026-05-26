@@ -145,6 +145,8 @@ export default async function GoogleOAuthCallbackController(req: Request<GoogleO
     }
   } catch (error) {
     console.error("Google OAuth callback error:", error);
-    return res.redirect(`${frontendUrl}/[locale]/auth/login?error=oauth_error`);
+    return res.redirect(
+      `${frontendUrl}/${frontendDefaultLocale}/auth/login?error=${encodeURIComponent("oauth_error")}`
+    );
   }
 }

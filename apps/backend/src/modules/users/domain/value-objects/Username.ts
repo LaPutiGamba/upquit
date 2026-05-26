@@ -6,15 +6,23 @@ export default class Username {
   private readonly value: string;
 
   constructor(value: string) {
-    this.ensureIsValidUsername(value);
-    this.value = value.trim().toLowerCase();
+    const normalized = Username.normalize(value);
+    this.ensureIsValidUsername(normalized);
+    this.value = normalized;
   }
 
-  private ensureIsValidUsername(value: string): void {
-    const normalizedValue = value.trim().toLowerCase();
+  private static normalize(value: string): string {
+    return value
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .normalize("NFC");
+  }
 
+  private ensureIsValidUsername(normalizedValue: string): void {
     if (!USERNAME_PATTERN.test(normalizedValue)) {
-      throw new InvalidUsernameException(value);
+      throw new InvalidUsernameException(normalizedValue);
     }
   }
 
